@@ -1,0 +1,364 @@
+:root {
+  --blue: rgb(20, 120, 167);
+  --blueRGB: 20, 120, 167;
+  --darkBlue: rgb(15, 48, 98);
+  --darkBlueRGB: 15, 48, 98;
+  --lightBlue: rgb(82, 181, 217);
+  --lightBlueRGB: 82, 181, 217;
+  --red: rgb(255, 115, 105);
+  --redRGB: 255, 115, 105;
+}
+
+* {
+  font-family: "Poppins", "Sans-serif";
+}
+
+.white-text {
+  color: white;
+  text-shadow: 0 0 4px black;
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
+}
+
+/* font-awesome 
+  https://github.com/FortAwesome/Font-Awesome/blob/6.x/css/all.min.css 
+  https://origin.fontawesome.com/v6/docs/web/add-icons/pseudo-elements
+  https://origin.fontawesome.com/search?o=r&m=free&s=regular&f=classic
+*/
+.fa::before {
+  display: inline-block;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  font: var(--fa-font-regular);
+}
+
+.fa {
+  text-decoration: none;
+}
+
+h2, h3 {
+  padding: 1rem;
+}
+
+p {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+span {
+  color: white;
+  text-shadow: 0px 0px 4px black;
+  font-size: clamp(0.8rem, 1.2vw, 0.8rem);
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+
+
+/* BUTTONS GENERAL STYLE */
+button {
+  padding: 10px 10px 10px 10px;
+  background-color: var(--darkBlue);
+  color: white;
+
+
+  border-radius: 50px;
+  border: none;
+
+  display:flex;
+  align-items: center;
+  justify-content: center;
+
+  pointer-events: all;
+}
+
+button:hover {
+  background-color: var(--lightBlue);
+  transition: all 0.2s ease-in-out;
+}
+
+.button-text {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.button-active {
+  background-color: var(--red);
+  box-shadow: 0px 0px 4px black;
+  transition: all 0.2s ease-in-out;
+}
+.button-active:hover {
+  background-color: var(--red);
+}
+
+@media screen and (max-width: 770px) {
+  button {
+    padding: 4px;
+  }
+}
+
+
+.clickable {
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+}
+.clickable:hover {
+  transform: scale(1.05);
+  transition: all 0.2s ease-in-out;
+}
+.unavailable {
+  background-color: rgb(136, 136, 136);
+  border: 2px solid gray;
+  pointer-events: none;
+  cursor:auto;
+}
+
+
+
+
+
+/* Limit SVG size */
+.icon-svg {
+  width: 45px;
+  height: 45px;
+}
+
+.icon-svg:hover {
+  border-width: 2px;
+  border-color: black;
+  border-style: solid;
+  border-radius: 50%;
+  background-color: rgb(176, 176, 176);
+}
+
+.roundButton {
+  border-style: none;
+  padding: 0;
+  margin-bottom: 10px;
+  border-radius: 50%;
+}
+
+.icon-str {
+  width: 25px;
+  height: 25px;
+  color: white;
+  text-shadow: 0px 0px 4px black;
+  font-weight: bold;
+
+  background: var(--lightBlue);
+  border-radius: 50%;
+  box-shadow: 0px 0px 5px black;
+  margin-left: 3px;
+  margin-right: 3px;
+
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.icon-str:hover {
+  background-color: var(--blue);
+}
+/* Close icon */
+.icon-str-close {
+  /* background-color: var(--red); */
+  background-color: gray;
+}
+.icon-str-close::after {
+  content: "\2715";
+}
+.icon-str-close:hover{
+  background-color: lightgray;
+}
+/* Open icon */
+.icon-str-open {
+  background-color: var(--lightBlue);
+}
+.icon-str-open::after {
+  font-family: initial;
+  content: "\1F441";
+}
+.icon-str-open:hover{
+  background-color: green;
+}
+
+
+.icon-big{
+  width: 35px;
+  height: 35px;
+}
+
+.icon-img:hover {
+  border: 2px solid var(--lightBlue);
+  cursor:pointer;
+}
+
+
+
+
+/* WIDGET */
+.widget {
+  user-select: none;
+  width: 264px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+
+  z-index: 11;
+}
+
+
+.titleWidget {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+.titleWidget-closed {
+  width: 100%;
+  justify-content: flex-end;
+}
+h4 {
+  color: white;
+  text-shadow: 0px 0px 4px black;
+  font-size: clamp(0.7rem, 2vw, 1rem);
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 0px;
+}
+.widgetButtonContainer {
+  display:flex;
+  flex-wrap: nowrap;
+  padding: 10px;
+  align-items: center;
+}
+
+.widgetSpan {
+  color: white;
+  text-shadow: 0px 0px 4px black;
+  font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+  padding-left: 3px;
+  padding-right: 3px;
+}
+.widgetButtonHFRadar {
+  color: white;
+  background-color: darkgray;
+  border-radius: 5px;
+  border: 2px solid gray;
+
+  margin-top: 5px;
+
+  font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+  text-align: center;
+  text-decoration: none;
+
+  pointer-events: all;
+  cursor: pointer;
+}
+.widgetButtonHFRadar-active {
+  background-color: var(--red);
+  border: 2px solid rgb(255, 90, 90);
+  cursor: pointer;
+}
+
+.widgetButtonHFRadar-active:hover {
+  background-color: var(--red);
+  border: 2px solid rgb(255, 199, 199);
+  cursor: pointer;
+}
+
+.widgetButtonHFRadar-unavailable {
+  background-color: rgb(136, 136, 136);
+  border: 2px solid gray;
+  pointer-events: none;
+  cursor:auto;
+}
+
+.widgetButtonHFRadar-unavailable:hover {
+  background-color: rgb(136, 136, 136);
+  border: 2px solid gray;
+  pointer-events: none;
+  cursor:auto;
+}
+
+
+
+
+/* SCROLLBAR */
+/* Works on Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color:  lightblue var(--blue);
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: lightblue
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--lightBlue);
+  border-radius: 5px;
+  border: 1px solid var(--darkBlue);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--blue);
+  border-radius: 5px;
+  border: 1px solid var(--darkBlue);
+}
+
+
+/* 
+input[type='range'] {
+    -webkit-appearance: none !important;
+    background:var(--red);
+    height: 7px;
+}
+input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    background: var(--darkBlue);
+    height: 10px;
+    width: 10px;
+
+} */
+
+.accordion-button {
+  color:white;
+  background: var(--darkBlue);
+}
+
+.accordion-button:not(.collapsed){
+  background: var(--blue);
+  color:white;
+}
+
+
+
+
+
+@media screen and (max-width: 770px) {
+  .hiddenInMobile {
+    display: none
+  }
+
+  .visibleInMobile {
+    display: block;
+  }
+}
+
+@media screen and (min-width: 770px) {
+  .visibleInMobile {
+    display: none;
+  }
+}
+
+
