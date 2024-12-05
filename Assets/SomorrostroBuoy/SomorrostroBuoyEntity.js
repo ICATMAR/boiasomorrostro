@@ -11,8 +11,23 @@ class SomorrostroBuoyEntity {
     gltfLoader.load('/boiasomorrostro/Assets/SomorrostroBuoy/SomorrostroBuoy.glb', (gltf) => {
       // GLTF scene
       const root = gltf.scene;
+
+      // Mesh
+      let buoyMesh = root.children[0];
+
+      // Fix ambient occlusion and material
+      buoyMesh.geometry.attributes.uv2 = buoyMesh.geometry.attributes.uv;
+      const aoTexture = new THREE.TextureLoader().load('/boiasomorrostro/Assets/SomorrostroBuoy/aoMap.png');
+      aoTexture.flipY = false;
+      buoyMesh.material.aoMap = aoTexture;
+      buoyMesh.material.aoMapIntensity = 1;
+      
+      
+
+
+
       // Fix frustrum culling
-      root.children[0].frustumCulled = false;
+      buoyMesh.frustumCulled = false;
       // Scene direction fix
       const angleFix = 90;
 
@@ -20,8 +35,8 @@ class SomorrostroBuoyEntity {
 
       this.root = root;
       
-
-      this.root.children[0].translateY(-0.5);
+      buoyMesh.geometry.attributes.uv2 = buoyMesh.geometry.attributes.uv;
+      buoyMesh.translateY(-0.5);
 
 
       

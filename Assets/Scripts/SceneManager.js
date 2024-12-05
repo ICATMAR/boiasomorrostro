@@ -55,7 +55,7 @@ class SceneManager{
     this.controls = controls;
     // TODO: limit orbit controls
     // Surface
-    camera.position.set(10, 7.5, 10);
+    camera.position.set(5, 3, 5);
     controls.target.set(0, 1, 0);
   // OBSEA base
   // camera.position.set(3, -16, 3);
