@@ -136,7 +136,7 @@
 
 
 <script>
-import Knob from '/CasablancaBuoy/Components/Knob.vue';
+import Knob from '/boiasomorrostro/Components/Knob.vue';
 
 // TODO: Wave height tip: http://jsfiddle.net/Zu59F/
 

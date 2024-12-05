@@ -1,12 +1,11 @@
 import * as THREE from 'three';
 import { Vector3 } from 'three';
-import { GLTFLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
-import {OceanVertShader, OceanFragShader} from '/CasablancaBuoy/Assets/Ocean/OceanShader.js';
+import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
 
-import { OceanGrid } from '/CasablancaBuoy/Assets/Ocean/OceanGrid.js';
-import {OceanProjectedGridVertShader, OceanProjectedGridFragShader} from '/CasablancaBuoy/Assets/Ocean/OceanProjectedGridShader.js';
+import { OceanGrid } from '/boiasomorrostro/Assets/Ocean/OceanGrid.js';
+import {OceanProjectedGridVertShader, OceanProjectedGridFragShader} from '/boiasomorrostro/Assets/Ocean/OceanProjectedGridShader.js';
 
-import { OceanParameters } from '/CasablancaBuoy/Assets/Ocean/OceanParams.js';
+import { OceanParameters } from '/boiasomorrostro/Assets/Ocean/OceanParams.js';
 
 class OceanEntity {
 
@@ -54,16 +53,16 @@ class OceanEntity {
     paramsTexture.needsUpdate = true;
 
     // Load normal texture for smaller waves that the geometry cannot capture
-    // let normalTexture = new THREE.TextureLoader().load('/CasablancaBuoy/Assets/Terrain/OceanNormal.png');
+    // let normalTexture = new THREE.TextureLoader().load('/boiasomorrostro/Assets/Terrain/OceanNormal.png');
     // normalTexture.wrapS = normalTexture.wrapT = THREE.RepeatWrapping;
 
     // Create video texture
     // https://blenderartists.org/t/animated-water-normal-map-tileable-looped/673140
-    // /CasablancaBuoy/lib/three.js/examples/?q=video#webgl_materials_video
+    // /boiasomorrostro/lib/three.js/examples/?q=video#webgl_materials_video
     // https://github.com/mrdoob/three.js/blob/master/examples/webgl_materials_video.html
     let videoEl = document.createElement("video");
     videoEl.loop = true; videoEl.crossOrigin = 'anonymous'; videoEl.playsInline = true; videoEl.muted = "muted";
-    videoEl.src = '/CasablancaBuoy/Assets/Terrain/OceanNormal.mp4';
+    videoEl.src = '/boiasomorrostro/Assets/Terrain/OceanNormal.mp4';
     videoEl.play();
     let normalTexture = new THREE.VideoTexture(videoEl);
     normalTexture.wrapS = normalTexture.wrapT = THREE.RepeatWrapping;
@@ -121,120 +120,7 @@ class OceanEntity {
   scene.add(this.oceanTile);
 
   this.isLoaded = true;
-// ************************************************ // 
-  return
-    
 
-    // Load ocean mesh
-    let gltfLoader = new GLTFLoader();
-
-    gltfLoader.load('/CasablancaBuoy/Assets/Terrain/OceanSurfaceLR.glb', (gltf) => {
-
-      // Define material and shaders
-      let oceanMaterial = new THREE.ShaderMaterial({
-        blending: THREE.NormalBlending,
-        transparent: true,
-        // lights: true, // https://github.com/mrdoob/three.js/issues/16656
-        uniforms: {
-          u_time: { value: this.time },
-          u_fogUnderwaterColor: { value: new THREE.Vector3(scene.fog.color.r, scene.fog.color.g, scene.fog.color.b)},
-          u_fogDensity: {value: scene.fog.density},
-          u_paramsTexture: {value: paramsTexture},
-          u_imgSize: {value: new THREE.Vector2(imgSize, imgSize)},
-          u_steepnessFactor: { value: 0.2 },
-          // u_wavelength: { value: 7.0 },
-          // u_direction: { value: new THREE.Vector2(1, 0) },
-          u_wave1Params: { value: new THREE.Vector4(0.1, 0.1, 0.0, 1.0) }, // steepness, waveHeight, directionx, directionz
-          u_wave2Params: { value: new THREE.Vector4(0.05, 0.2, 0.5, 1.0) }, // steepness, waveHeight, directionx, directionz
-          u_normalTexture: {value: normalTexture}, // TODO: WHAT IF THE TEXTURE TAKES TOO LONG TO LOAD?
-        },
-        vertexShader: OceanVertShader,
-        fragmentShader: OceanFragShader,
-      });
-      oceanMaterial.side = THREE.DoubleSide;
-
-
-      // Store the version
-      this.oceanLOD.LR = gltf.scene.children[0];
-      // Assign current version to oceanTile
-      this.oceanTile = gltf.scene.children[0];
-      this.oceanTile.material = oceanMaterial;
-
-
-      // Scene fix
-      gltf.scene.translateY(-0.001);
-
-      scene.add(gltf.scene);
-      let lowResScene = gltf.scene;
-
-      // Redefine loading events of the gltf loader, so the mid- and high-res surfaces are not taken into account
-      const manager = new THREE.LoadingManager();
-      manager.onStart = () => {};
-      manager.onProgress = () => {};
-      manager.onLoad = () => {};
-      gltfLoader = new GLTFLoader(manager);
-
-      // LEVEL OF DETAIL INCREASE WHEN HIGHER RESOLUTIONS ARE LOADED
-      // Load next resolution and add
-      gltfLoader.load('/CasablancaBuoy/Assets/Terrain/OceanSurfaceMR.glb', (gltf) => {
-        // Store the version
-        this.oceanLOD.MR = gltf.scene.children[0];
-        this.oceanTile = gltf.scene.children[0];
-        this.oceanTile.material = oceanMaterial;
-        // Scene fix
-        gltf.scene.translateY(-0.001);
-        // Remove previous version and add new
-        scene.remove(this.oceanLOD.LR.parent);
-        scene.add(gltf.scene);
-        let midResScene = gltf.scene;
-        // Load next resolution and add
-        gltfLoader.load('/CasablancaBuoy/Assets/Terrain/OceanSurfaceHR.glb', (gltf) => {
-          this.oceanLOD.HR = gltf.scene.children[0];
-          this.oceanTile = gltf.scene.children[0];
-          this.oceanTile.material = oceanMaterial;
-          // Scene fix
-          gltf.scene.translateY(-0.001);
-          // Remove previous version and add new
-          scene.remove(this.oceanLOD.MR.parent);
-          scene.add(gltf.scene);
-        });
-      });
-
-
-      this.isLoaded = true;
-
-    });
-
-
-    // USER ACTIONS
-    // let el = document.getElementById("randomWaveHeights");
-    // el.addEventListener("click", () => {
-    //   this.oceanParams.randomizeWaveHeightDistribution();
-    //   let paramsData = this.oceanParams.getWaveParamsImageData();
-    //   let paramsTexture = new THREE.DataTexture(paramsData, this.imgSize, this.imgSize, THREE.RGBAFormat, THREE.UnsignedByteType);
-    //   paramsTexture.magFilter = THREE.NearestFilter;
-    //   paramsTexture.needsUpdate = true;
-    //   // Update uniforms
-    //   this.oceanTile.material.uniforms.u_paramsTexture.value = paramsTexture;
-    //   //this.oceanLRTile.material.uniforms.u_paramsTexture.value = paramsTexture;
-    // });
-    // el = document.getElementById("randomWaveDirs");
-    // el.addEventListener("click", () => {
-    //   this.oceanParams.randomizeWaveDirectionDistribution();
-    //   let paramsData = this.oceanParams.getWaveParamsImageData();
-    //   let paramsTexture = new THREE.DataTexture(paramsData, imgSize, imgSize, THREE.RGBAFormat, THREE.UnsignedByteType);
-    //   paramsTexture.magFilter = THREE.NearestFilter;
-    //   paramsTexture.needsUpdate = true;
-    //   // Update uniforms
-    //   this.oceanTile.material.uniforms.u_paramsTexture.value = paramsTexture;
-    //   //this.oceanLRTile.material.uniforms.u_paramsTexture.value = paramsTexture;
-    // });
-
-
-    // USER GUI
-    this.customWaveParameters[0] = this.getWaveParametersHTML("1");
-    this.customWaveParameters[1] = this.getWaveParametersHTML("2");
-    this.oceanSteepness = this.getOceanParameters();
     
   }
 

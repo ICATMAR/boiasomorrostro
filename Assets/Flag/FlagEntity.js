@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { GLTFLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
-import { FlagBehavior } from '/CasablancaBuoy/Assets/Flag/FlagBehavior.js'
+import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
+import { FlagBehavior } from '/boiasomorrostro/Assets/Flag/FlagBehavior.js'
 
 class FlagEntity {
   
@@ -19,7 +19,7 @@ class FlagEntity {
 
     const gltfLoader = new GLTFLoader();
     // objLoader.load('https://threejs.org/manual/examples/resources/models/windmill/windmill.obj', (root) => {
-    gltfLoader.load('/CasablancaBuoy/Assets/Flag/flag.glb', (gltf) => {
+    gltfLoader.load('/boiasomorrostro/Assets/Flag/flag.glb', (gltf) => {
       // GLTF scene
       this.root = gltf.scene;
       this.flagObj = this.root.getObjectByName("Armature");//this.root.children[0];
@@ -33,7 +33,7 @@ class FlagEntity {
 
       // Set flag texture
       const loader = new THREE.TextureLoader();
-      let texture = loader.load('/CasablancaBuoy/Assets/Flag/CasablancaFlag.png');
+      let texture = loader.load('/boiasomorrostro/Assets/Flag/CasablancaFlag.png');
       texture.encoding = THREE.sRGBEncoding;
       texture.magFilter = THREE.LinearFilter; //THREE.NearestFilter;
       texture.flipY = false;
@@ -104,7 +104,7 @@ class FlagEntity {
     if (this.beaufortTextures[scale] == undefined){
       // Load texture
       const loader = new THREE.TextureLoader();
-      texture = loader.load('/CasablancaBuoy/Assets/Flag/BeaufortScale/'+ scale +'.png');
+      texture = loader.load('/boiasomorrostro/Assets/Flag/BeaufortScale/'+ scale +'.png');
       texture.encoding = THREE.sRGBEncoding;
       texture.magFilter = THREE.LinearFilter; //THREE.NearestFilter;
       texture.flipY = false;

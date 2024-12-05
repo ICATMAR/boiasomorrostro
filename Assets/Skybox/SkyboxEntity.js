@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import { GLTFLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
 
 class SkyboxEntity {
 
   constructor(scene){
     const gltfLoader = new GLTFLoader();
-    gltfLoader.load('/CasablancaBuoy/Assets/Skybox/skybox.glb', (gltf) => { // '../Assets/Skybox/skybox.glb'
+    gltfLoader.load('/boiasomorrostro/Assets/Skybox/skybox.glb', (gltf) => { // '../Assets/Skybox/skybox.glb'
       // GLTF scene
       const root = gltf.scene;
       // Scale

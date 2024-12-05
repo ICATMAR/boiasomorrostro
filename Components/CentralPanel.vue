@@ -31,10 +31,10 @@
 
 
 <script>
-import InfoPanel from '/CasablancaBuoy/Components//Panels/InfoPanel.vue';
-import SeaPanel from "/CasablancaBuoy/Components/Panels/SeaPanel.vue"
-import WindPanel from "/CasablancaBuoy/Components/Panels/WindPanel.vue"
-import ExternalDataCMEMSPanel from '/CasablancaBuoy/Components/Panels/ExternalDataCMEMSPanel.vue';
+import InfoPanel from '/boiasomorrostro/Components//Panels/InfoPanel.vue';
+import SeaPanel from "/boiasomorrostro/Components/Panels/SeaPanel.vue"
+import WindPanel from "/boiasomorrostro/Components/Panels/WindPanel.vue"
+import ExternalDataCMEMSPanel from '/boiasomorrostro/Components/Panels/ExternalDataCMEMSPanel.vue';
 
 export default {
   name: "CentralPanel",

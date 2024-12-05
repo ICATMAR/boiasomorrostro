@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { OrbitControls } from '/CasablancaBuoy/lib/three.js/examples/jsm/controls/OrbitControls.js';
-import { OBJLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/OBJLoader.js';
-import { RosaVentsEntity } from '/CasablancaBuoy/Assets/Orientation/RosaVentsEntity.js';
+import { OrbitControls } from '/boiasomorrostro/lib/three.js/examples/jsm/controls/OrbitControls.js';
+import { OBJLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/OBJLoader.js';
+import { RosaVentsEntity } from '/boiasomorrostro/Assets/Orientation/RosaVentsEntity.js';
 
 function main() {
   const canvas = document.querySelector('#c');

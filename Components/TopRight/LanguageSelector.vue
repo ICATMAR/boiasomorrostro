@@ -4,9 +4,9 @@
     <div class="language-button-container">
       <button id="language-button" @click="dropdownClick" class="icon-str" :title="$i18n.t('languageButton')">
 
-        <img class="lang-icon" src="/CasablancaBuoy/lang/en-200.png" v-show="$i18n.locale.includes('en')">
-        <img class="lang-icon" src="/CasablancaBuoy/lang/es-200.png" v-show="$i18n.locale.includes('es')">
-        <img class="lang-icon" src="/CasablancaBuoy/lang/ca-200.png" v-show="$i18n.locale.includes('ca')">
+        <img class="lang-icon" src="/boiasomorrostro/lang/en-200.png" v-show="$i18n.locale.includes('en')">
+        <img class="lang-icon" src="/boiasomorrostro/lang/es-200.png" v-show="$i18n.locale.includes('es')">
+        <img class="lang-icon" src="/boiasomorrostro/lang/ca-200.png" v-show="$i18n.locale.includes('ca')">
       
       </button>
     </div>
@@ -127,16 +127,16 @@ export default {
 
 .es:before {
   content: '';
-  background-image: url(/CasablancaBuoy/lang/es-200.png);
+  background-image: url(/boiasomorrostro/lang/es-200.png);
 }
 
 .en:before {
   content: '';
-  background-image: url(/CasablancaBuoy/lang/en-200.png);
+  background-image: url(/boiasomorrostro/lang/en-200.png);
 }
 .cat:before {
   content: '';
-  background-image: url(/CasablancaBuoy/lang/ca-200.png);
+  background-image: url(/boiasomorrostro/lang/ca-200.png);
 }
 
 .lang-icon {

@@ -95,7 +95,7 @@
 
     <!-- Funding image -->
     <a href="https://marine.copernicus.eu/" target="_blank">
-      <img class="bottomLogo" src="/CasablancaBuoy/Assets/Logos/CMEMS.png">
+      <img class="bottomLogo" src="/boiasomorrostro/Assets/Logos/CMEMS.png">
     </a>
 
 
@@ -142,7 +142,7 @@ export default {
       dataRows: [   
         { // Wave icon
           key: 'waveicon',
-          imgURL: '/CasablancaBuoy/Assets/Logos/icons.png',
+          imgURL: '/boiasomorrostro/Assets/Logos/icons.png',
           position: 1,
           defURL: 'https://es.wisuki.com/images/px.png',
           source: 'Wave significant height',
@@ -239,7 +239,7 @@ export default {
 
         { // Current icon
           key: 'currenticon',
-          imgURL: '/CasablancaBuoy/Assets/Logos/icons.png',
+          imgURL: '/boiasomorrostro/Assets/Logos/icons.png',
           position: 2,
           defURL: 'https://es.wisuki.com/images/px.png',
           source: 'Sea surface velocity',

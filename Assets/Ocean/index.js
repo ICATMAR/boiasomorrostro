@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { OrbitControls } from '/CasablancaBuoy/lib/three.js/examples/jsm/controls/OrbitControls.js';
-//import { OBJLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/OBJLoader.js';
-import { GLTFLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
-import { FBXLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/FBXLoader.js'
+import { OrbitControls } from '/boiasomorrostro/lib/three.js/examples/jsm/controls/OrbitControls.js';
+//import { OBJLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
+import { FBXLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/FBXLoader.js'
 import { OceanEntity } from './OceanEntity.js';
 import { SandEntity } from '../Assets/Terrain/SandEntity.js';
 import * as FogShader from '../Assets/Terrain/FogShader.js'
@@ -10,11 +10,11 @@ import { OBSEAStationEntity } from '../Assets/OBSEAStation/ObseaStationEntity.js
 import { OBSEABuoyEntity } from '../Assets/OBSEABuoy/OBSEABuoyEntity.js';
 import { SkyboxEntity } from '../Assets/Skybox/SkyboxEntity.js';
 import { RosaVentsEntity } from '../Assets/Orientation/RosaVentsEntity.js';
-// import { GUI } from '/CasablancaBuoy/lib/three.js/examples/jsm/libs/lil-gui.module.min.js';
+// import { GUI } from '/boiasomorrostro/lib/three.js/examples/jsm/libs/lil-gui.module.min.js';
 
 
 /* OCEAN
-/CasablancaBuoy/lib/three.js/examples/webgl_shaders_ocean.html
+/boiasomorrostro/lib/three.js/examples/webgl_shaders_ocean.html
 https://29a.ch/slides/2012/webglwater/
 https://29a.ch/sandbox/2012/terrain/
 https://www.tamats.com/work/bwr/
@@ -27,7 +27,7 @@ https://www.shadertoy.com/view/4dBcRD#
 https://www.shadertoy.com/view/Xdlczl
 
 sky shader
-/CasablancaBuoy/lib/three.js/examples/?q=sky#webgl_shaders_sky
+/boiasomorrostro/lib/three.js/examples/?q=sky#webgl_shaders_sky
 
 
 TODO:

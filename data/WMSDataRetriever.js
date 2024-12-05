@@ -1,4 +1,4 @@
-import preLoadedDataTypes from "/CasablancaBuoy/data/WMSDataTypes.js";
+import preLoadedDataTypes from "/boiasomorrostro/data/WMSDataTypes.js";
 
 
 // Scripts that obtain data from the CMEMS WMS API

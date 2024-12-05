@@ -1,28 +1,28 @@
 import * as THREE from 'three';
-import Stats from '/CasablancaBuoy/lib/three.js/examples/jsm/libs/stats.module.js';
-import { OrbitControls } from '/CasablancaBuoy/lib/three.js/examples/jsm/controls/OrbitControls.js';
-import { OBJLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/OBJLoader.js';
-import { GLTFLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
-import { FBXLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/FBXLoader.js'
-import { RosaVentsEntity } from '/CasablancaBuoy/Assets/Orientation/RosaVentsEntity.js';
-import { SandEntity } from '/CasablancaBuoy/Assets/Terrain/SandEntity.js';
-import { SkyboxEntity } from '/CasablancaBuoy/Assets/Skybox/SkyboxEntity.js';
+import Stats from '/boiasomorrostro/lib/three.js/examples/jsm/libs/stats.module.js';
+import { OrbitControls } from '/boiasomorrostro/lib/three.js/examples/jsm/controls/OrbitControls.js';
+import { OBJLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
+import { FBXLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/FBXLoader.js'
+import { RosaVentsEntity } from '/boiasomorrostro/Assets/Orientation/RosaVentsEntity.js';
+import { SandEntity } from '/boiasomorrostro/Assets/Terrain/SandEntity.js';
+import { SkyboxEntity } from '/boiasomorrostro/Assets/Skybox/SkyboxEntity.js';
 
-import * as FogShader from '/CasablancaBuoy/Assets/Terrain/FogShader.js'
-import { OceanEntity } from '/CasablancaBuoy/Assets/Ocean/OceanEntity.js';
+import * as FogShader from '/boiasomorrostro/Assets/Terrain/FogShader.js'
+import { OceanEntity } from '/boiasomorrostro/Assets/Ocean/OceanEntity.js';
 
-import { CasablancaBuoyEntity } from '/CasablancaBuoy/Assets/CasablancaBuoy/CasablancaBuoyEntity.js';
+import { SomorrostroBuoyEntity } from '/boiasomorrostro/Assets/SomorrostroBuoy/SomorrostroBuoyEntity.js';
 
-import { OBSEABuoyEntity } from '/CasablancaBuoy/Assets/OBSEABuoy/OBSEABuoyEntity.js';
-import { OBSEAStationEntity } from '/CasablancaBuoy/Assets/OBSEAStation/ObseaStationEntity.js';
-import { OBSEABiotopEntity } from '/CasablancaBuoy/Assets/OBSEABiotop/OBSEABiotopEntity.js'
-import { OBSEACrawlerEntity } from '/CasablancaBuoy/Assets/OBSEACrawler/CrawlerEntity.js';
-//import { WindsockEntity } from '/CasablancaBuoy/Assets/Windsock/WindsockEntity.js';
-import { FlagEntity } from '/CasablancaBuoy/Assets/Flag/FlagEntity.js';
-import { CurrentEntity } from '/CasablancaBuoy/Assets/Current/CurrentEntity.js';
-import { TextMeshEntity } from '/CasablancaBuoy/Assets/TextMesh/TextMeshEntity.js';
+import { OBSEABuoyEntity } from '/boiasomorrostro/Assets/OBSEABuoy/OBSEABuoyEntity.js';
+import { OBSEAStationEntity } from '/boiasomorrostro/Assets/OBSEAStation/ObseaStationEntity.js';
+import { OBSEABiotopEntity } from '/boiasomorrostro/Assets/OBSEABiotop/OBSEABiotopEntity.js'
+import { OBSEACrawlerEntity } from '/boiasomorrostro/Assets/OBSEACrawler/CrawlerEntity.js';
+//import { WindsockEntity } from '/boiasomorrostro/Assets/Windsock/WindsockEntity.js';
+import { FlagEntity } from '/boiasomorrostro/Assets/Flag/FlagEntity.js';
+import { CurrentEntity } from '/boiasomorrostro/Assets/Current/CurrentEntity.js';
+import { TextMeshEntity } from '/boiasomorrostro/Assets/TextMesh/TextMeshEntity.js';
 
-import { OBSEADataRetriever } from '/CasablancaBuoy/data/OBSEADataRetriever.js'
+import { OBSEADataRetriever } from '/boiasomorrostro/data/OBSEADataRetriever.js'
 
 
 
@@ -116,7 +116,7 @@ class SceneManager{
     // Ocean
     this.ocean = new OceanEntity(scene);
     // OBSEA Buoy
-    this.casablancaBuoy = new CasablancaBuoyEntity(scene);
+    this.somorrostroBuoy = new SomorrostroBuoyEntity(scene);
     // OBSEA Base
     //this.obseaBase = new OBSEAStationEntity(scene);
     // OBSEA Biotop
@@ -212,7 +212,7 @@ class SceneManager{
 
     // Create image logo
     let expObseaImg = document.createElement("img");
-    expObseaImg.src = "/CasablancaBuoy/Assets/Logos/icatmar-mini-logo.svg";
+    expObseaImg.src = "/boiasomorrostro/Assets/Logos/icatmar-mini-logo.svg";
     expObseaImg.style['max-width'] = '40vw';
     expObseaImg.style['max-height'] = '130px';//'18%';
 
@@ -236,7 +236,7 @@ class SceneManager{
 
     // Create sponsors logos
     let sponsorsImg = document.createElement("img");
-    sponsorsImg.src = "/CasablancaBuoy/img/Logos.png";
+    sponsorsImg.src = "/boiasomorrostro/img/Logos.png";
     sponsorsImg.style['max-width'] = '100%';
     sponsorsImg.style['max-height'] = '20%';
     sponsorsImg.style.bottom = '10px';
@@ -370,8 +370,8 @@ class SceneManager{
         this.ocean.update(dt);
 
         // Change buoy position
-        if (this.casablancaBuoy !== undefined) {
-          if (this.casablancaBuoy.isLoaded) {
+        if (this.somorrostroBuoy !== undefined) {
+          if (this.somorrostroBuoy.isLoaded) {
             // Get y position and normal of the wave on that point
             let position = new THREE.Vector3();
             let normal = new THREE.Vector3();
@@ -384,17 +384,17 @@ class SceneManager{
               // dt from 16 to 40
               coef = 0.95 - 0.4 * (1 - dt / 16); // Dependent on frame rate
               
-              let casablancaBuoy = this.casablancaBuoy;
-              casablancaBuoy.root.position.x = casablancaBuoy.root.position.x * coef + (1 - coef) * position.x;
-              casablancaBuoy.root.position.y = casablancaBuoy.root.position.y * coef + (1 - coef) * position.y;
-              casablancaBuoy.root.position.z = casablancaBuoy.root.position.z * coef + (1 - coef) * position.z;
+              let somorrostroBuoy = this.somorrostroBuoy;
+              somorrostroBuoy.root.position.x = somorrostroBuoy.root.position.x * coef + (1 - coef) * position.x;
+              somorrostroBuoy.root.position.y = somorrostroBuoy.root.position.y * coef + (1 - coef) * position.y;
+              somorrostroBuoy.root.position.z = somorrostroBuoy.root.position.z * coef + (1 - coef) * position.z;
 
               // EMA for rotation
               normal.applyAxisAngle(new THREE.Vector3(1, 0, 0), 90 * Math.PI / 180)
               let tempQuat = new THREE.Quaternion();
               tempQuat.setFromUnitVectors(new THREE.Vector3(1, 0, 0), normal.normalize());
               tempQuat.normalize();
-              casablancaBuoy.root.quaternion.slerp(tempQuat, 0.002);
+              somorrostroBuoy.root.quaternion.slerp(tempQuat, 0.002);
 
             }
           }

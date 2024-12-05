@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { GLTFLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
 
 class OBSEAStationEntity {
   constructor(scene){
     const gltfLoader = new GLTFLoader();
-    gltfLoader.load('/CasablancaBuoy/Assets/OBSEAStation/OBSEAStation.glb', (gltf) => {
+    gltfLoader.load('/boiasomorrostro/Assets/OBSEAStation/OBSEAStation.glb', (gltf) => {
       // GLTF scene
       const root = gltf.scene;
       // Fix frustrum culling

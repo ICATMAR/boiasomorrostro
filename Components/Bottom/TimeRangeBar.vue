@@ -86,9 +86,9 @@
 
 
 <script>
-import DataStreamsBar from '/CasablancaBuoy/Components/Bottom/DataStreamsBar.vue';
+import DataStreamsBar from '/boiasomorrostro/Components/Bottom/DataStreamsBar.vue';
 // Import components
-import RangeSlider from '/CasablancaBuoy/Components/Bottom/RangeSlider.vue'
+import RangeSlider from '/boiasomorrostro/Components/Bottom/RangeSlider.vue'
 
 export default {
     name: "time-range-bar",

@@ -1,14 +1,14 @@
 import * as THREE from 'three';
-import { GLTFLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
 
-class CasablancaBuoyEntity {
+class SomorrostroBuoyEntity {
 
   isLoaded = false;
 
   constructor(scene){
     // https://www.youtube.com/watch?v=6LA8vEB47Nk&ab_channel=DirkTeucher
     const gltfLoader = new GLTFLoader();
-    gltfLoader.load('/CasablancaBuoy/Assets/CasablancaBuoy/CasablancaBuoy.glb', (gltf) => {
+    gltfLoader.load('/boiasomorrostro/Assets/SomorrostroBuoy/SomorrostroBuoy.glb', (gltf) => {
       // GLTF scene
       const root = gltf.scene;
       // Fix frustrum culling
@@ -19,15 +19,11 @@ class CasablancaBuoyEntity {
       root.rotation.y = angleFix * Math.PI / 180;
 
       this.root = root;
-
-      // Move upwards all children objects
-      root.children.forEach(ch => {
-        if (ch.name == 'UPC_textFront')
-        ch.translateZ(-0.3);
-        else
-          ch.translateY(0.3);
       
-      });
+
+      this.root.children[0].translateY(-0.5);
+
+
       
 
       scene.add(root);
@@ -37,4 +33,4 @@ class CasablancaBuoyEntity {
   }
 }
 
-export { CasablancaBuoyEntity }
+export { SomorrostroBuoyEntity }

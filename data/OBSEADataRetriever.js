@@ -1,5 +1,5 @@
-import OBSEADataTypes from "/CasablancaBuoy/data/OBSEADataTypes.js";
-import OBSEADailyDataMax from "/CasablancaBuoy/data/StaticData/OBSEADailyDataMax.js"
+import OBSEADataTypes from "/boiasomorrostro/data/OBSEADataTypes.js";
+import OBSEADailyDataMax from "/boiasomorrostro/data/StaticData/OBSEADailyDataMax.js"
 
 // // https://data.obsea.es/api/Datastreams(27)/Observations?$select=resultTime,result&$top=1000000&$filter=resultQuality/qc_flag eq 1 and resultTime ge 2021-01-01T00:00:00z and resultTime lt 2022-01-01T00:00:00z&$orderBy=resultTime asc
 
@@ -13,7 +13,7 @@ export class OBSEADataRetriever{
   
   halfHourlyData = {};
   dataKeys;
-  baseURLStaticFiles = '/CasablancaBuoy/data/StaticData/';
+  baseURLStaticFiles = '/boiasomorrostro/data/StaticData/';
 
   staticFiles = ['obsea_2011_1.csv', 'obsea_2011_2.csv',
                   'obsea_2013_1.csv', 'obsea_2013_2.csv',

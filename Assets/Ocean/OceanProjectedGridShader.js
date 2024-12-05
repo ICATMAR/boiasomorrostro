@@ -381,6 +381,6 @@ export const OceanProjectedGridFragShader = /* glsl */`
     //gl_FragColor = vec4(normalize(v_WorldPosition), 1.0);
     //gl_FragColor = vec4((cameraPosition), 1.0);
     //gl_FragColor = vec4((normalTexel), 1.0);
-    gl_FragColor = vec4(vec3(v_distToCam / 255.0), 1.0);
+    //gl_FragColor = vec4(vec3(v_distToCam / 255.0), 1.0);
   }
   `;

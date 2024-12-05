@@ -1,10 +1,10 @@
-// /CasablancaBuoy/lib/three.js/examples/#webgl_geometry_text
+// /boiasomorrostro/lib/three.js/examples/#webgl_geometry_text
 // https://dev.to/emurtzle/intro-to-threejs--interactive-text-exampletutorial-4d1k
 
 // Use this to generate a new font: https://gero3.github.io/facetype.js/
 import * as THREE from 'three';
-import { FontLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/FontLoader.js';
-import { TextGeometry } from '/CasablancaBuoy/lib/three.js/examples/jsm/geometries/TextGeometry.js';
+import { FontLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from '/boiasomorrostro/lib/three.js/examples/jsm/geometries/TextGeometry.js';
 
 class TextMeshEntity {
 
@@ -34,8 +34,8 @@ class TextMeshEntity {
   // Loads the font and calls a function once its loaded
   loadFont = function(callback){
     const fontLoader = new FontLoader();
-    //fontLoader.load('/CasablancaBuoy/lib/three.js/examples/fonts/helvetiker_bold.typeface.json', (font) => {
-    fontLoader.load('/CasablancaBuoy/Assets/TextMesh/Helvetica 65 Medium_Regular.json', (font) => { 
+    //fontLoader.load('/boiasomorrostro/lib/three.js/examples/fonts/helvetiker_bold.typeface.json', (font) => {
+    fontLoader.load('/boiasomorrostro/Assets/TextMesh/Helvetica 65 Medium_Regular.json', (font) => { 
       this.font = font;
       callback();
     });

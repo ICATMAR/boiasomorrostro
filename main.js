@@ -1,14 +1,14 @@
 // https://github.com/FranckFreiburger/vue3-sfc-loader
 // https://github.com/FranckFreiburger/vue3-sfc-loader/blob/main/docs/examples.md#use-sfc-custom-blocks-for-i18n
-import ca from '/CasablancaBuoy/lang/ca.js';
-import en from '/CasablancaBuoy/lang/en.js';
-import es from '/CasablancaBuoy/lang/es.js';
+import ca from '/boiasomorrostro/lang/ca.js';
+import en from '/boiasomorrostro/lang/en.js';
+import es from '/boiasomorrostro/lang/es.js';
 // Load classes
 // SceneManager
-import SceneManager from "/CasablancaBuoy/Assets/Scripts/SceneManager.js"
+import SceneManager from "/boiasomorrostro/Assets/Scripts/SceneManager.js"
 window.SceneManager = SceneManager;
 // DataManager
-// import DataManager from "/CasablancaBuoy/data/DataManager.js"
+// import DataManager from "/boiasomorrostro/data/DataManager.js"
 // window.DataManager = DataManager;
 
 // Import WMTSDataRetriever
@@ -61,7 +61,7 @@ const { loadModule } = window['vue3-sfc-loader'];
 
 const app = Vue.createApp({
   components: {
-    'app-manager': Vue.defineAsyncComponent(() => loadModule('/CasablancaBuoy/Components/AppManager.vue', options)),
+    'app-manager': Vue.defineAsyncComponent(() => loadModule('/boiasomorrostro/Components/AppManager.vue', options)),
   },
   template: '<app-manager></app-manager>'
 });

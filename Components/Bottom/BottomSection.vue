@@ -79,9 +79,9 @@
 
 
 <script>
-import DataTicker from '/CasablancaBuoy/Components/Bottom/DataTicker.vue';
-import CameraYoutube from "/CasablancaBuoy/Components/Bottom/CameraYoutube.vue"
-import TimeRangeBar from "/CasablancaBuoy/Components/Bottom/TimeRangeBar.vue"
+import DataTicker from '/boiasomorrostro/Components/Bottom/DataTicker.vue';
+import CameraYoutube from "/boiasomorrostro/Components/Bottom/CameraYoutube.vue"
+import TimeRangeBar from "/boiasomorrostro/Components/Bottom/TimeRangeBar.vue"
 
 export default {
   name:"BottomSection",

@@ -57,7 +57,7 @@
 
 
 <script>
-import Knob from "/CasablancaBuoy/Components/Knob.vue";
+import Knob from "/boiasomorrostro/Components/Knob.vue";
 
 
 

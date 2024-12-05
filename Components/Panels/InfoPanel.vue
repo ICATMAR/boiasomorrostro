@@ -6,7 +6,7 @@
       <p> {{$t('infoPanel.p1')}} 
         <a href="https://icatmar.cat" target="_blank">{{$t('infoPanel.ICATMAR')}}</a>
         {{$t('infoPanel.p1_2')}}
-        <a href="https://www.github.com/ICATMAR/CasablancaBuoy" target="_blank">{{$t('infoPanel.github')}}</a>
+        <a href="https://www.github.com/ICATMAR/boiasomorrostro" target="_blank">{{$t('infoPanel.github')}}</a>
 
         
       </p>
@@ -36,7 +36,7 @@
 
 
       <!-- Funding image -->
-      <img src="/CasablancaBuoy/img/Logos.png" style="max-width: 100%">
+      <img src="/boiasomorrostro/img/Logos.png" style="max-width: 100%">
     </div>
   </div>
 </template>

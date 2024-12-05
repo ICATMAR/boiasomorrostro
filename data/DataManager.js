@@ -1,5 +1,5 @@
-import OBSEADataRetriever from "/CasablancaBuoy/data/OBSEADataRetriever.js";
-import WMTSDataRetriever from "/CasablancaBuoy/Scripts/Assets/WMTSDataRetriever.js";
+import OBSEADataRetriever from "/boiasomorrostro/data/OBSEADataRetriever.js";
+import WMTSDataRetriever from "/boiasomorrostro/Scripts/Assets/WMTSDataRetriever.js";
 
 // Manages where to get the data from (API, WMS, or static files)
 class DataManager{
@@ -18,7 +18,7 @@ class DataManager{
     // TODO: files should only be loaded on demand (more than 20Mb of data, no need to download)
     //        - Load files on demand
 
-    // Load all static files to compute the daily maximum (this data is stored locally in "/CasablancaBuoy/data/StaticData/OBSEADailyDataMax.js")
+    // Load all static files to compute the daily maximum (this data is stored locally in "/boiasomorrostro/data/StaticData/OBSEADailyDataMax.js")
     if (!this.OBSEADataRetriever.DailyDataMax)
       this.getStaticData();
 

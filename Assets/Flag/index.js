@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import Stats from '/CasablancaBuoy/lib/three.js/examples/jsm/libs/stats.module.js';
-import { OrbitControls } from '/CasablancaBuoy/lib/three.js/examples/jsm/controls/OrbitControls.js';
-//import { OBJLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/OBJLoader.js';
-import { GLTFLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
-import { GUI } from '/CasablancaBuoy/lib/three.js/examples/jsm/libs/lil-gui.module.min.js';
+import Stats from '/boiasomorrostro/lib/three.js/examples/jsm/libs/stats.module.js';
+import { OrbitControls } from '/boiasomorrostro/lib/three.js/examples/jsm/controls/OrbitControls.js';
+//import { OBJLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
+import { GUI } from '/boiasomorrostro/lib/three.js/examples/jsm/libs/lil-gui.module.min.js';
 import { WindsockBehavior } from '../Assets/Windsock/WindsockBehavior.js'
 import { RosaVentsEntity } from '../Assets/Orientation/RosaVentsEntity.js';
 import { WindsockEntity } from '../Assets/Windsock/WindsockEntity.js';

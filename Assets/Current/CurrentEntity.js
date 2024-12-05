@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { OBJLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/OBJLoader.js';
+import { OBJLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/OBJLoader.js';
 import { Vector3 } from 'three';
 
 class CurrentEntity {
@@ -27,7 +27,7 @@ class CurrentEntity {
   constructor(scene) {
       const objLoader = new OBJLoader();
       // objLoader.load('https://threejs.org/manual/examples/resources/models/windmill/windmill.obj', (root) => {
-      objLoader.load('/CasablancaBuoy/Assets/Orientation/ArrowX.obj', (root) => {
+      objLoader.load('/boiasomorrostro/Assets/Orientation/ArrowX.obj', (root) => {
 
         // Add material
         const arrowMaterial = new THREE.MeshPhongMaterial({

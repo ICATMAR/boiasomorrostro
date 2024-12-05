@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from '/CasablancaBuoy/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
 
 class OBSEABuoyEntity {
 
@@ -8,7 +8,7 @@ class OBSEABuoyEntity {
   constructor(scene){
     // https://www.youtube.com/watch?v=6LA8vEB47Nk&ab_channel=DirkTeucher
     const gltfLoader = new GLTFLoader();
-    gltfLoader.load('/CasablancaBuoy/Assets/OBSEABuoy/OBSEABuoy.glb', (gltf) => {
+    gltfLoader.load('/boiasomorrostro/Assets/OBSEABuoy/OBSEABuoy.glb', (gltf) => {
       // GLTF scene
       const root = gltf.scene;
       // Fix frustrum culling
