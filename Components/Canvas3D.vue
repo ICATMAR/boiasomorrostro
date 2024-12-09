@@ -259,9 +259,15 @@ export default {
 
 
 <style scoped>
+#canvas3Dcontainer{
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 #canvas3D {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   position: absolute;
   background-color: red;
   z-index: 0;

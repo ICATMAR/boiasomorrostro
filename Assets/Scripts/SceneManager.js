@@ -13,17 +13,10 @@ import { OceanEntity } from '/boiasomorrostro/Assets/Ocean/OceanEntity.js';
 
 import { SomorrostroBuoyEntity } from '/boiasomorrostro/Assets/SomorrostroBuoy/SomorrostroBuoyEntity.js';
 
-import { OBSEABuoyEntity } from '/boiasomorrostro/Assets/OBSEABuoy/OBSEABuoyEntity.js';
-import { OBSEAStationEntity } from '/boiasomorrostro/Assets/OBSEAStation/ObseaStationEntity.js';
-import { OBSEABiotopEntity } from '/boiasomorrostro/Assets/OBSEABiotop/OBSEABiotopEntity.js'
-import { OBSEACrawlerEntity } from '/boiasomorrostro/Assets/OBSEACrawler/CrawlerEntity.js';
 //import { WindsockEntity } from '/boiasomorrostro/Assets/Windsock/WindsockEntity.js';
 import { FlagEntity } from '/boiasomorrostro/Assets/Flag/FlagEntity.js';
 import { CurrentEntity } from '/boiasomorrostro/Assets/Current/CurrentEntity.js';
 import { TextMeshEntity } from '/boiasomorrostro/Assets/TextMesh/TextMeshEntity.js';
-
-import { OBSEADataRetriever } from '/boiasomorrostro/data/OBSEADataRetriever.js'
-
 
 
 class SceneManager{
@@ -57,9 +50,6 @@ class SceneManager{
     // Surface
     camera.position.set(5, 3, 5);
     controls.target.set(0, 1, 0);
-  // OBSEA base
-  // camera.position.set(3, -16, 3);
-  // controls.target.set(6,-19, -1);
 
     controls.update();
     controls.enableDamping = true;
@@ -117,14 +107,8 @@ class SceneManager{
     });
     // Ocean
     this.ocean = new OceanEntity(scene);
-    // OBSEA Buoy
+    // Buoy
     this.somorrostroBuoy = new SomorrostroBuoyEntity(scene);
-    // OBSEA Base
-    //this.obseaBase = new OBSEAStationEntity(scene);
-    // OBSEA Biotop
-    //this.obseaBiotop = new OBSEABiotopEntity(scene);
-    // OBSEA Crawler
-    //this.obseaCrawler = new OBSEACrawlerEntity(scene);
 
     // Flag
     this.flag = new FlagEntity(scene, () => {
@@ -158,19 +142,6 @@ class SceneManager{
       this.Stext.textObj.position.y = 1;
       this.Stext.textObj.position.z = 4;
     });
-
-    // Potential salinity
-
-    // OBSEA Data
-    // let dataRetriever = new OBSEADataRetriever(() => {
-    //   // Modify ocean parameters
-    //   if (ocean) ocean.updateOceanParameters(dataRetriever.currentParams);
-    //   // Modify wind
-    //   if (flag) flag.updateWindParameters(dataRetriever.currentParams);
-    //   // Update currents
-    //   if (currents) currents.updateCurrentParameters(dataRetriever.currentParams);
-    // });
-
 
 
 
@@ -213,10 +184,10 @@ class SceneManager{
     loadDiv.style['transition'] = 'all 1.5s ease-in-out';
 
     // Create image logo
-    let expObseaImg = document.createElement("img");
-    expObseaImg.src = "/boiasomorrostro/Assets/Logos/icatmar-mini-logo.svg";
-    expObseaImg.style['max-width'] = '40vw';
-    expObseaImg.style['max-height'] = '130px';//'18%';
+    let loadingImg = document.createElement("img");
+    loadingImg.src = "/boiasomorrostro/Assets/Logos/icatmar-mini-logo.svg";
+    loadingImg.style['max-width'] = '40vw';
+    loadingImg.style['max-height'] = '130px';//'18%';
 
     // Create progress bar
     let progress = document.createElement('div');
@@ -245,7 +216,7 @@ class SceneManager{
     sponsorsImg.style.position = 'absolute';
 
     // Add to div
-    loadDiv.appendChild(expObseaImg);
+    loadDiv.appendChild(loadingImg);
     loadDiv.appendChild(progress);
     loadDiv.appendChild(sponsorsImg);
     // Add to body
@@ -423,10 +394,6 @@ class SceneManager{
     }
 
 
-    // Crawler
-    if (this.obseaCrawler){
-      this.obseaCrawler.update(dt);
-    }
 
 
   }
