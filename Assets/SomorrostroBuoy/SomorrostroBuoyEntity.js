@@ -15,16 +15,18 @@ class SomorrostroBuoyEntity {
       // Mesh
       let buoyMesh = root.children[0];
 
-      // Fix ambient occlusion and material
+      // Fix material
+      // AO
       buoyMesh.geometry.attributes.uv2 = buoyMesh.geometry.attributes.uv;
       const aoTexture = new THREE.TextureLoader().load('/boiasomorrostro/Assets/SomorrostroBuoy/aoMap.png');
       aoTexture.flipY = false;
       buoyMesh.material.aoMap = aoTexture;
       buoyMesh.material.aoMapIntensity = 1;
+      // Normal map
+      buoyMesh.material.normalScale.x = -1; // Normal map fix
+      // Metalness
+      buoyMesh.material.metalness = 0; // No metallic (needs environment map)
       
-      
-
-
 
       // Fix frustrum culling
       buoyMesh.frustumCulled = false;
