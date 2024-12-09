@@ -94,6 +94,7 @@ import SeaStateAnalysisPanel from './BottomSection/SeaStateAnalysisPanel.vue';
 import RenderStereoPanel from './BottomSection/RenderStereoPanel.vue';
 import RenderHeightPanel from './BottomSection/RenderHeightPanel.vue';
 import AboutPanel from './BottomSection/AboutPanel.vue';
+import MapBuoyLocation from './BottomSection/MapBuoyLocation.vue';
 
 export default {
   name: "BottomSection",
@@ -238,6 +239,7 @@ export default {
     "render-heights": RenderHeightPanel,
     "render-stereo": RenderStereoPanel,
     "about": AboutPanel,
+    "mapBuoyLocation": MapBuoyLocation,
   }
 }
 
@@ -373,6 +375,8 @@ export default {
 }
 .submenu-item-content{
   overflow: auto;
+  justify-items: center;
+  width: 100%;
 }
 
 .top-right-icons {
