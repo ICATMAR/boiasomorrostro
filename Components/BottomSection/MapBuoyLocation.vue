@@ -1,5 +1,5 @@
 <template>
-  <div id="map" class="map-container content"></div>
+  <div id="map" class="map-container"></div>
 </template>
 
 <script>
@@ -25,15 +25,9 @@ export default {
 </script>
 
 <style scoped>
-.content {
-  padding: 20px;
-  font-size: small;
-  max-width: 700px;
-}
-
 .map-container {
   height: 400px;
-  width: 100%;
+  width: 60vw;
   margin: auto;
 }
 </style>

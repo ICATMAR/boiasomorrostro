@@ -89,12 +89,15 @@
 
 <script>
 
-import DiscreteWaves from './BottomSection/DiscreteWavesPanel.vue';
-import SeaStateAnalysisPanel from './BottomSection/SeaStateAnalysisPanel.vue';
-import RenderStereoPanel from './BottomSection/RenderStereoPanel.vue';
-import RenderHeightPanel from './BottomSection/RenderHeightPanel.vue';
-import AboutPanel from './BottomSection/AboutPanel.vue';
+// import DiscreteWaves from './BottomSection/DiscreteWavesPanel.vue';
+// import SeaStateAnalysisPanel from './BottomSection/SeaStateAnalysisPanel.vue';
+// import RenderStereoPanel from './BottomSection/RenderStereoPanel.vue';
+// import RenderHeightPanel from './BottomSection/RenderHeightPanel.vue';
+
+import RawData from './BottomSection/RawData.vue';
 import MapBuoyLocation from './BottomSection/MapBuoyLocation.vue';
+import AboutPanel from './BottomSection/AboutPanel.vue';
+
 
 export default {
   name: "BottomSection",
@@ -234,12 +237,14 @@ export default {
     },
   },
   components: {
-    "discrete-waves": DiscreteWaves,
-    "sea-state-analysis": SeaStateAnalysisPanel,
-    "render-heights": RenderHeightPanel,
-    "render-stereo": RenderStereoPanel,
-    "about": AboutPanel,
+    // "discrete-waves": DiscreteWaves,
+    // "sea-state-analysis": SeaStateAnalysisPanel,
+    // "render-heights": RenderHeightPanel,
+    // "render-stereo": RenderStereoPanel,
+    "rawData": RawData,
     "mapBuoyLocation": MapBuoyLocation,
+    "about": AboutPanel,
+    
   }
 }
 
@@ -376,7 +381,6 @@ export default {
 .submenu-item-content{
   overflow: auto;
   justify-items: center;
-  width: 100%;
 }
 
 .top-right-icons {
