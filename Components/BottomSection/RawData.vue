@@ -15,7 +15,8 @@
       <tbody>
         <!-- Loop through the rows of CSV data -->
         <tr v-for="(row, rowIndex) in data" :key="rowIndex">
-          <td v-for="(value, colIndex) in row" :key="colIndex">{{ value }}</td>
+          <td class="sticky-first-column">{{ row[0] }}</td> <!-- Sticky first column -->
+          <td v-for="(value, colIndex) in row.slice(1)" :key="colIndex">{{ value }}</td> <!-- Other columns -->
         </tr>
       </tbody>
     </table>
@@ -76,24 +77,33 @@ export default {
 
 <style scoped>
 .content {
-  padding: 20px;
+  margin: min(20px, 2vw);
   overflow: auto;
   font-size: small;
-  max-width: 700px;
-  max-height: 100%;
+  max-width: 60vw;
+  max-height: 90%;
 }
 
 .csv-table th,
 .csv-table td {
-  padding: 10px;
-  border: 1px solid #ccc;
+  padding: min(10px, 1vw);
+  border: 1px solid gray;
   text-align: left;
 }
 
 .csv-table th {
-  background-color: #f4f4f4;
+  background-color: var(--lightBlue);
   position: sticky; /* Make the header sticky */
   top: 0; /* Stick to the top of the table wrapper */
-  z-index: 1; /* Ensure the header is above the table rows */
+  z-index: 2; /* Ensure the header is above the table rows */
+}
+
+/* Sticky first column */
+.sticky-first-column {
+  position: sticky;
+  left: 0; /* Stick to the left side of the table */
+  background-color: var(--lightBlue);
+  z-index: 1; /* Make sure the first column stays on top of the other columns */
+  font-weight: bold; /* Optional: Make the first column text bold for better visibility */
 }
 </style>
