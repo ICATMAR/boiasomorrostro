@@ -6,7 +6,6 @@
 export default {
   name: "MapComponent",
   mounted() {
-    debugger;
     // Ensure Leaflet is available globally via the script tag
     const map = L.map("map").setView([41.375694, 2.216194], 13); // Center at the given coordinates, zoom level 13
 
@@ -19,7 +18,7 @@ export default {
     // Add a pin at the specified coordinates
     L.marker([41.375694, 2.216194])
       .addTo(map)
-      .bindPopup("Somorrostro buoy location")
+      .bindPopup(this.$i18n.t("Somorrostro buoy"))
       .openPopup();
   },
 };

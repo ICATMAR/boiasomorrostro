@@ -18,7 +18,7 @@
           class="menu-left-button clickable" :class="[selectedMenu == el.title ? 'menu-left-button-sel' : '']" 
           @click="menuLeftItemClicked(el)">
           <span v-if="el.icon" class="fa" v-html="el.icon"></span>
-          <span>{{ el.title }}</span>
+          <span>{{ $t(el.title) }}</span>
         </button>
       </div>
       
@@ -31,7 +31,7 @@
             <!-- Submenu title -->
             <div class="submenu-title">
               <div class="fa" v-html="el.icon"></div>
-              {{ el.title }}
+              {{ $t(el.title) }}
             </div>
             <!-- Submenu items -->
             <div class="submenu-items-container">
