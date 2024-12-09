@@ -4,6 +4,18 @@ export default ca = {
   "Longitude": "Longitud",
   "Latitude": "Latitud",
 
+  "intro": "Aquesta aplicació ofereix una visualització dinàmica en 3D de la boia Somorrostro, reflectint les seves condicions reals i proporcionant accés a dades meteorològiques i oceanogràfiques en temps real.",
+  "disclaimer": "Les dades presentades en aquesta aplicació són únicament per a fins informatius. Tot i que ens esforcem per garantir-ne la precisió i fiabilitat, no podem assegurar que les dades estiguin lliures d'errors o interrupcions. La informació no s'ha d'utilitzar per a la presa de decisions crítiques sense una verificació addicional. L'ús d'aquesta aplicació és sota la seva pròpia responsabilitat.",
+  "concept": "El concepte d’aquesta aplicació web s’origina en els bessons digitals: l’estat del mar mostrat aquí hauria de ser una rèplica del mar real. A més, l’usuari hauria de poder modificar el bessó digital i crear 'escenaris hipotètics'.",
+  "howtocite": "Si voleu fer referència a aquesta aplicació web, utilitzeu les cites següents:",
+
+  "Contact": "Contacte",
+  "author-info-gerard": "Per qualsevol dubte, comentari o suggeriment respecte l'aplicació web, podeu contactar amb ",
+  "contact-github-issues": "Si esteu familiaritzats amb github issues, podeu informar d'errors a través de ",
+  "author-info-jordi": "Respecte les dades, el seu tractament i obtenció, contacteu amb ",
+  "contact-icatmar": "Per qualsevol altra cosa, podeu contactar a través de ",
+
+
   "buoyButtonTitle": "Centra la càmara a la boia de superficie",
   "baseButtonTitle": "Centra la càmara a l'observatori submarí",
 

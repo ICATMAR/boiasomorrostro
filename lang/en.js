@@ -4,6 +4,19 @@ export default en = {
   "Longitude": "Longitude",
   "Latitude": "Latitude",
 
+
+
+  "intro": "This application offers a dynamic 3D visualization of the Somorrostro buoy, mirroring its actual conditions and providing access to live meteorological and oceanographic data.",
+  "disclaimer": "The data presented in this application is for informational purposes only. While we strive to ensure accuracy and reliability, we cannot guarantee that the data is free from errors or interruptions. The information should not be used for critical decision-making without additional verification. Use of the application is at your own risk.",
+  "concept": "The concept of this web application originates from digital twins: the sea state shown here should be a replica of the real sea. Additionally, the user should be able to change the digital twin and create 'what-if scenarios'.",
+  "howtocite": "If you want to reference this web application please use the folling citations:",
+
+  "Contact": "Contact",
+  "author-info-gerard": "For any questions, comments, or suggestions regarding the web application, you can contact ",
+  "contact-github-issues": "If you are familiar with GitHub issues, you can report errors through ",
+  "author-info-jordi": "For questions regarding the data, its processing, and acquisition, contact ",
+  "contact-icatmar": "For anything else, you can contact us through ",
+
   "buoyButtonTitle": "Center the camera on the surface buoy",
   "baseButtonTitle": "Center the camera on the underwater observatory",
 

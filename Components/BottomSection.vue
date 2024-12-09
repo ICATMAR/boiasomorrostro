@@ -111,71 +111,86 @@ export default {
       // Menu structure
       menu: [
         {
-          title: 'Waves',
-          icon: '&#xf773',
-          children: [
-            {
-              title: 'Discrete waves',
-              component: 'discrete-waves'
-            },
-            {
-              title: 'Sea state analysis',
-              icon: '&#xf201',
-              component: 'sea-state-analysis'
-            },
-            {
-              title: 'Generate sea state',
-              icon: '&#xf1fe',
-              component: 'generate-sea-state'
-            }
-          ]
-        }, // End of waves
+          title: 'Raw data',
+          icon: '&#xe69b',
+          component: 'rawData',
+        },
         {
-          title: 'Export',
-          icon: '&#xf56e',
-          children: [
-            {
-              title: 'Export discrete waves (.json)',
-              isClickEvent: true,
-              event: () => {
-                window.eventBus.emit('BottomSection_ExportWavesClicked');
-              }
-            },
-            {
-              title: 'Render heights (.png)',
-              icon: '&#xf302',
-              component: 'render-heights',
-            },
-            {
-              title: 'Render stereo cameras (.png)',
-              icon: '&#xf302',
-              component: 'render-stereo',
-            }
-          ]
-        }, // End of export
-        {
-          title: 'Scene',
-          icon: '&#xf61f',
-          children: [
-            {
-              title: 'Add/Remove objects',
-              component: 'SceneObjects'
-            },
-            {
-              title: 'Colors',
-              component: 'SceneColors',
-            },
-            {
-              title: 'Environment',
-              component: 'SceneEnvironment'
-            }
-          ]
-        }, // End of scene
+          title: 'Map',
+          icon: '&#xf5a0',
+          component: 'mapBuoyLocation'
+        },
         {
           title: 'About',
           icon: '&#xf05a',
-          component: 'about'
+          component: 'about',
         } // End of about
+        // {
+        //   title: 'Waves',
+        //   icon: '&#xf773',
+        //   children: [
+        //     {
+        //       title: 'Discrete waves',
+        //       component: 'discrete-waves'
+        //     },
+        //     {
+        //       title: 'Sea state analysis',
+        //       icon: '&#xf201',
+        //       component: 'sea-state-analysis'
+        //     },
+        //     {
+        //       title: 'Generate sea state',
+        //       icon: '&#xf1fe',
+        //       component: 'generate-sea-state'
+        //     }
+        //   ]
+        // }, // End of waves
+        // {
+        //   title: 'Export',
+        //   icon: '&#xf56e',
+        //   children: [
+        //     {
+        //       title: 'Export discrete waves (.json)',
+        //       isClickEvent: true,
+        //       event: () => {
+        //         window.eventBus.emit('BottomSection_ExportWavesClicked');
+        //       }
+        //     },
+        //     {
+        //       title: 'Render heights (.png)',
+        //       icon: '&#xf302',
+        //       component: 'render-heights',
+        //     },
+        //     {
+        //       title: 'Render stereo cameras (.png)',
+        //       icon: '&#xf302',
+        //       component: 'render-stereo',
+        //     }
+        //   ]
+        // }, // End of export
+        // {
+        //   title: 'Scene',
+        //   icon: '&#xf61f',
+        //   children: [
+        //     {
+        //       title: 'Add/Remove objects',
+        //       component: 'SceneObjects'
+        //     },
+        //     {
+        //       title: 'Colors',
+        //       component: 'SceneColors',
+        //     },
+        //     {
+        //       title: 'Environment',
+        //       component: 'SceneEnvironment'
+        //     }
+        //   ]
+        // }, // End of scene
+        // {
+        //   title: 'About',
+        //   icon: '&#xf05a',
+        //   component: 'about'
+        // } // End of about
       ] // End of menu
     }
   },
@@ -291,6 +306,9 @@ export default {
 .menu-list-left > button {
   margin-bottom: 10px;
   width: 100%;
+}
+.menu-list-left > button > span {
+  text-wrap-mode: nowrap;
 }
 .menu-left-button {
   padding-left: 10px;

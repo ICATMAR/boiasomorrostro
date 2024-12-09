@@ -4,6 +4,19 @@ export default es = {
   "Longitude": "Longitud",
   "Latitude": "Latitud",
 
+  "intro": "Esta aplicación ofrece una visualización dinámica en 3D de la boya Somorrostro, reflejando sus condiciones reales y proporcionando acceso a datos meteorológicos y oceanográficos en tiempo real.",
+  "disclaimer": "Los datos presentados en esta aplicación son únicamente para fines informativos. Aunque nos esforzamos por garantizar su precisión y fiabilidad, no podemos asegurar que los datos estén libres de errores o interrupciones. La información no debe utilizarse para la toma de decisiones críticas sin una verificación adicional. El uso de esta aplicación es bajo su propia responsabilidad.",
+  "concept": "El concepto de esta aplicación web se origina en los gemelos digitales: el estado del mar mostrado aquí debería ser una réplica del mar real. Además, el usuario debería poder modificar el gemelo digital y crear 'escenarios hipotéticos'.",
+  "howtocite": "Si desea hacer referencia a esta aplicación web, utilice las siguientes citas:",
+
+  "Contact": "Contacto",
+  "author-info-gerard": "Para cualquier duda, comentario o sugerencia sobre la aplicación web, puedes contactar con ",
+  "contact-github-issues": "Si estás familiarizado con GitHub issues, puedes informar de errores a través de ",
+  "author-info-jordi": "Para consultas sobre los datos, su tratamiento y obtención, contacta con ",
+  "contact-icatmar": "Para cualquier otra cosa, puedes contactar a través de ",
+
+
+
   "buoyButtonTitle": "Centra la cámara en la boya de superfície",
   "baseButtonTitle": "Centra la cámara en el observatorio submarino",
 
