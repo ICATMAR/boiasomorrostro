@@ -47,19 +47,57 @@ export default {
   methods: {
     async fetchCSVData() {
       try {
-        const response = await fetch("https://icatmar.github.io/BuoyData/Somorrostro/csv/BuoySomorrostro_2024_11.csv"); // Replace with your CSV URL
-        const csvText = await response.text();
-                
-        let tmp = csvText.replace('\r', '');
-        this.headers = tmp.split('\n')[0].split(',');
-        tmp = tmp.split('\n');
-        tmp.shift();
-        tmp.pop();
-        let data = [];
-        for (let i = 0; i < tmp.length; i++){
-          data[i] = tmp[i].split(',');
+        // Fetch this month and previous month
+        let now = new Date();
+        let year = now.getUTCFullYear();
+        let month = now.getUTCMonth() + 1;
+        let baseURL =  'https://icatmar.github.io/BuoyData/Somorrostro/csv/BuoySomorrostro_';
+        // Current
+        let urls = [baseURL + year + '_' +  String(month).padStart(2, '0') + '.csv'];
+        // Prev month
+        now.setUTCMonth(now.getUTCMonth() - 1);
+        let prevYear = now.getUTCFullYear();
+        let prevMonth = now.getUTCMonth() + 1;
+        urls.push(baseURL + prevYear + '_' +  String(prevMonth).padStart(2, '0') + '.csv');
+
+        // Create promises
+        let promises = [];
+        for (let i = 0; i < urls.length; i++){
+          promises.push(
+            fetch(urls[i])
+            .then(r => {
+              if (!r.ok) {
+                throw new Error(urls[i] + " not found.");
+              }
+              else
+                return r.text()})
+            .then(res => {
+              let tmp = res.replace('\r', '');
+              let headers = tmp.split('\n')[0].split(',');
+              tmp = tmp.split('\n');
+              tmp.shift();
+              tmp.pop();
+              let data = [];
+              for (let i = 0; i < tmp.length; i++){
+                data[i] = tmp[i].split(',');
+              }
+              return [headers, data];
+            })
+          )
         }
-        this.data = data;
+
+        // Create Headers and Data arrays
+        this.data = [];
+        let results = await Promise.allSettled(promises);
+        for (let i = 0; i < results.length; i++){
+          if (results[i].status == 'rejected')
+            continue;
+
+          this.headers = results[i].value[0];
+          this.data = this.data.concat(results[i].value[1]);
+        }
+        // Sort data by date
+        this.data.sort((a, b) => new Date(b[0]) - new Date(a[0]));
 
         this.isLoading = false;
       
