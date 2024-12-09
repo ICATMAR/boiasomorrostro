@@ -16,10 +16,8 @@
     <!-- Top right icons -->
     <top-right-menu></top-right-menu>
 
-    <!-- Top left icons -->
-    <top-left-menu></top-left-menu>
-
-    <!-- <bottom-section></bottom-section> -->
+    <!-- Top left icons that show how to control the ocean -->
+    <!-- <top-left-menu></top-left-menu> -->
 
 
     <!-- Central Panel -->
