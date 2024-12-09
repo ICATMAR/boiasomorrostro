@@ -38,7 +38,7 @@
     </div>
 
     <!-- Location -->
-    <span>{{$t('Latitude')}}: {{lat}} º, {{$t('Longitude')}}: {{long}} º</span>
+    <span>{{$t('Latitude')}}: {{lat.toFixed(2)}} º, {{$t('Longitude')}}: {{long.toFixed(2)}} º</span>
     <!-- Data source attribution -->
     <span class="wrapText">{{$t('Data source')}}: <a class="widgetSpan clickable" title="Weather data source" :href="sourceDoi" target="_blank">E.U. CMEMS,
             Copernicus Marine Service</a></span>
@@ -60,6 +60,8 @@
     created() {
       // Create data retriever
       this.dataRetriever = window.WMTSDataRetriever;
+
+
 
       // Create data object
       this.dataValues = {};
@@ -208,10 +210,8 @@
           
         ],
         currentDateHTML: '',
-        long: 1.345567,
-        lat: 40.704597,
-        longStr: '1.34',
-        latStr: '40.70',
+        long: 2.287564,
+        lat: 41.351599,
       }
     },
     methods: {
@@ -246,10 +246,12 @@
         // Get data
         this.dataRows.forEach((rr, rIndex) => {
           let layerName = rr.direction ? rr.layer : rr.name;
+          debugger;
           // Icon row does not load data
           if (layerName !== undefined){
             this.dataRetriever.getDataAtPoint(layerName, date.toISOString(), lat, long, 'h', rr.direction)
               .then(value => {
+                debugger;
                 if (value == undefined){
                   this.dataValues[rr.name].value = 'x';
                   this.dataValues[rr.name].loading = false;
@@ -357,8 +359,6 @@
 
       updateTable: async function(inputDate, long, lat){
 
-        this.latStr = lat.toFixed(2);
-        this.longStr = long.toFixed(2);
         let str = inputDate.toString().substring(0,15);
         // Translate
         this.currentDateHTML = this.$i18n.t(str.split(" ")[0]) + " " + this.$i18n.t(str.split(" ")[1]) + " " + str.split(" ")[2] + " " + str.split(" ")[3];

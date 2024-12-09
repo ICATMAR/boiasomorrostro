@@ -298,10 +298,8 @@ export default {
       numDaysAhead: 4,
       daysString: [],
       currentDateHTML: '',
-      long: 1.345567,
-      lat: 40.704597,
-      longStr: '1.34',
-      latStr: '40.70',
+      long: 2.287564,
+      lat: 41.351599,
     }
   },
   watch: {
@@ -534,8 +532,6 @@ export default {
 
     updateTable: async function(inputDate, long, lat){
 
-      this.latStr = lat.toFixed(2);
-      this.longStr = long.toFixed(2);
       let str = inputDate.toString().substring(0,15);
       // Translate
       this.currentDateHTML = this.$i18n.t(str.split(" ")[0]) + " " + this.$i18n.t(str.split(" ")[1]) + " " + str.split(" ")[2] + " " + str.split(" ")[3];
