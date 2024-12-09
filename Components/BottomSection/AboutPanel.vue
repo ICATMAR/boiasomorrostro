@@ -29,6 +29,18 @@
     <p>
       {{ $t('author-info-gerard') }} {{ email }}@{{ emailProvider }}. {{ $t('contact-github-issues') }} <a href="https://github.com/ICATMAR/boiasomorrostro" title="repository" target="_blank">github</a>. {{ $t('contact-icatmar') }} {{ emailObs }}@{{ emailProviderIcatmar }}
     </p>
+
+    <!-- Attributions -->
+     <!-- Funding agencies icons-->
+     <div class="attributions-container">
+      <div class="logos-container">
+        <img src="img/logos/ICATMAR512.png">
+        <img src="img/logos/AjuntamentBarcelona.png">
+        <img src="img/logos/Generalitat.png">
+        <img src="img/logos/ICM.png">
+        <img src="img/logos/CSIC.png">
+      </div>
+    </div>
     
 
   </div>
@@ -98,5 +110,28 @@ p {
 
 .citation {
   font-style: italic;
+}
+
+
+
+.attributions-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.logos-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  
+}
+.logos-container > img {
+  width: 20%;
+  object-fit: contain;
+  padding-left: 2%;
+  padding-right: 2%;
+  max-width: 150px;
 }
 </style>
