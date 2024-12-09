@@ -246,12 +246,10 @@
         // Get data
         this.dataRows.forEach((rr, rIndex) => {
           let layerName = rr.direction ? rr.layer : rr.name;
-          debugger;
           // Icon row does not load data
           if (layerName !== undefined){
             this.dataRetriever.getDataAtPoint(layerName, date.toISOString(), lat, long, 'h', rr.direction)
               .then(value => {
-                debugger;
                 if (value == undefined){
                   this.dataValues[rr.name].value = 'x';
                   this.dataValues[rr.name].loading = false;
