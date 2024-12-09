@@ -22,6 +22,8 @@ class SandEntity {
     pBottMesh.translateY(-19.4);
     pBottMesh.rotation.x = Math.PI * -.5;
 
+    this.mesh = pBottMesh;
+
     scene.add(pBottMesh);
 
   }

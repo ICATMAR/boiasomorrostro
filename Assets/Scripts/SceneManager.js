@@ -112,7 +112,9 @@ class SceneManager{
     // Skybox
     this.skybox = new SkyboxEntity(scene);
     // Sand
-    this.sand = new SandEntity(scene);
+    this.sand = new SandEntity(scene, () => {
+      this.sand.mesh.position.y = -43;
+    });
     // Ocean
     this.ocean = new OceanEntity(scene);
     // OBSEA Buoy
