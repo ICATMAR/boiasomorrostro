@@ -12,6 +12,8 @@ import * as FogShader from '/boiasomorrostro/Assets/Terrain/FogShader.js'
 import { OceanEntity } from '/boiasomorrostro/Assets/Ocean/OceanEntity.js';
 
 import { SomorrostroBuoyEntity } from '/boiasomorrostro/Assets/SomorrostroBuoy/SomorrostroBuoyEntity.js';
+import { HeavyChainsEntity } from '/boiasomorrostro/Assets/Mooring/HeavyChainsEntity.js';
+
 
 //import { WindsockEntity } from '/boiasomorrostro/Assets/Windsock/WindsockEntity.js';
 import { FlagEntity } from '/boiasomorrostro/Assets/Flag/FlagEntity.js';
@@ -101,10 +103,7 @@ class SceneManager{
 
     // Skybox
     this.skybox = new SkyboxEntity(scene);
-    // Sand
-    this.sand = new SandEntity(scene, () => {
-      this.sand.mesh.position.y = -43;
-    });
+    
     // Ocean
     this.ocean = new OceanEntity(scene);
     // Buoy
@@ -114,7 +113,16 @@ class SceneManager{
     this.flag = new FlagEntity(scene, () => {
       this.flag.root.position.y = -1;
     });
+
+
+    // Mooring
+    this.mooring = new HeavyChainsEntity(scene, () => {
+      this.mooring.root.position.y = -42.8;
+    });
     
+    // Sand
+    this.sand = new SandEntity(scene);
+    this.sand.mesh.position.y = -43;
 
     // Rosa dels vents
     //his.rosaVents = new RosaVentsEntity(scene);

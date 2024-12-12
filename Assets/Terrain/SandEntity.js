@@ -19,7 +19,6 @@ class SandEntity {
       transparent: true
     });
     const pBottMesh = new THREE.Mesh(planeBottom, pBottMat);
-    pBottMesh.translateY(-19.4);
     pBottMesh.rotation.x = Math.PI * -.5;
 
     this.mesh = pBottMesh;
