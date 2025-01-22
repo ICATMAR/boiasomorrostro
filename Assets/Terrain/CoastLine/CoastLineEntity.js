@@ -5,7 +5,8 @@ import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/G
 class CoastLineEntity {
 
   constructor(scene) {
-    const gltfLoader = new GLTFLoader();
+    const manager = new THREE.LoadingManager(); // Empty manager
+    const gltfLoader = new GLTFLoader(manager);
     gltfLoader.load('/boiasomorrostro/Assets/Terrain/CoastLine/CoastLine.glb', (gltf) => { // '../Assets/Skybox/skybox.glb'
       // GLTF scene
       const root = gltf.scene;
