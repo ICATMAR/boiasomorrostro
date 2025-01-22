@@ -9,7 +9,7 @@ class SkyboxEntity {
       // GLTF scene
       const root = gltf.scene;
       // Scale
-      root.scale.multiplyScalar(9.5);
+      root.scale.multiplyScalar(1000);
       // Scene direction fix
       const angleFix = 90;
       root.rotation.y = angleFix * Math.PI / 180;

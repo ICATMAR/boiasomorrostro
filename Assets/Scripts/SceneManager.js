@@ -7,6 +7,9 @@ import { FBXLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/FB
 import { RosaVentsEntity } from '/boiasomorrostro/Assets/Orientation/RosaVentsEntity.js';
 import { SandEntity } from '/boiasomorrostro/Assets/Terrain/SandEntity.js';
 import { SkyboxEntity } from '/boiasomorrostro/Assets/Skybox/SkyboxEntity.js';
+// CoastLine
+import { CoastLineEntity } from '/boiasomorrostro/Assets/Terrain/CoastLine/CoastLineEntity.js';
+
 
 import * as FogShader from '/boiasomorrostro/Assets/Terrain/FogShader.js'
 import { OceanEntity } from '/boiasomorrostro/Assets/Ocean/OceanEntity.js';
@@ -40,8 +43,8 @@ class SceneManager{
 
     const fov = 45;
     const aspect = 2;  // the canvas default
-    const near = 0.1;
-    const far = 2000;
+    const near = 0.5;
+    const far = 100000;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     this.camera = camera;
 
@@ -104,6 +107,10 @@ class SceneManager{
     // Skybox
     this.skybox = new SkyboxEntity(scene);
     
+    // Coastline
+    this.coastLine = new CoastLineEntity(scene);
+  
+
     // Ocean
     this.ocean = new OceanEntity(scene);
     // Buoy
