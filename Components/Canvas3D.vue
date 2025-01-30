@@ -28,7 +28,8 @@ export default {
     // Event listeners
     // Window resize
     window.addEventListener('resize', (e) => {
-      this.sceneManager.windowWasResized();
+      // HACK: for some reason, using windows + arrows resizes the window and calls the event, but the width and height are not correct
+      setTimeout(() => {this.sceneManager.windowWasResized()}, 100); 
     });
     // ***** INSTRUMENTS PANEL *****
     // Center on instruments
