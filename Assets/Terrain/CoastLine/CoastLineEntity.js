@@ -3,6 +3,7 @@ import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/G
 
 // Tutorial 3D Tiles Google to Blender
 // https://www.youtube.com/watch?v=OzfNCZG-u7I&t=499s&ab_channel=Xuacucreativo
+// Google Earth Decoder update: https://flightsim.to/file/39900/gogole-earth-decoder-update
 class CoastLineEntity {
 
   constructor(scene) {
@@ -23,4 +24,4 @@ class CoastLineEntity {
   }
 }
 
-export {CoastLineEntity}
+export { CoastLineEntity }
