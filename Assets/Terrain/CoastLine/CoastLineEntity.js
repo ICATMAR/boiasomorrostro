@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
 
-
+// Tutorial 3D Tiles Google to Blender
+// https://www.youtube.com/watch?v=OzfNCZG-u7I&t=499s&ab_channel=Xuacucreativo
 class CoastLineEntity {
 
   constructor(scene) {
