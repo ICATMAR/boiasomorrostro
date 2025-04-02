@@ -5,15 +5,24 @@ import shipTypes from './AISShipTypes.js';
 export class AISManager {
 
   ships = {}; // Dictionary to store ship objects
+  isCreated = false;
 
   constructor() {
+    
+  }
+
+  // Create Websocket connection
+  createWSConnection() {
+    if (this.isCreated) return;
+
     // Connection
     this.ws;
     // if (window.location.href.includes('localhost') || window.location.href.includes('127.0.0.1')) {
     //   this.ws = new WebSocket('ws://localhost:30521');
     // } else {
-      this.ws = new WebSocket('wss://api.icatmar.cat/ais');
+    this.ws = new WebSocket('wss://api.icatmar.cat/ais');
     // }
+    this.isCreated = true;
 
     // General connection events
     // OPEN
@@ -37,9 +46,10 @@ export class AISManager {
     // MESSAGE
     this.ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      
+
       // Add bounding boxes
       if (data.bboxes) {
+        window.eventBus.emit('AISManager_bboxes', data.bboxes);
       }
 
       // Process AIS message
@@ -47,6 +57,9 @@ export class AISManager {
       this.processAISMessage(data.message);
     }
   }
+
+
+
 
 
   processAISMessage(message) {
@@ -85,7 +98,7 @@ export class AISManager {
       if (typeOfMessages.includes("PositionReport") == false) typeOfMessages.push("PositionReport");
       this.ships[MMSI].heading = heading;
       this.ships[MMSI].sog = sog;
-      
+
     }
     // Static Ship Data
     if (message.Message.ShipStaticData) {
