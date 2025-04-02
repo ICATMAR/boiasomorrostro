@@ -5,6 +5,9 @@
 <script>
 export default {
   name: "MapComponent",
+  created() {
+    this.update();
+  },
   mounted() {
     // Ensure Leaflet is available globally via the script tag
     let map = this.map = L.map("map").setView([41.375694, 2.216194], 13); // Center at the given coordinates, zoom level 13
@@ -36,7 +39,7 @@ export default {
     this.markers = {};
     if (window.AISManager) {
       let ships = window.AISManager.getCurrentShips();
-      
+
       Object.keys(ships).forEach((key) => {
         let shipInfo = ships[key];
         this.handleAISMessage(shipInfo);
@@ -54,9 +57,9 @@ export default {
       let heading;
       if (shipInfo.heading === 511) {
         if (shipInfo.empiricHeading) {
-          heading = shipInfo.empiricHeading;
+          heading = shipInfo.empiricHeading.toFixed(0);
         } else {
-          heading = 0;
+          heading = 511;
         }
       } else {
         heading = shipInfo.heading;
@@ -69,15 +72,16 @@ export default {
         marker.setLatLng([shipInfo.latitude, shipInfo.longitude]);
 
         // Content
+        let nowText = this.$i18n.t("now");
         marker.setPopupContent(
           `<b>${shipInfo.shipName}</b><br>
           <b>MMSI:</b> ${shipInfo.MMSI}<br>
-          <b>Heading:</b> ${heading}°<br>
+          <b>Heading:</b> ${shipInfo.heading}°<br>
           <b>SOG:</b> ${shipInfo.sog} knots<br>
           <b>Type:</b> ${shipInfo.shipType}<br>
           <b>Messages:</b> ${shipInfo.typeOfMessages.join(", ")}<br>
           <b>Dimensions:</b> ${shipInfo.length} x ${shipInfo.beam} m<br>
-          <b>Last Updated:</b><span id="last-update"></span>`);
+          <b>Last Updated: </b><label id="last-update">${nowText}</label>`);
       }
       // Marker is new
       else {
@@ -88,7 +92,8 @@ export default {
           iconSize: [30, 30]
         });
 
-        const marker = L.marker([shipInfo.latitude, shipInfo.longitude], { icon }).addTo(this.map)
+        const marker = L.marker([shipInfo.latitude, shipInfo.longitude], { icon }).addTo(this.map);
+        let nowText = this.$i18n.t("now");
         marker.bindPopup(
           `<b>${shipInfo.shipName}</b><br>
           <b>MMSI:</b> ${shipInfo.MMSI}<br>
@@ -97,7 +102,7 @@ export default {
           <b>Type:</b> ${shipInfo.shipType}<br>
           <b>Messages:</b> ${shipInfo.typeOfMessages.join(", ")}<br>
           <b>Dimensions:</b> ${shipInfo.length} x ${shipInfo.beam} m<br>
-          <b>Last Updated:</b><span id="last-update"></span>`);
+          <b>Last Updated: </b><label id="last-update">${nowText}</label>`);
 
         this.markers[shipInfo.MMSI] = marker;
         marker.getElement().classList.add('ship-marker');
@@ -111,6 +116,33 @@ export default {
       shipMarkerStyle.height = `${shipInfo.length * 0.5}px`;
 
     },
+    // UPDATE
+    update() {
+      setInterval(() => {
+        const now = Date.now();
+        const timeSinceLastCall = (now - this.prevTime) / 1000;
+        this.prevTime = now;
+        if (timeSinceLastCall > 11) console.log("Time interval was bigger than 10 seconds: " + timeSinceLastCall.toFixed(1));
+
+        // Update
+        let ships = window.AISManager.getCurrentShips();
+        Object.keys(ships).forEach(key => {
+          let shipInfo = ships[key];
+          let timeSinceLastUpdate = (now - new Date(shipInfo.lastTmst).getTime()) / (1000 * 60);
+          let marker = this.markers[shipInfo.MMSI];
+          let message = '';
+          if (timeSinceLastUpdate < 1) {
+            message = this.$i18n.t('< 1 minute ago');
+          } else {
+            message = Math.round(timeSinceLastCall) + ' ' + this.$i18n.t('minutes ago');
+          }
+
+          marker.getPopup().setContent(marker.getPopup().getContent().replace(/<label id="last-update">(.+?)<\/label>/, `<label id="last-update">${message}</label>`));
+
+        });
+
+      }, 10 * 1000); // 10 second interval
+    }
   },
 };
 </script>
