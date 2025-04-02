@@ -22,6 +22,7 @@ export class AISManager {
     
   }
 
+  // WEBSOCKET AIS
   // Create Websocket connection
   createWSConnection() {
     if (this.isCreated) return;
@@ -71,9 +72,6 @@ export class AISManager {
       this.processAISMessage(data.message);
     }
   }
-
-
-
 
   // Process AIS message
   processAISMessage(message) {
@@ -163,8 +161,7 @@ export class AISManager {
 
 
 
-
-
+  // UTILS
   // Calculate the heading between two points
   calculateHeading(oldLong, oldLat, newLong, newLat) {
     // Convert degrees to radians
@@ -190,7 +187,7 @@ export class AISManager {
 
 
 
-
+  // PUBLIC
   // Get current ships
   getCurrentShips() {
     return this.ships;
