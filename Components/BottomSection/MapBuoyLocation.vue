@@ -21,31 +21,35 @@ export default {
       .bindPopup(this.$i18n.t("Somorrostro buoy"))
       .openPopup();
 
-
-
-    // EVENTS
-    // Service bboxes (somorrostro buoy)
-    window.eventBus.on('AISManager_bboxes', (bboxes) => {
-      bboxes.forEach((bbox) => {
+    // Add bboxes
+    if (window.AISManager) {
+      window.AISManager.bboxes.forEach((bbox) => {
         const bounds = [
           [bbox[0][0], bbox[0][1]], // Southwest corner
           [bbox[1][0], bbox[1][1]]  // Northeast corner
         ];
         L.rectangle(bounds, { color: "#ff7800", weight: 1 }).addTo(map);
       });
-    });
+    }
 
-    // AIS messages
+    // Add current ships
     this.markers = {};
-    window.eventBus.on('AISManager_receivedAISMessage', this.handleAISMessage);
+    if (window.AISManager) {
+      let ships = window.AISManager.getCurrentShips();
+      
+      Object.keys(ships).forEach((key) => {
+        let shipInfo = ships[key];
+        this.handleAISMessage(shipInfo);
+      });
+    }
 
-    // Initiate AIS Websocket connection
-    window.AISManager.createWSConnection();
+    // EVENTS
+    // AIS messages
+    window.eventBus.on('AISManager_receivedAISMessage', this.handleAISMessage);
   },
   methods: {
     // Function to handle the received AIS messages
     handleAISMessage(shipInfo) {
-      console.log(shipInfo);
       // Heading
       let heading;
       if (shipInfo.heading === 511) {

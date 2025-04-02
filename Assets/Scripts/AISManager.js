@@ -6,6 +6,7 @@ export class AISManager {
 
   ships = {}; // Dictionary to store ship objects
   isCreated = false;
+  bboxes = [];
 
   constructor() {
     
@@ -49,6 +50,7 @@ export class AISManager {
 
       // Add bounding boxes
       if (data.bboxes) {
+        this.bboxes = data.bboxes;
         window.eventBus.emit('AISManager_bboxes', data.bboxes);
       }
 
@@ -61,7 +63,7 @@ export class AISManager {
 
 
 
-
+  // Process AIS message
   processAISMessage(message) {
 
     const metaData = message.MetaData;
@@ -123,7 +125,7 @@ export class AISManager {
     // Infer heading from position change if not available
     if (heading == 511 && this.ships[MMSI].latitude && this.ships[MMSI].longitude) {
       heading = this.calculateHeading(this.ships[MMSI].longitude, this.ships[MMSI].latitude, long, lat);
-      this.ships[MMSI].empiricHeading = heading;
+      this.ships[MMSI].empiricHeading = heading.toFixed(1);
     }
 
 
@@ -172,6 +174,15 @@ export class AISManager {
     return (bearing + 360) % 360;
   }
 
+
+
+
+
+
+  // Get current ships
+  getCurrentShips() {
+    return this.ships;
+  }
 
 
 

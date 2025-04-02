@@ -22,6 +22,8 @@ window.WMTSTileManager = new WMTSTileManagerClass();
 // Import AISManager
 import AISManagerClass from './Assets/Scripts/AISManager.js';
 window.AISManager = new AISManagerClass();
+// Initiate AIS Websocket connection
+window.AISManager.createWSConnection();
 
 // Declare translations
 const i18n = VueI18n.createI18n({
