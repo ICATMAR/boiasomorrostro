@@ -9,6 +9,16 @@ export class AISManager {
   bboxes = [];
 
   constructor() {
+
+    // Initiate AIS Websocket connection
+    this.createWSConnection();
+
+    // Refocusing on tab or window event, restart if needed
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState == "visible")
+        this.createWSConnection();
+    });
+    document.addEventListener("focus", this.createWSConnection);
     
   }
 
@@ -36,12 +46,14 @@ export class AISManager {
     // CLOSE
     this.ws.onclose = () => {
       window.eventBus.emit('AISManager_wsClosed');
-      console.log('WebSocket connection closed');
+      console.log('❌ WebSocket connection closed');
+      this.isCreated = false;
     }
     // ERROR
     this.ws.onerror = (error) => {
       window.eventBus.emit('AISManager_wsError', error);
-      console.error('WebSocket error:', error);
+      console.error('❌ WebSocket error:', error);
+      this.isCreated = false;
     }
 
     // MESSAGE
