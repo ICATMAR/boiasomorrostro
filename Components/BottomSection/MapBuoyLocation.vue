@@ -132,7 +132,10 @@ export default {
           let marker = this.markers[shipInfo.MMSI];
           let lastUpdatedMessage = '';
           if (timeSinceLastUpdate < 1) {
-            lastUpdatedMessage = this.$i18n.t('< 1 minute ago');
+            if (this.$i18n)
+              lastUpdatedMessage = this.$i18n.t('< 1 minute ago');
+            else
+              lastUpdatedMessage = '< 1 minute ago';
           } else {
             lastUpdatedMessage = Math.round(timeSinceLastCall) + ' ' + this.$i18n.t('minutes ago');
           }
