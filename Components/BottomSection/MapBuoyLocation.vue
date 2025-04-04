@@ -130,11 +130,11 @@ export default {
           let shipInfo = ships[key];
           let timeSinceLastUpdate = (now - new Date(shipInfo.lastTmst).getTime()) / (1000 * 60);
           let marker = this.markers[shipInfo.MMSI];
-          let message = '';
+          let lastUpdatedMessage = '';
           if (timeSinceLastUpdate < 1) {
-            message = this.$i18n.t('< 1 minute ago');
+            lastUpdatedMessage = this.$i18n.t('< 1 minute ago');
           } else {
-            message = Math.round(timeSinceLastCall) + ' ' + this.$i18n.t('minutes ago');
+            lastUpdatedMessage = Math.round(timeSinceLastCall) + ' ' + this.$i18n.t('minutes ago');
           }
 
           marker.getPopup().setContent(marker.getPopup().getContent().replace(/<label id="last-update">(.+?)<\/label>/, `<label id="last-update">${message}</label>`));
