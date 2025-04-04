@@ -13,6 +13,7 @@ class BoatEntity {
     const manager = new THREE.LoadingManager(); // Empty manager
 
     const loader = new OBJLoader(manager);
+    // TODO: use shipType to load different models
     loader.load('/boiasomorrostro/Assets/AISBoats/Boat.obj', (obj) => {
       // Scene
       this.root = obj;
@@ -59,7 +60,7 @@ class BoatEntity {
     if (!this.isLoaded)
       return;
     // Set ship orientation
-    this.root.rotation.y = THREE.MathUtils.degToRad(heading);
+    this.root.rotation.y = -THREE.MathUtils.degToRad(heading);
   }
 
   setShipSOG = (sog) => {
@@ -73,8 +74,14 @@ class BoatEntity {
     if (!this.isLoaded)
       return;
 
+    // Default boat dimensions
+    if (length < 0 || beam < 0) {
+      length = 12;
+      beam = 4;
+    }
+
     // Set ship dimensions
-    this.root.scale.set(Math.abs(beam), Math.abs(beam), Math.abs(length));
+    this.root.scale.set(beam, beam, length);
   }
 
 
