@@ -152,7 +152,13 @@ export class AISManager {
     this.ships[MMSI].length = dimensions.A + dimensions.B;
     this.ships[MMSI].beam = dimensions.C + dimensions.D;
     // For some reason the ShipStaticData is always 10 minutes old. TODO? Only PositionReport and StandardClassBPositionReport?
-    this.ships[MMSI].lastTmst = metaData.time_utc;
+    if (this.ships[MMSI].lastTmst == undefined) {
+      this.ships[MMSI].lastTmst = metaData.time_utc;
+    }
+    // If new message is older, use most recent tmst
+    else if (new Date(this.ships[MMSI].lastTmst) < new Date(metaData.time_utc)) {
+      this.ships[MMSI].lastTmst = metaData.time_utc;
+    }
     this.ships[MMSI].typeOfMessages = typeOfMessages;
 
 
