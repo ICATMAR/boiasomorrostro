@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OBJLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
 
 class BoatEntity {
 
@@ -12,27 +13,30 @@ class BoatEntity {
 
     const manager = new THREE.LoadingManager(); // Empty manager
 
-    const loader = new OBJLoader(manager);
+    //const loader = new OBJLoader(manager);
+    const loader = new GLTFLoader(manager);
     // TODO: use shipType to load different models
-    loader.load('/boiasomorrostro/Assets/AISBoats/Boat.obj', (obj) => {
+    //loader.load('/boiasomorrostro/Assets/AISBoats/Boat.obj', (obj) => {
+    loader.load('/boiasomorrostro/Assets/AISBoats/Objects/TankerNormXY.glb', (obj) => { // '../Assets/Skybox/skybox.glb'
       // Scene
-      this.root = obj;
+      this.root = obj.scene;
 
+    ;
       // Random color
       // Apply random colors to the meshes
-      this.root.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          // Generate random HSL values with controlled saturation and lightness
-          const hue = Math.random();
-          const saturation = Math.random() * 0.5 + 0.5; // Saturation between 0.5 and 1
-          const lightness = Math.random() * 0.5 + 0.3; // Lightness between 0.3 and 0.8
+      // this.root.traverse((child) => {
+      //   if (child instanceof THREE.Mesh) {
+      //     // Generate random HSL values with controlled saturation and lightness
+      //     const hue = Math.random();
+      //     const saturation = Math.random() * 0.5 + 0.5; // Saturation between 0.5 and 1
+      //     const lightness = Math.random() * 0.5 + 0.3; // Lightness between 0.3 and 0.8
 
-          const color = new THREE.Color();
-          color.setHSL(hue, saturation, lightness);
+      //     const color = new THREE.Color();
+      //     color.setHSL(hue, saturation, lightness);
 
-          child.material = new THREE.MeshStandardMaterial({ color: color });
-        }
-      });
+      //     child.material = new THREE.MeshStandardMaterial({ color: color });
+      //   }
+      // });
 
       scene.add(this.root);
       this.isLoaded = true;
@@ -81,7 +85,7 @@ class BoatEntity {
     }
 
     // Set ship dimensions
-    this.root.scale.set(beam, beam, length);
+    this.root.scale.set(length, 1, beam);
   }
 
 
