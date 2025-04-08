@@ -168,10 +168,6 @@ class TankerBoatEntity extends BoatEntity {
 // CARGO
 class CargoBoatEntity extends BoatEntity {
 
-  offsetX = 13; // Offset for X position
-  offsetY = 15.58; // Offset for Y position
-  offsetZ = 0; // Offset for Z position
-
   constructor(scene, shipInfo, onload) {
     // gltf URL
     let gltfURL = '/boiasomorrostro/Assets/AISBoats/Objects/CargoNormXY_BridgeNormY.glb';
@@ -198,6 +194,9 @@ class CargoBoatEntity extends BoatEntity {
 
     // // Create containers
     // ONLY WHEN USER IS VERY CLOSE? GENERATE AUTOMATICALLY CONTAINERS
+    // const offsetX = 13; // Offset for X position
+    // const offsetY = 15.58; // Offset for Y position
+    // const offsetZ = 0; // Offset for Z position
     // // Calculate number of available containers and build matrix
     // const containerLength = 6; // Length of each container
     // const containerWidth = 2.5; // Width of each container
