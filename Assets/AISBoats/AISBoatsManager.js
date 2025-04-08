@@ -70,30 +70,25 @@ class AISBoatsManager {
 
     // Check ship type and create appropriate entity
     let shipType = shipInfo.shipType || "Unknown";
-    
-    if (shipType.includes("Cargo")) {
-      shipEntity = new CargoBoatEntity(scene, shipInfo, () => {
-        // Set ship position
-        //shipEntity.setShipPosition(this.LONGITUDE, this.LATITUDE, shipInfo.longitude, shipInfo.latitude);
-        // Set ship orientation
-        shipEntity.setShipOrientation(shipInfo.heading);
-        // Set ship speed-over-ground
-        shipEntity.setShipSOG(shipInfo.sog);
-      });
-    } 
-    // else if (shipType.includes("Tanker")) {
 
-    // } 
+    const onLoadShip = () => {
+      // Set ship position
+      shipEntity.setShipPosition(this.LONGITUDE, this.LATITUDE, shipInfo.longitude, shipInfo.latitude);
+      // Set ship orientation
+      shipEntity.setShipOrientation(shipInfo.heading);
+      // Set ship speed-over-ground
+      shipEntity.setShipSOG(shipInfo.sog);
+    }
+
+    if (shipType.includes("Cargo")) {
+      shipEntity = new CargoBoatEntity(scene, shipInfo, onLoadShip);
+    }
+    else if (shipType.includes("Tanker")) {
+      shipEntity = new TankerBoatEntity(scene, shipInfo, onLoadShip);
+    }
     else {
       // Create default ship entity
-      shipEntity = new BoatEntity(scene, shipInfo, () => {
-        // Set ship position
-        shipEntity.setShipPosition(this.LONGITUDE, this.LATITUDE, shipInfo.longitude, shipInfo.latitude);
-        // Set ship orientation
-        shipEntity.setShipOrientation(shipInfo.heading);
-        // Set ship speed-over-ground
-        shipEntity.setShipSOG(shipInfo.sog);
-      });
+      shipEntity = new BoatEntity(scene, shipInfo, onLoadShip);
     }
 
 
