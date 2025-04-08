@@ -7,43 +7,39 @@ class BoatEntity {
   isLoaded = false;
   sog = 0; // Speed over ground
   scale = 1; // Scale factor for position calculation
+  gltfURL = '/boiasomorrostro/Assets/AISBoats/Objects/TankerNormXY.glb'; // Default gltf URL
 
   // shipType: https://api.vtexplorer.com/docs/ref-aistypes.html
-  constructor(scene, shipType, onload) {
+  constructor(scene, shipInfo, onload) {
+    // Load
+    this.load(scene, shipInfo, onload);
+  }
 
+  // Default load function
+  load = (scene, shipInfo, onload) => {
+    // Load the model and add it to the scene
     const manager = new THREE.LoadingManager(); // Empty manager
-
     //const loader = new OBJLoader(manager);
-    const loader = new GLTFLoader(manager);
+    this.loader = new GLTFLoader(manager);
     // TODO: use shipType to load different models
     //loader.load('/boiasomorrostro/Assets/AISBoats/Boat.obj', (obj) => {
-    loader.load('/boiasomorrostro/Assets/AISBoats/Objects/TankerNormXY.glb', (obj) => { // '../Assets/Skybox/skybox.glb'
-      // Scene
-      this.root = obj.scene;
-
-    ;
-      // Random color
-      // Apply random colors to the meshes
-      // this.root.traverse((child) => {
-      //   if (child instanceof THREE.Mesh) {
-      //     // Generate random HSL values with controlled saturation and lightness
-      //     const hue = Math.random();
-      //     const saturation = Math.random() * 0.5 + 0.5; // Saturation between 0.5 and 1
-      //     const lightness = Math.random() * 0.5 + 0.3; // Lightness between 0.3 and 0.8
-
-      //     const color = new THREE.Color();
-      //     color.setHSL(hue, saturation, lightness);
-
-      //     child.material = new THREE.MeshStandardMaterial({ color: color });
-      //   }
-      // });
-
-      scene.add(this.root);
-      this.isLoaded = true;
-      if (onload)
-        onload();
+    this.loader.load(this.gltfURL, (obj) => { // '../Assets/Skybox/skybox.glb'
+      this.addToScene(obj, scene, shipInfo, onload);
     });
   }
+
+
+  // Add object to scene
+  addToScene = (obj, scene, shipInfo, onload) => {
+    // Scene
+    this.root = obj.scene;
+
+    scene.add(this.root);
+    this.isLoaded = true;
+    if (onload)
+      onload();
+  }
+
 
 
 
@@ -60,6 +56,7 @@ class BoatEntity {
     this.root.position.set(deltaLon * this.scale, 0, -deltaLat * this.scale);
   }
 
+
   setShipOrientation = (heading) => {
     if (!this.isLoaded)
       return;
@@ -75,6 +72,7 @@ class BoatEntity {
   }
 
   setShipDimensions = (length, beam) => {
+    return;
     if (!this.isLoaded)
       return;
 
@@ -101,7 +99,122 @@ class BoatEntity {
     }
   }
 
+
+
+
+  getRandomColor = () => {
+    // Generate random HSL values with controlled saturation and lightness
+    const hue = Math.random();
+    const saturation = Math.random() * 0.5 + 0.5; // Saturation between 0.5 and 1
+    const lightness = Math.random() * 0.5 + 0.3; // Lightness between 0.3 and 0.8
+
+    const color = new THREE.Color();
+    color.setHSL(hue, saturation, lightness);
+
+    return color;
+  }
 }
 
 
-export { BoatEntity }
+
+// TANKER
+class TankerBoatEntity extends BoatEntity {
+
+  // gltf URL
+  gltfURL = '/boiasomorrostro/Assets/AISBoats/Objects/TankerNormXY.glb';
+
+  constructor(scene, shipInfo, onload) {
+    console.log(this.gltfURL);
+    super(scene, shipInfo, onload);
+  }
+
+  // Load function
+  addToScene = (obj, scene, shipInfo, onload) => {
+    // Scene
+    this.root = obj.scene;
+
+    // Default tanker dimensions
+    let length = shipInfo.length;
+    let beam = shipInfo.beam;
+    if (length < 0 || beam < 0) {
+      length = 160;
+      beam = 25;
+    }
+
+    // Set ship dimensions
+    this.root.scale.set(length, 1, beam);
+
+
+    scene.add(this.root);
+    this.isLoaded = true;
+    if (onload)
+      onload();
+  }
+}
+
+
+
+
+
+// CARGO
+class CargoBoatEntity extends BoatEntity {
+
+  // gltf URL
+  gltfURL = '/boiasomorrostro/Assets/AISBoats/Objects/CargoNormXY_BridgeNormY.glb';
+
+  constructor(scene, shipInfo, onload) {
+    super(scene, shipInfo, onload);
+  }
+
+  // Load function
+  addToScene = (obj, scene, shipInfo, onload) => {
+    // Scene
+    this.root = obj.scene;
+
+    // Apply scale
+    // Default boat dimensions
+    let length = shipInfo.length;
+    let beam = shipInfo.beam;
+    if (length < 0 || beam < 0) {
+      length = 250;
+      beam = 50;
+    }
+
+    // Set ship dimensions
+    // Apply XY scale to Cargo
+    this.root.getObjectByName('Cargo').scale.set(length, 1, beam);
+    // Apply Y scale to Bridge
+    this.root.getObjectByName('Bridge').scale.set(1, 1, beam);
+
+    // Create containers with colors
+    // Create containers...
+    const containerGeometry = new THREE.BoxGeometry(1, 1, 1);
+    const containerMaterial = new THREE.MeshStandardMaterial({ color: this.getRandomColor() });
+
+    // Random color
+    // Apply random colors to the meshes
+    // this.root.traverse((child) => {
+    //   if (child instanceof THREE.Mesh) {
+    //     // Generate random HSL values with controlled saturation and lightness
+    //     const hue = Math.random();
+    //     const saturation = Math.random() * 0.5 + 0.5; // Saturation between 0.5 and 1
+    //     const lightness = Math.random() * 0.5 + 0.3; // Lightness between 0.3 and 0.8
+
+    //     const color = new THREE.Color();
+    //     color.setHSL(hue, saturation, lightness);
+
+    //     child.material = new THREE.MeshStandardMaterial({ color: color });
+    //   }
+    // });
+
+    scene.add(this.root);
+    this.isLoaded = true;
+    if (onload)
+      onload();
+
+  }
+
+
+}
+
+export {BoatEntity, TankerBoatEntity, CargoBoatEntity }

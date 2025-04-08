@@ -1,4 +1,4 @@
-import { BoatEntity } from "./BoatEntity.js";
+import { BoatEntity, TankerBoatEntity, CargoBoatEntity } from "./BoatEntity.js";
 
 class AISBoatsManager {
 
@@ -55,7 +55,7 @@ class AISBoatsManager {
     }
     // Update ship
     else {
-      this.ships[shipInfo.MMSI].setShipPosition(this.LONGITUDE, this.LATITUDE, shipInfo.longitude, shipInfo.latitude);
+      //this.ships[shipInfo.MMSI].setShipPosition(this.LONGITUDE, this.LATITUDE, shipInfo.longitude, shipInfo.latitude);
       this.ships[shipInfo.MMSI].setShipOrientation(heading);
       this.ships[shipInfo.MMSI].setShipSOG(shipInfo.sog);
       this.ships[shipInfo.MMSI].setShipDimensions(shipInfo.length, shipInfo.beam);
@@ -66,16 +66,36 @@ class AISBoatsManager {
 
   createShip = (shipInfo, scene) => {
     // Create ship entity
-    let shipEntity = new BoatEntity(scene, shipInfo.shipType, () => {
-      // Set ship position
-      shipEntity.setShipPosition(this.LONGITUDE, this.LATITUDE,shipInfo.longitude, shipInfo.latitude);
-      // Set ship orientation
-      shipEntity.setShipOrientation(shipInfo.heading);
-      // Set ship speed-over-ground
-      shipEntity.setShipSOG(shipInfo.sog);
-      // Set ship dimensions
-      shipEntity.setShipDimensions(shipInfo.length, shipInfo.beam);
-    });
+    let shipEntity
+
+    // Check ship type and create appropriate entity
+    let shipType = shipInfo.shipType || "Unknown";
+    
+    if (shipType.includes("Cargo")) {
+      shipEntity = new CargoBoatEntity(scene, shipInfo, () => {
+        // Set ship position
+        //shipEntity.setShipPosition(this.LONGITUDE, this.LATITUDE, shipInfo.longitude, shipInfo.latitude);
+        // Set ship orientation
+        shipEntity.setShipOrientation(shipInfo.heading);
+        // Set ship speed-over-ground
+        shipEntity.setShipSOG(shipInfo.sog);
+      });
+    } 
+    // else if (shipType.includes("Tanker")) {
+
+    // } 
+    else {
+      // Create default ship entity
+      shipEntity = new BoatEntity(scene, shipInfo, () => {
+        // Set ship position
+        shipEntity.setShipPosition(this.LONGITUDE, this.LATITUDE, shipInfo.longitude, shipInfo.latitude);
+        // Set ship orientation
+        shipEntity.setShipOrientation(shipInfo.heading);
+        // Set ship speed-over-ground
+        shipEntity.setShipSOG(shipInfo.sog);
+      });
+    }
+
 
     // Add ship to ships list
     this.ships[shipInfo.MMSI] = shipEntity;
