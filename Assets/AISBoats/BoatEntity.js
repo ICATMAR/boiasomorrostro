@@ -25,6 +25,7 @@ class BoatEntity {
     // TODO: use shipType to load different models
     //loader.load('/boiasomorrostro/Assets/AISBoats/Boat.obj', (obj) => {
     this.loader.load(this.gltfURL, (obj) => { // '../Assets/Skybox/skybox.glb'
+      this.isLoaded = true;
       this.addToScene(obj, scene, shipInfo, onload);
     });
   }
@@ -36,7 +37,6 @@ class BoatEntity {
     this.root = obj.scene;
 
     scene.add(this.root);
-    this.isLoaded = true;
     if (onload)
       onload();
   }
@@ -146,7 +146,6 @@ class TankerBoatEntity extends BoatEntity {
 
 
     scene.add(this.root);
-    this.isLoaded = true;
     if (onload)
       onload();
   }
@@ -229,7 +228,6 @@ class CargoBoatEntity extends BoatEntity {
 
 
     scene.add(this.root);
-    this.isLoaded = true;
     if (onload)
       onload();
 
