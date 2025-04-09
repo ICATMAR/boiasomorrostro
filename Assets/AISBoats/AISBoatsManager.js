@@ -1,4 +1,4 @@
-import { BoatEntity, TankerBoatEntity, CargoBoatEntity } from "./BoatEntity.js";
+import { BoatEntity, TankerBoatEntity, CargoBoatEntity, CruiseBigEntity } from "./BoatEntity.js";
 
 class AISBoatsManager {
 
@@ -85,6 +85,9 @@ class AISBoatsManager {
     }
     else if (shipType.includes("Tanker")) {
       shipEntity = new TankerBoatEntity(scene, shipInfo, onLoadShip);
+    }
+    else if (shipType.includes("Passenger")) {
+      shipEntity = new CruiseBigEntity(scene, shipInfo, onLoadShip);
     }
     else {
       // Create default ship entity

@@ -73,7 +73,7 @@ class BoatEntity {
   }
 
   setShipDimensions = (length, beam) => {
-    
+
     if (!this.isLoaded)
       return;
 
@@ -151,7 +151,7 @@ class TankerBoatEntity extends BoatEntity {
   }
 
 
-  
+
   setShipDimensions = (length, beam) => {
     if (!this.isLoaded)
       return;
@@ -247,4 +247,53 @@ class CargoBoatEntity extends BoatEntity {
 
 }
 
-export { BoatEntity, TankerBoatEntity, CargoBoatEntity }
+
+
+
+// CRUISE BIG
+class CruiseBigEntity extends BoatEntity {
+  constructor(scene, shipInfo, onload) {
+    // gltf URL
+    let gltfURL = '/boiasomorrostro/Assets/AISBoats/Objects/CruiseBigNormXY_Norm2Z.glb';
+    super(scene, shipInfo, onload, gltfURL);
+  }
+
+  // Load function
+  addToScene = (obj, scene, shipInfo, onload) => {
+    console.log("🚢 AIS Cargo added to scene");
+    // Scene
+    this.root = obj.scene;
+
+    // Apply scale
+    // Default boat dimensions
+    let length = shipInfo.length;
+    let beam = shipInfo.beam;
+    if (length < 0 || beam < 0) {
+      length = 254;
+      beam = 50;
+    }
+
+    // Set ship dimensions
+    this.setShipDimensions(length, beam);
+
+    scene.add(this.root);
+    if (onload)
+      onload();
+  }
+
+  // Set ship dimensions
+  setShipDimensions = (length, beam) => {
+    if (!this.isLoaded)
+      return;
+
+    // Calculate height (air draught/draft)
+    // Biggest cruise: 315m length, 70 air draft
+    // Mid-size cruise: 228m length, 40 air draft
+    let factorLength = (length - 228) / (315 - 228);
+    let airDraft = (70 - 40) * factorLength + 40; // 40m to 70m
+    // Must multiply the air draft (height) by 2 because of the 3D model
+    this.root.scale.set(length, airDraft * 2, beam);
+  }
+}
+
+export { BoatEntity, TankerBoatEntity, CargoBoatEntity, CruiseBigEntity }
