@@ -19,7 +19,7 @@ export class AISManager {
         this.createWSConnection();
     });
     document.addEventListener("focus", this.createWSConnection);
-    
+
   }
 
   // WEBSOCKET AIS
@@ -65,6 +65,13 @@ export class AISManager {
       if (data.bboxes) {
         this.bboxes = data.bboxes;
         window.eventBus.emit('AISManager_bboxes', data.bboxes);
+      }
+
+      // Message history
+      if (data.history) {
+        for (let i = 0; i < data.history.length; i++) {
+          this.processAISMessage(data.history[i]);
+        }
       }
 
       // Process AIS message
