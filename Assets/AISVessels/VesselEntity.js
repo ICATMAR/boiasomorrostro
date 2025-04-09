@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import { OBJLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/OBJLoader.js';
 import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
-class BoatEntity {
+class VesselEntity {
 
   isLoaded = false;
   sog = 0; // Speed over ground
   scale = 1; // Scale factor for position calculation
-  gltfURL = '/boiasomorrostro/Assets/AISBoats/Objects/TankerNormXY.glb'; // Default gltf URL
+  gltfURL = '/boiasomorrostro/Assets/AISVessels/Objects/TankerNormXY.glb'; // Default gltf URL
 
   // shipType: https://api.vtexplorer.com/docs/ref-aistypes.html
   constructor(scene, shipInfo, onload, gltfURL) {
@@ -23,7 +23,7 @@ class BoatEntity {
     //const loader = new OBJLoader(manager);
     this.loader = new GLTFLoader(manager);
     // TODO: use shipType to load different models
-    //loader.load('/boiasomorrostro/Assets/AISBoats/Boat.obj', (obj) => {
+    //loader.load('/boiasomorrostro/Assets/AISVessels/Vessel.obj', (obj) => {
     this.loader.load(this.gltfURL, (obj) => { // '../Assets/Skybox/skybox.glb'
       this.isLoaded = true;
       this.addToScene(obj, scene, shipInfo, onload);
@@ -77,7 +77,7 @@ class BoatEntity {
     if (!this.isLoaded)
       return;
 
-    // Default boat dimensions
+    // Default Vessel dimensions
     if (length < 0 || beam < 0) {
       length = 12;
       beam = 4;
@@ -119,11 +119,11 @@ class BoatEntity {
 
 
 // TANKER
-class TankerBoatEntity extends BoatEntity {
+class TankerVesselEntity extends VesselEntity {
 
   constructor(scene, shipInfo, onload) {
     // gltf URL
-    let gltfURL = '/boiasomorrostro/Assets/AISBoats/Objects/TankerNormXY.glb';
+    let gltfURL = '/boiasomorrostro/Assets/AISVessels/Objects/TankerNormXY.glb';
     super(scene, shipInfo, onload, gltfURL);
   }
 
@@ -165,11 +165,11 @@ class TankerBoatEntity extends BoatEntity {
 
 
 // CARGO
-class CargoBoatEntity extends BoatEntity {
+class CargoVesselEntity extends VesselEntity {
 
   constructor(scene, shipInfo, onload) {
     // gltf URL
-    let gltfURL = '/boiasomorrostro/Assets/AISBoats/Objects/CargoNormXY_BridgeNormY.glb';
+    let gltfURL = '/boiasomorrostro/Assets/AISVessels/Objects/CargoNormXY_BridgeNormY.glb';
     super(scene, shipInfo, onload, gltfURL);
   }
 
@@ -180,7 +180,7 @@ class CargoBoatEntity extends BoatEntity {
     this.root = obj.scene;
 
     // Apply scale
-    // Default boat dimensions
+    // Default Vessel dimensions
     let length = shipInfo.length;
     let beam = shipInfo.beam;
     if (length < 0 || beam < 0) {
@@ -251,10 +251,10 @@ class CargoBoatEntity extends BoatEntity {
 
 
 // CRUISE BIG
-class CruiseBigEntity extends BoatEntity {
+class CruiseBigEntity extends VesselEntity {
   constructor(scene, shipInfo, onload) {
     // gltf URL
-    let gltfURL = '/boiasomorrostro/Assets/AISBoats/Objects/CruiseBigNormXY_Norm2Z.glb';
+    let gltfURL = '/boiasomorrostro/Assets/AISVessels/Objects/CruiseBigNormXY_Norm2Z.glb';
     super(scene, shipInfo, onload, gltfURL);
   }
 
@@ -265,7 +265,7 @@ class CruiseBigEntity extends BoatEntity {
     this.root = obj.scene;
 
     // Apply scale
-    // Default boat dimensions
+    // Default Vessel dimensions
     let length = shipInfo.length;
     let beam = shipInfo.beam;
     if (length < 0 || beam < 0) {
@@ -296,4 +296,4 @@ class CruiseBigEntity extends BoatEntity {
   }
 }
 
-export { BoatEntity, TankerBoatEntity, CargoBoatEntity, CruiseBigEntity }
+export { VesselEntity, TankerVesselEntity, CargoVesselEntity, CruiseBigEntity }

@@ -1,6 +1,6 @@
-import { BoatEntity, TankerBoatEntity, CargoBoatEntity, CruiseBigEntity } from "./BoatEntity.js";
+import { VesselEntity, TankerVesselEntity, CargoVesselEntity, CruiseBigEntity } from "./VesselEntity.js";
 
-class AISBoatsManager {
+class AISVesselsManager {
 
   constructor(scene, LONGITUDE, LATITUDE) {
     // Store scene
@@ -81,17 +81,17 @@ class AISBoatsManager {
     }
 
     if (shipType.includes("Cargo")) {
-      shipEntity = new CargoBoatEntity(scene, shipInfo, onLoadShip);
+      shipEntity = new CargoVesselEntity(scene, shipInfo, onLoadShip);
     }
     else if (shipType.includes("Tanker")) {
-      shipEntity = new TankerBoatEntity(scene, shipInfo, onLoadShip);
+      shipEntity = new TankerVesselEntity(scene, shipInfo, onLoadShip);
     }
-    else if (shipType.includes("Passenger")) {
+    else if (shipType.includes("Passenger")) { // TODO: small passenger ships
       shipEntity = new CruiseBigEntity(scene, shipInfo, onLoadShip);
     }
     else {
       // Create default ship entity
-      shipEntity = new BoatEntity(scene, shipInfo, onLoadShip);
+      shipEntity = new VesselEntity(scene, shipInfo, onLoadShip);
     }
 
 
@@ -102,4 +102,4 @@ class AISBoatsManager {
 }
 
 
-export { AISBoatsManager };
+export { AISVesselsManager };

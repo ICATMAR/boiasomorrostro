@@ -23,8 +23,8 @@ import { FlagEntity } from '/boiasomorrostro/Assets/Flag/FlagEntity.js';
 import { CurrentEntity } from '/boiasomorrostro/Assets/Current/CurrentEntity.js';
 import { TextMeshEntity } from '/boiasomorrostro/Assets/TextMesh/TextMeshEntity.js';
 
-// AIS BOATS
-import { AISBoatsManager } from '/boiasomorrostro/Assets/AISBoats/AISBoatsManager.js';
+// AIS Vessels
+import { AISVesselsManager } from '/boiasomorrostro/Assets/AISVessels/AISVesselsManager.js';
 
 
 class SceneManager{
@@ -145,8 +145,8 @@ class SceneManager{
     this.currents = new CurrentEntity(scene);
 
 
-    // AIS BOATS
-    this.aisBoatsManager = new AISBoatsManager(scene, this.LONGITUDE, this.LATITUDE);
+    // AIS Vessels
+    this.aisVesselsManager = new AISVesselsManager(scene, this.LONGITUDE, this.LATITUDE);
 
 
 
