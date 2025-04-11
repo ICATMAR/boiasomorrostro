@@ -18,6 +18,11 @@ window.WMTSDataRetriever = new WMTSDataRetrieverClass();
 import WMTSTileManagerClass from './Assets/Scripts/WMTSTileManager.js'
 window.WMTSTileManager = new WMTSTileManagerClass();
 
+
+// Import AISManager
+import AISManagerClass from './Assets/Scripts/AISManager.js';
+window.AISManager = new AISManagerClass();
+
 // Declare translations
 const i18n = VueI18n.createI18n({
   // https://vue-i18n.intlify.dev/guide/essentials/fallback.html#explicit-fallback-with-one-locale

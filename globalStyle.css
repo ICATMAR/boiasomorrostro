@@ -344,6 +344,27 @@ input[type='range']::-webkit-slider-thumb {
 
 
 
+/*
+MAP ELEMENTS
+*/
+.boat {
+  width: 15px;
+  height: 30px;
+  border-radius: 50% 50% 0px 0px;
+  background-color: #005a97;
+  border: solid #002b4e;
+  opacity: 0.6;
+}
+
+.ship-marker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+
 
 @media screen and (max-width: 770px) {
   .hiddenInMobile {

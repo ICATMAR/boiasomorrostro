@@ -12,6 +12,9 @@ class CoastLineEntity {
     gltfLoader.load('/boiasomorrostro/Assets/Terrain/CoastLine/CoastLine.glb', (gltf) => { // '../Assets/Skybox/skybox.glb'
       // GLTF scene
       const root = gltf.scene;
+      this.root = root;
+      // Position correction
+      this.root.position.set(160, 0, -210);
       // Scale
       //root.scale.multiplyScalar(0.1);
       // Scene direction fix

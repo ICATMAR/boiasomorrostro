@@ -23,11 +23,17 @@ import { FlagEntity } from '/boiasomorrostro/Assets/Flag/FlagEntity.js';
 import { CurrentEntity } from '/boiasomorrostro/Assets/Current/CurrentEntity.js';
 import { TextMeshEntity } from '/boiasomorrostro/Assets/TextMesh/TextMeshEntity.js';
 
+// AIS Vessels
+import { AISVesselsManager } from '/boiasomorrostro/Assets/AISVessels/AISVesselsManager.js';
+
 
 class SceneManager{
 
   stats;
   prevTime = 0;
+  LONGITUDE = 2.216194; // Somorrostro longitude
+  LATITUDE = 41.375694; // Somorrostro latitude
+  
 
   constructor(canvas){
     // Add loading screen
@@ -137,6 +143,10 @@ class SceneManager{
     
     // Sea velocity, currents
     this.currents = new CurrentEntity(scene);
+
+
+    // AIS Vessels
+    this.aisVesselsManager = new AISVesselsManager(scene, this.LONGITUDE, this.LATITUDE);
 
 
 
