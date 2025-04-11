@@ -1,12 +1,11 @@
 import * as THREE from 'three';
-import { OBJLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/OBJLoader.js';
 import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
 class VesselEntity {
 
   isLoaded = false;
   sog = 0; // Speed over ground
   scale = 1; // Scale factor for position calculation
-  gltfURL = '/boiasomorrostro/Assets/AISVessels/Objects/TankerNormXY.glb'; // Default gltf URL
+  gltfURL = '/boiasomorrostro/Assets/AISVessels/Objects/Cruiser.glb'; // Default gltf URL
 
   // shipType: https://api.vtexplorer.com/docs/ref-aistypes.html
   constructor(scene, shipInfo, onload, gltfURL) {
@@ -33,6 +32,7 @@ class VesselEntity {
 
   // Add object to scene
   addToScene = (obj, scene, shipInfo, onload) => {
+    console.log("⛵ AIS Vessel (Default) added to scene");
     // Scene
     this.root = obj.scene;
 
@@ -73,6 +73,7 @@ class VesselEntity {
   }
 
   setShipDimensions = (length, beam) => {
+    return;
 
     if (!this.isLoaded)
       return;
@@ -260,7 +261,7 @@ class CruiseBigEntity extends VesselEntity {
 
   // Load function
   addToScene = (obj, scene, shipInfo, onload) => {
-    console.log("🚢 AIS Cargo added to scene");
+    console.log("⛴️ AIS Ferry/Cruise added to scene");
     // Scene
     this.root = obj.scene;
 
