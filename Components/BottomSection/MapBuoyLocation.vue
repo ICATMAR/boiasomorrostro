@@ -72,7 +72,9 @@ export default {
         marker.setLatLng([shipInfo.latitude, shipInfo.longitude]);
 
         // Content
-        let nowText = this.$i18n.t("now");
+        let nowText = "now";
+        if (this.$i18n)
+          nowText = this.$i18n.t("now");
         marker.setPopupContent(
           `<b>${shipInfo.shipName}</b><br>
           <b>MMSI:</b> ${shipInfo.MMSI}<br>
