@@ -6,6 +6,7 @@ export default ca = {
 
 
   "Raw data": "Dades crues",
+  "Data": "Dades",
 
 
 

@@ -7,6 +7,7 @@ export default en = {
 
 
   "Raw data": "Raw data",
+  "Data": "Data",
 
 
   "About": "About",
