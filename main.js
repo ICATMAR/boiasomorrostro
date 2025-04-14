@@ -12,15 +12,15 @@ window.SceneManager = SceneManager;
 // window.DataManager = DataManager;
 
 // Import WMTSDataRetriever
-import WMTSDataRetrieverClass from './Assets/Scripts/WMTSDataRetriever.js';
+import WMTSDataRetrieverClass from './Assets/Scripts/WMTS/WMTSDataRetriever.js';
 window.WMTSDataRetriever = new WMTSDataRetrieverClass();
 // Import tile manager
-import WMTSTileManagerClass from './Assets/Scripts/WMTSTileManager.js'
+import WMTSTileManagerClass from './Assets/Scripts/WMTS/WMTSTileManager.js'
 window.WMTSTileManager = new WMTSTileManagerClass();
 
 
 // Import AISManager
-import AISManagerClass from './Assets/Scripts/AISManager.js';
+import AISManagerClass from './Assets/Scripts/AIS/AISManager.js';
 window.AISManager = new AISManagerClass();
 
 // Declare translations
