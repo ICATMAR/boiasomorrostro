@@ -383,6 +383,7 @@ export default {
 .submenu-item-content{
   overflow: auto;
   justify-items: center;
+  width: 100%;
 }
 
 .top-right-icons {
