@@ -13,8 +13,6 @@
 
     <!-- CMEMS -->
     <h3>CMEMS</h3>
-    <!-- Loading -->
-    <div v-if="isLoading" class="loading">Loading...</div>
     <WeatherWidget></WeatherWidget>
 
     <!-- AIS -->

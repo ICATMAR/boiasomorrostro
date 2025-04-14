@@ -31,8 +31,8 @@ class SceneManager{
 
   stats;
   prevTime = 0;
-  LONGITUDE = 2.216194; // Somorrostro longitude
-  LATITUDE = 41.375694; // Somorrostro latitude
+  LONGITUDE = window.LONGITUDE; // Somorrostro longitude
+  LATITUDE = window.LATITUDE; // Somorrostro latitude
   
 
   constructor(canvas){

@@ -3,12 +3,22 @@
 import ca from '/boiasomorrostro/lang/ca.js';
 import en from '/boiasomorrostro/lang/en.js';
 import es from '/boiasomorrostro/lang/es.js';
+
+
+// Location
+window.LONGITUDE = 2.216194;
+window.LATITUDE = 41.375694;
+window.CMEMS_LONGITUDE = 2.207;
+window.CMEMS_LATITUDE = 41.373;
+
+
+
 // Load classes
 // SceneManager
 import SceneManager from "/boiasomorrostro/Assets/Scripts/SceneManager.js"
 window.SceneManager = SceneManager;
 // DataManager
-// import DataManager from "/boiasomorrostro/data/DataManager.js"
+// import DataManager from "/boiasomorrostro/Assets/Scripts/DataManager.js"
 // window.DataManager = DataManager;
 
 // Import WMTSDataRetriever

@@ -71,7 +71,7 @@ export default {
   },
   mounted(){
     // Update table with the current date
-    this.updateTable(new Date(), 2.216194, 41.375694);
+    this.updateTable(new Date(), window.CMEMS_LONGITUDE, window.CMEMS_LATITUDE);
 
 
     // EVENTS
@@ -249,7 +249,7 @@ export default {
           let layerName = rr.direction ? rr.layer : rr.name;
           // Icon row does not load data
           if (layerName !== undefined){
-            this.dataRetriever.getDataAtPoint(layerName, date.toISOString(), lat, long, 'd', rr.direction)
+            this.dataRetriever.getDataAtPoint(layerName, date.toISOString(), lat, long, 'h', rr.direction)
               .then(value => {
                 if (value == undefined){
                   rr.data[dIndex].value = 'x';
@@ -262,7 +262,7 @@ export default {
                 rr.data[dIndex].loading = false;
                 // Get product
                 let id = this.dataRetriever.getDataSetIdFromDataName(layerName);
-                let dataSet = this.dataRetriever.getDataSet(id, 'd', date.toISOString());
+                let dataSet = this.dataRetriever.getDataSet(id, 'h', date.toISOString());
                 if (this.dataProducts[dataSet.productName] == undefined){
                   this.dataProducts[dataSet.productName] = {doi: dataSet.doi};
                 }

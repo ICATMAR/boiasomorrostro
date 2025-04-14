@@ -400,6 +400,9 @@ export class WMTSDataRetriever {
         else if (dataSet.name == dataName)
           return dataSet.id;
     }
+    // If no dataSet is found, report error
+    console.error("No dataSet found with name " + dataName);
+    return undefined;
   }
 
   // Get data at a specific point
