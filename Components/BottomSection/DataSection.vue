@@ -2,23 +2,35 @@
   <div class="content">
 
     <!-- BUOY -->
-    <h5>{{$t('Buoy')}}</h5>
-    <!-- Loading -->
-    <div>{{ $t('No data available') }}</div>
+    <div class="content-section">
+      <h5>{{ $t('Buoy') }}</h5>
+      <!-- Content -->
+      <div>{{ $t('No data available') }}</div>
+    </div>
 
     <!-- HF Radar -->
-    <h5>High Frequency Radar</h5>
-    <!-- Loading -->
-    <div v-if="isLoading" class="loading">Loading...</div>
+    <div class="content-section">
+      <h5>{{ $t('Surface current from HF Radar') }}</h5>
+      <!-- Content -->
+      <div>{{ $t('Work in progress...') }}</div>
+    </div>
+
 
     <!-- CMEMS -->
-    <h5>CMEMS</h5>
-    <WeatherWidget></WeatherWidget>
+    <div class="content-section">
+      <h5>Copernicus Marine Service</h5>
+      <!-- Content -->
+      <div>{{ $t('Data from models') }}</div>
+      <WeatherWidget></WeatherWidget>
+    </div>
+
 
     <!-- AIS -->
-    <h5>Vessels from AIS</h5>
-    <!-- Loading -->
-    <div v-if="isLoading" class="loading">Loading...</div>
+    <div class="content-section">
+      <h5>{{ $t('Vessels from AIS') }}</h5>
+      <!-- Content -->
+      <div>{{ $t('Work in progress...') }}</div>
+    </div>
 
   </div>
 </template>
@@ -37,7 +49,7 @@ export default {
       hasData: false, // Flag to indicate if data is available
     }
   },
-  mounted(){
+  mounted() {
 
 
   },
@@ -67,5 +79,14 @@ export default {
   max-width: 80vw;
   max-height: 90%;
   width: 100%;
+}
+
+.content-section {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 4px black;
+  margin: 10px 10px 20px 10px;
 }
 </style>
