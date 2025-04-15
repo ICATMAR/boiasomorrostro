@@ -5,9 +5,7 @@
 <script>
 export default {
   name: "MapComponent",
-  created() {
-    this.update();
-  },
+
   mounted() {
     // Ensure Leaflet is available globally via the script tag
     let map = this.map = L.map("map").setView([41.375694, 2.216194], 13); // Center at the given coordinates, zoom level 13
@@ -49,7 +47,20 @@ export default {
     // EVENTS
     // AIS messages
     window.eventBus.on('AISManager_receivedAISMessage', this.handleAISMessage);
+
+    // UPDATE
+    this.startUpdateLoop();
   },
+  unmounted() {
+    // Stop loop
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+    // Unhook event listener
+    window.eventBus.off('AISManager_receivedAISMessage', this.handleAISMessage);
+  },
+
+
   methods: {
     // Function to handle the received AIS messages
     handleAISMessage(shipInfo) {
@@ -72,9 +83,8 @@ export default {
         marker.setLatLng([shipInfo.latitude, shipInfo.longitude]);
 
         // Content
-        let nowText = "now";
-        if (this.$i18n)
-          nowText = this.$i18n.t("now");
+        let nowText = this.$i18n.t("now");
+
         marker.setPopupContent(
           `<b>${shipInfo.shipName}</b><br>
           <b>MMSI:</b> ${shipInfo.MMSI}<br>
@@ -118,9 +128,9 @@ export default {
       shipMarkerStyle.height = `${shipInfo.length * 0.5}px`;
 
     },
-    // UPDATE
-    update() {
-      setInterval(() => {
+    // UPDATE LOOP
+    startUpdateLoop() {
+      this.intervalId = setInterval(() => {
         const now = Date.now();
         const timeSinceLastCall = (now - this.prevTime) / 1000;
         this.prevTime = now;
@@ -134,10 +144,7 @@ export default {
           let marker = this.markers[shipInfo.MMSI];
           let lastUpdatedMessage = '';
           if (timeSinceLastUpdate < 1) {
-            if (this.$i18n)
-              lastUpdatedMessage = this.$i18n.t('< 1 minute ago');
-            else
-              lastUpdatedMessage = '< 1 minute ago';
+            lastUpdatedMessage = this.$i18n.t('< 1 minute ago');
           } else {
             lastUpdatedMessage = Math.round(timeSinceLastCall) + ' ' + this.$i18n.t('minutes ago');
           }
