@@ -95,7 +95,7 @@
 // import RenderHeightPanel from './BottomSection/RenderHeightPanel.vue';
 
 import RawData from './BottomSection/RawData.vue';
-import Data from './BottomSection/Data.vue';
+import DataSection from './BottomSection/DataSection.vue';
 import MapBuoyLocation from './BottomSection/MapBuoyLocation.vue';
 import AboutPanel from './BottomSection/AboutPanel.vue';
 
@@ -118,7 +118,7 @@ export default {
         {
           title: 'Data',
           icon: '&#xe69b',
-          component: 'data',
+          component: 'dataSection',
         },
         {
           title: 'Map',
@@ -243,7 +243,7 @@ export default {
     // "render-heights": RenderHeightPanel,
     // "render-stereo": RenderStereoPanel,
     "rawData": RawData,
-    "data": Data,
+    "dataSection": DataSection,
     "mapBuoyLocation": MapBuoyLocation,
     "about": AboutPanel,
     

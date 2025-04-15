@@ -2,9 +2,9 @@
   <div class="content">
 
     <!-- BUOY -->
-    <h5>Buoy</h5>
+    <h5>{{$t('Buoy')}}</h5>
     <!-- Loading -->
-    <div v-if="isLoading" class="loading">Loading...</div>
+    <div>{{ $t('No data available') }}</div>
 
     <!-- HF Radar -->
     <h5>High Frequency Radar</h5>
@@ -28,7 +28,7 @@
 import WeatherWidget from "./DataSections/WeatherWidget.vue";
 
 export default {
-  name: "Data",
+  name: "DataSection",
   data() {
     return {
       isLoading: true, // Flag to indicate loading state
