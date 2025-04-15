@@ -2,21 +2,21 @@
   <div class="content">
 
     <!-- BUOY -->
-    <h3>Buoy</h3>
+    <h5>Buoy</h5>
     <!-- Loading -->
     <div v-if="isLoading" class="loading">Loading...</div>
 
     <!-- HF Radar -->
-    <h3>High Frequency Radar</h3>
+    <h5>High Frequency Radar</h5>
     <!-- Loading -->
     <div v-if="isLoading" class="loading">Loading...</div>
 
     <!-- CMEMS -->
-    <h3>CMEMS</h3>
+    <h5>CMEMS</h5>
     <WeatherWidget></WeatherWidget>
 
     <!-- AIS -->
-    <h3>Vessels from AIS</h3>
+    <h5>Vessels from AIS</h5>
     <!-- Loading -->
     <div v-if="isLoading" class="loading">Loading...</div>
 
