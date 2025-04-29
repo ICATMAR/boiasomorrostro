@@ -2,11 +2,14 @@
   <!-- Container -->
   <div id="weather-widget" class="wcontainer p-1">
     <div>
-      <h6>{{$t('Weather and sea conditions')}}</h6>
-      {{$t('Date')}}: {{currentDateHTML}}, {{$t('Latitude')}}: {{lat}} º, {{$t('Longitude')}}: {{long}} º
+      {{ $t('Latitude') }}: {{ lat }} º, {{ $t('Longitude') }}: {{ long }} º
     </div>
-    
-    
+    <!-- Temporal domain options -->
+    <div class="time-interval-opts-container">
+      {{ $t('Time interval') }}:
+      <button v-for="tInt in timeInterval" :class="[selTimeInterval == tInt ? 'button-selected' : '']" :key="tInt" @click="onTimeIntervalChanged(tInt)">{{ $t(tInt) }}</button>
+    </div>
+
     <!-- Table -->
     <table>
       <!-- Table Head - Days -->
@@ -14,8 +17,9 @@
         <tr>
           <td></td>
           <!-- Col for each day -->
-          <th class="wcol" style="min-width:40px" :key="dd" v-for="(dd, index) in daysString" :title="dates[index].toISOString()">
-            {{$t(dd.split(' ')[0]) + ' ' + dd.split(' ')[1]}}
+          <th class="wcol" style="min-width:40px" :key="dd" v-for="(dd, index) in daysString"
+            :title="dates[index].toISOString()">
+            {{ $t(dd.split(' ')[0]) + ' ' + dd.split(' ')[1] }}
           </th>
         </tr>
       </thead>
@@ -24,21 +28,23 @@
         <!-- Row -->
         <tr :key="dR.name" v-for="(dR, index) in dataRows">
           <!-- Row name -->
-          <th scope="row"><span v-if="dR.imgURL== undefined">{{$t(dR.name)}} ({{dR.units}})</span></th>
+          <th scope="row"><span v-if="dR.imgURL == undefined">{{ $t(dR.name) }} ({{ dR.units }})</span></th>
           <!-- Values -->
           <td class="wcol" :key="dd.key" v-for="dd in dataRows[index].data">
-            <div v-if='dd.loading && !dR.imgURL' class="spinner-border text-light" style="width: 1rem; height: 1rem; position: relative;" role="status">
+            <div v-if='dd.loading && !dR.imgURL' class="spinner-border text-light"
+              style="width: 1rem; height: 1rem; position: relative;" role="status">
               <span class="visually-hidden">Loading...</span>
             </div>
-            <div v-else-if='dR.direction' :style="{'transform': 'rotate('+ (dd.value - 90) +'deg)'}" :title="dd.value + 'º'">&#10140;</div>
+            <div v-else-if='dR.direction' :style="{ 'transform': 'rotate(' + (dd.value - 90) + 'deg)' }"
+              :title="dd.value + 'º'">&#10140;</div>
             <div v-else-if='dR.imgURL'><img :src=dR.defURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
 
-            <div v-else-if='!dd.loading' :style="getStyle(dR, dd)">{{dd.value}}</div>
-            
+            <div v-else-if='!dd.loading' :style="getStyle(dR, dd)">{{ dd.value }}</div>
+
           </td>
         </tr>
       </tbody>
-      
+
     </table>
 
     <div>
@@ -58,18 +64,18 @@
 export default {
   // REQUIRES WMTSDataRetriever.js
   name: "weather-info",
-  created(){
+  created() {
     // Create data retreiver
     this.dataRetriever = window.WMTSDataRetriever;
-    
+
     // Create data array inside dataRows
     this.dataRows.forEach(dr => {
       dr.data = [];
       for (let i = 0; i < this.numDays; i++)
-        dr.data[i] = {value: '', loading: true, key: dr.name ? dr.name + i : dr.key + i};
+        dr.data[i] = { value: '', loading: true, key: dr.name ? dr.name + i : dr.key + i };
     });
   },
-  mounted(){
+  mounted() {
     // Update table with the current date
     this.updateTable(new Date(), window.CMEMS_LONGITUDE, window.CMEMS_LATITUDE);
 
@@ -78,11 +84,14 @@ export default {
     // Panel open
     window.eventBus.on('SidePanel_isPanelOpen', this.panelStateChanged)
   },
-  unmounted(){
+  unmounted() {
 
   },
-  data(){
+  data() {
     return {
+      //  Time interval
+      timeInterval: ['1h', '3h', '1d'],
+      selTimeInterval: '3h',
       // Check https://es.wisuki.com/spot/2617/barceloneta for inspiration
       dataRows: [
         // TODO: no data product for wind? Work on WMTS
@@ -114,7 +123,7 @@ export default {
         //   color: '#6164ff',//'#71c3eb',
         //   colorScale: 'boxfill/sst_36'
         // },
-        
+
         { // Wave icon
           key: 'waveicon',
           imgURL: 'icons.png',
@@ -127,7 +136,7 @@ export default {
         {
           name: "Wave direction",
           abbr: "Dir",
-          units: "º", 
+          units: "º",
           direction: true,
           fromDirection: true,
           layer: "Wave significant height",
@@ -136,58 +145,58 @@ export default {
           name: "Wave significant height",
           abbr: "Waves",
           icon: true,
-          units: "m", 
+          units: "m",
           range: [0, 8],
-          signRange: [0.2,4],
+          signRange: [0.2, 4],
           color: '#6164ff',//'#71c3eb',
           colorScale: 'boxfill/alg',
         },
         {
           name: "Wave period",
           abbr: "T",
-          units: "s", 
-          range: [0,25],
-          signRange: [6,15],
+          units: "s",
+          range: [0, 25],
+          signRange: [6, 15],
           color: '#6164ff' // TODO: color or colorScale. If color, go from transparent to the specified color.
         },
         // TODO: wait until CMEMS has this data
-        // { // Current icon
-        //   key: 'currenticon',
-        //   imgURL: 'icons.png',
-        //   position: 2,
-        //   defURL: 'https://es.wisuki.com/images/px.png',
-        //   source: 'Sea surface velocity',
-        //   signRange: [0.25, 1],
-        //   color: '#6164ff',
-        // },
-        // {
-        //   name: "Sea current direction",
-        //   abbr: "Dir",
-        //   units: "m/s",
-        //   direction: true,
-        //   layer: "Sea surface velocity",
-        //   color: '#6164ff',//'#71c3eb',
-        // },        {
-        //   name: "Sea surface velocity",
-        //   abbr: "Current",
-        //   icon: true,
-        //   units: "m/s",
-        //   range: [0, 3],
-        //   signRange: [0.25, 1],
-        //   color: '#6164ff',//'#71c3eb',
-        // },
+        { // Current icon
+          key: 'currenticon',
+          imgURL: 'icons.png',
+          position: 2,
+          defURL: 'https://es.wisuki.com/images/px.png',
+          source: 'Sea surface velocity',
+          signRange: [0.25, 1],
+          color: '#6164ff',
+        },
+        {
+          name: "Sea current direction",
+          abbr: "Dir",
+          units: "m/s",
+          direction: true,
+          layer: "Sea water velocity",
+          color: '#6164ff',//'#71c3eb',
+        },        {
+          name: "Sea water velocity",
+          abbr: "Current",
+          icon: true,
+          units: "m/s",
+          range: [0, 3],
+          signRange: [0.25, 1],
+          color: '#6164ff',//'#71c3eb',
+        },
         {
           name: "Chlorophyll",
           abbr: "Chl",
-          units: "mg/m3", 
+          units: "mg/m3",
           range: [0, 2.5],
-          signRange: [0.5,1],
+          signRange: [0.5, 1],
           color: '#6164ff'
         },
         {
           name: "Salinity",
           abbr: "Sal",
-          units: "‰", 
+          units: "‰",
           range: [30, 45],
           signRange: [38, 40],
           color: '#6164ff'
@@ -228,19 +237,28 @@ export default {
   },
   methods: {
     // USER HTML ACTIONS
-    onClick: function(event){
+    onClick: function (event) {
 
     },
 
+    // Time interval changed
+    onTimeIntervalChanged: function (tInt) {
+      this.selTimeInterval = tInt;
+      // Create dates
+
+      // Request data
+      console.log(tInt);
+    },
+
     // PRIVATE METHODS
-    panelStateChanged: function(isPanelOpen){
-      if (isPanelOpen){
+    panelStateChanged: function (isPanelOpen) {
+      if (isPanelOpen) {
         this.requestDataUpdate(selId);
       }
     },
 
 
-    getData: function(lat, long){
+    getData: function (lat, long) {
       // Reset used data products
       this.dataProducts = {};
       // Get data
@@ -248,10 +266,10 @@ export default {
         this.dates.forEach((date, dIndex) => {
           let layerName = rr.direction ? rr.layer : rr.name;
           // Icon row does not load data
-          if (layerName !== undefined){
+          if (layerName !== undefined) {
             this.dataRetriever.getDataAtPoint(layerName, date.toISOString(), lat, long, 'h', rr.direction)
               .then(value => {
-                if (value == undefined){
+                if (value == undefined) {
                   rr.data[dIndex].value = 'x';
                   rr.data[dIndex].loading = false;
                   return;
@@ -263,47 +281,47 @@ export default {
                 // Get product
                 let id = this.dataRetriever.getDataSetIdFromDataName(layerName);
                 let dataSet = this.dataRetriever.getDataSet(id, 'h', date.toISOString());
-                if (this.dataProducts[dataSet.productName] == undefined){
-                  this.dataProducts[dataSet.productName] = {doi: dataSet.doi};
+                if (this.dataProducts[dataSet.productName] == undefined) {
+                  this.dataProducts[dataSet.productName] = { doi: dataSet.doi };
                 }
                 // Icon
-                if (rr.icon){
+                if (rr.icon) {
                   // Find dataRow with source
                   let iconRow = this.dataRows.filter(e => e.source == rr.name)[0];
-                  if (iconRow == undefined) {console.error('Icon is not found for ' + rr.name); return};
+                  if (iconRow == undefined) { console.error('Icon is not found for ' + rr.name); return };
                   iconRow.data[dIndex].value = rr.data[dIndex].value;
                   iconRow.data[dIndex].loading = false;
                 }
               })
               .catch(error => {
-                console.error("Can't get CMEMS-WMS " + layerName + " on " + date.getUTCFullYear() + "/" + (date.getMonth()+1));
+                console.error("Can't get CMEMS-WMS " + layerName + " on " + date.getUTCFullYear() + "/" + (date.getMonth() + 1));
                 rr.data[dIndex].value = 'x';
                 rr.data[dIndex].loading = false;
               });
           } // end of if
-        
+
 
         });
       })
-      
-      
+
+
     },
 
 
 
-    getStyle: function(dR, dd){
+    getStyle: function (dR, dd) {
       let color = dR.color;
       let range = dR.signRange ? dR.signRange : dR.range; // Significant range
       let value = dd.value;
-      
-      let alpha = value == 'x' ? 0 : 255*(value - range[0]) / (range[1] - range[0]);
+
+      let alpha = value == 'x' ? 0 : 255 * (value - range[0]) / (range[1] - range[0]);
       alpha = Math.max(Math.min(alpha, 255), 0); // Clamp for HEX conversion
 
       let textWeight = 'normal';
-      if (dR.signRange){
-        if (value > (range[0] + 0.33*(range[1]-range[0])))
+      if (dR.signRange) {
+        if (value > (range[0] + 0.33 * (range[1] - range[0])))
           textWeight = 'bold';
-        else if (value > (range[0] + 0.66*(range[1]-range[0])))
+        else if (value > (range[0] + 0.66 * (range[1] - range[0])))
           textWeight = 'bolder';
       }
 
@@ -316,11 +334,11 @@ export default {
 
 
     // Create image style
-    getImageStyle: function(dR, dd){
+    getImageStyle: function (dR, dd) {
       let color = dR.color;
       let range = dR.signRange ? dR.signRange : dR.range; // Significant range
       let value = dd.value;
-      
+
       let alpha = value == 'x' ? 0 : (value - range[0]) / (range[1] - range[0]);
       alpha = Math.max(Math.min(alpha, 1), 0); // Clamp for HEX conversion
       //alpha *= 255;
@@ -335,7 +353,7 @@ export default {
       else
         colorFactor = 3;
 
-      let cssPosition = -dR.position*32 - colorFactor * 32*3;
+      let cssPosition = -dR.position * 32 - colorFactor * 32 * 3;
 
       // if (alpha/255 == 0){
       //   color = '#9cc6c8';
@@ -352,32 +370,32 @@ export default {
 
       return {
         //'background': color + alpha.toString(16).split('.')[0],
-        'background-image': 'url(./Assets/Icons/'+ dR.imgURL +')',
+        'background-image': 'url(./Assets/Icons/' + dR.imgURL + ')',
         'background-position': cssPosition + 'px 0',
         // transform: 'scale(1)',
       }
     },
 
     // Create dates
-    createDates: function(inputDate) {
+    createDates: function (inputDate) {
       // If dates does not exists (initialization)
       this.dates = this.dates == undefined ? this.dates = [] : this.dates;
       let tempDate = new Date(inputDate.getTime());
 
-      for (let i = 0; i < this.numDays; i++){
-        this.daysString[this.numDays-1 - i] = tempDate.toDateString().substring(0,2) + ' ' + tempDate.getDate();
-        this.dates[this.numDays-1 - i] = new Date(tempDate.getTime());
+      for (let i = 0; i < this.numDays; i++) {
+        this.daysString[this.numDays - 1 - i] = tempDate.toDateString().substring(0, 2) + ' ' + tempDate.getDate();
+        this.dates[this.numDays - 1 - i] = new Date(tempDate.getTime());
         tempDate.setDate(tempDate.getDate() - 1);
       }
 
-      
+
     },
 
 
-    updateTable: async function(inputDate, long, lat){
+    updateTable: async function (inputDate, long, lat) {
       this.lat = lat.toFixed(2);
       this.long = long.toFixed(2);
-      let str = inputDate.toString().substring(0,15);
+      let str = inputDate.toString().substring(0, 15);
       // Translate
       this.currentDateHTML = this.$i18n.t(str.split(" ")[0]) + " " + this.$i18n.t(str.split(" ")[1]) + " " + str.split(" ")[2] + " " + str.split(" ")[3];
 
@@ -387,7 +405,7 @@ export default {
       await new Promise((resolve) => setTimeout(resolve, 200));
       // Reset loading
       this.dataRows.forEach(dr => {
-        for (let i = 0; i < this.numDays; i++){
+        for (let i = 0; i < this.numDays; i++) {
           dr.data[i].value = '';
           dr.data[i].loading = true;
         }
@@ -404,30 +422,30 @@ export default {
 
 
     // PUBLIC METHODS
-    requestDataUpdate(id){
+    requestDataUpdate(id) {
       // Is selected haul different from previously loaded?
-      if (id != this.selHaulId){
+      if (id != this.selHaulId) {
         // If so, load new data
         let fdManager = window.DataManager.getFishingDataManager();
         this.selHaul = fdManager.hauls[id];
         this.selHaulId = id;
         let middleCoordinate;
-        if (this.selHaul == undefined){
+        if (this.selHaul == undefined) {
           debugger;
         }
         if (this.selHaul.geometry.type == "Point")
           middleCoordinate = this.selHaul.geometry.coordinates;
         else {
           let coords = this.selHaul.geometry.coordinates;
-          middleCoordinate = [...coords[Math.round(coords.length/2)]]; // copy
+          middleCoordinate = [...coords[Math.round(coords.length / 2)]]; // copy
         }
-        
+
         this.updateTable(this.selHaul.Date, middleCoordinate[0], middleCoordinate[1]);
       }
     },
 
-    
-    
+
+
 
   },
   components: {
@@ -441,12 +459,24 @@ export default {
 
 <style scoped>
 .wcontainer {
-  font-size:12px;
+  font-size: 12px;
   /* display: flex; 
   flex-direction: column; */
   width: 100%;
   /* border:black;
   border-style: solid; */
+}
+
+.time-interval-opts-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.time-interval-opts-container>button {
+  padding: 4px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 table {
@@ -464,7 +494,7 @@ table {
 .wcol {
   /* border:rgb(252, 252, 252);
   border-style: solid; */
-  border-style:none;
+  border-style: none;
   /* flex-grow: 1; */
   text-align: center;
   align-items: center;
