@@ -5,9 +5,9 @@
       {{ $t('Latitude') }}: {{ lat }} º, {{ $t('Longitude') }}: {{ long }} º
     </div>
     <!-- Temporal domain options -->
-    <div class="time-interval-opts-container">
-      <div style="padding-right: 5px">{{ $t('Time interval') }}:</div>
-      <button v-for="tInt in timeInterval" :class="[selTimeInterval == tInt ? 'button-selected' : '']" :key="tInt" @click="onTimeIntervalChanged(tInt)">{{ $t(tInt) }}</button>
+    <div class="time-step-opts-container">
+      <div style="padding-right: 5px">{{ $t('Time step') }}:</div>
+      <button v-for="tStep in timeSteps" class="clickable" :class="[selTimeStep == tStep ? 'button-selected' : '']" :key="tStep" @click="onTimeStepChanged(tStep)">{{ $t(tStep) }}</button>
     </div>
 
     <!-- Table -->
@@ -16,12 +16,13 @@
       <thead>
         <tr>
           <td></td>
-          <!-- Col for each time step -->
-          <th class="wcol" style="min-width:40px" :key="timeStep" v-for="(timeStep, index) in timeSteps"
-            :title="dates[index].toISOString()">
-            {{ $t(timeStep.split(' ')[0])}}
-            <br>{{timeStep.split(' ')[1] }}
-            <template v-if="selTimeInterval.includes('h')"><br>{{timeStep.split(' ')[2]}}h</template>
+          <!-- Col for each time string -->
+          <th class="wcol" style="min-width:40px" :key="timeStr" v-for="(timeStr, index) in timeStrs"
+            :title="dates[index].toISOString()"
+            :class="[selTime == timeStr ? 'selColumn' : index % 2 == 0 ? 'evenDay' : 'oddDay']">
+            {{ $t(timeStr.split(' ')[0])}}
+            <br>{{timeStr.split(' ')[1] }}
+            <template v-if="selTimeStep.includes('h')"><br>{{timeStr.split(' ')[2]}}h</template>
           </th>
         </tr>
       </thead>
@@ -91,9 +92,10 @@ export default {
   },
   data() {
     return {
-      //  Time interval
-      timeInterval: ['1h', '3h', '1d'],
-      selTimeInterval: '3h',
+      //  Time step
+      timeSteps: ['1h', '3h', '1d'],
+      selTimeStep: '3h',
+      selTimeStr: '',
       // Check https://es.wisuki.com/spot/2617/barceloneta for inspiration
       dataRows: [
         // TODO: no data product for wind? Work on WMTS
@@ -228,7 +230,7 @@ export default {
       ],
       dataProducts: {},
       numDays: 7,
-      timeSteps: [],
+      timeStrs: [],
       currentDateHTML: '',
       lat: '',
       long: '',
@@ -242,13 +244,13 @@ export default {
 
     },
 
-    // Time interval changed
-    onTimeIntervalChanged: function (tInt) {
-      this.selTimeInterval = tInt;
+    // Time step changed
+    onTimeStepChanged: function (tStep) {
+      this.selTimeStep = tStep;
       // Create dates
 
       // Request data
-      console.log(tInt);
+      console.log(tStep);
     },
 
     // PRIVATE METHODS
@@ -379,12 +381,19 @@ export default {
 
     // Create dates
     createDates: function (inputDate) {
+
+      // Set selected time step
+      this.selTime = inputDate.toDateString().substring(0, 2) + ' ' + inputDate.getDate() + ' ' + inputDate.getHours();
+
       // If dates does not exists (initialization)
       this.dates = this.dates == undefined ? this.dates = [] : this.dates;
       let tempDate = new Date(inputDate.getTime());
+      // 3 days forecast
+      tempDate.setDate(tempDate.getDate() + 3);
+
 
       for (let i = 0; i < this.numDays; i++) {
-        this.timeSteps[this.numDays - 1 - i] = tempDate.toDateString().substring(0, 2) + ' ' + tempDate.getDate() + ' ' + tempDate.getHours();
+        this.timeStrs[this.numDays - 1 - i] = tempDate.toDateString().substring(0, 2) + ' ' + tempDate.getDate() + ' ' + tempDate.getHours();
         this.dates[this.numDays - 1 - i] = new Date(tempDate.getTime());
         tempDate.setDate(tempDate.getDate() - 1);
       }
@@ -468,13 +477,13 @@ export default {
   border-style: solid; */
 }
 
-.time-interval-opts-container {
+.time-step-opts-container {
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-.time-interval-opts-container>button {
+.time-step-opts-container>button {
   padding: 4px;
   padding-left: 10px;
   padding-right: 10px;
@@ -501,6 +510,15 @@ table {
   align-items: center;
   padding: 2px;
 }
+
+.selColumn {
+  background-color: var(--red);
+}
+.evenDay {
+  background-color: rgb(82 181 217 / 28%);
+}
+/* .oddDay {
+} */
 
 
 img {
