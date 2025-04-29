@@ -15,7 +15,7 @@
       <!-- Menu left -->
       <div class="menu-list-left">
         <button v-for="el in menu" :key="el.title" 
-          class="menu-left-button clickable" :class="[selectedMenu == el.title ? 'menu-left-button-sel' : '']" 
+          class="menu-left-button clickable" :class="[selectedMenu == el.title ? 'button-selected' : '']" 
           @click="menuLeftItemClicked(el)">
           <span v-if="el.icon" class="fa" v-html="el.icon"></span>
           <span>{{ $t(el.title) }}</span>
@@ -323,9 +323,7 @@ export default {
   padding-left: 10px;
   padding-right: 10px;
 }
-.menu-left-button-sel{
-  background: var(--blue);
-}
+
 
 .submenu-container {
   width: 100%;
