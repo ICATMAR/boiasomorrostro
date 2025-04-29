@@ -6,7 +6,7 @@
     </div>
     <!-- Temporal domain options -->
     <div class="time-interval-opts-container">
-      {{ $t('Time interval') }}:
+      <div style="padding-right: 5px">{{ $t('Time interval') }}:</div>
       <button v-for="tInt in timeInterval" :class="[selTimeInterval == tInt ? 'button-selected' : '']" :key="tInt" @click="onTimeIntervalChanged(tInt)">{{ $t(tInt) }}</button>
     </div>
 
@@ -16,10 +16,12 @@
       <thead>
         <tr>
           <td></td>
-          <!-- Col for each day -->
-          <th class="wcol" style="min-width:40px" :key="dd" v-for="(dd, index) in daysString"
+          <!-- Col for each time step -->
+          <th class="wcol" style="min-width:40px" :key="timeStep" v-for="(timeStep, index) in timeSteps"
             :title="dates[index].toISOString()">
-            {{ $t(dd.split(' ')[0]) + ' ' + dd.split(' ')[1] }}
+            {{ $t(timeStep.split(' ')[0])}}
+            <br>{{timeStep.split(' ')[1] }}
+            <template v-if="selTimeInterval.includes('h')"><br>{{timeStep.split(' ')[2]}}h</template>
           </th>
         </tr>
       </thead>
@@ -159,7 +161,6 @@ export default {
           signRange: [6, 15],
           color: '#6164ff' // TODO: color or colorScale. If color, go from transparent to the specified color.
         },
-        // TODO: wait until CMEMS has this data
         { // Current icon
           key: 'currenticon',
           imgURL: 'icons.png',
@@ -227,7 +228,7 @@ export default {
       ],
       dataProducts: {},
       numDays: 7,
-      daysString: [],
+      timeSteps: [],
       currentDateHTML: '',
       lat: '',
       long: '',
@@ -383,7 +384,7 @@ export default {
       let tempDate = new Date(inputDate.getTime());
 
       for (let i = 0; i < this.numDays; i++) {
-        this.daysString[this.numDays - 1 - i] = tempDate.toDateString().substring(0, 2) + ' ' + tempDate.getDate();
+        this.timeSteps[this.numDays - 1 - i] = tempDate.toDateString().substring(0, 2) + ' ' + tempDate.getDate() + ' ' + tempDate.getHours();
         this.dates[this.numDays - 1 - i] = new Date(tempDate.getTime());
         tempDate.setDate(tempDate.getDate() - 1);
       }
