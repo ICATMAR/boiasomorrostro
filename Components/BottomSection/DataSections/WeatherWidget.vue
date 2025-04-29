@@ -249,10 +249,23 @@ export default {
     },
 
     // Time step changed
-    onTimeStepChanged: function (tStep) {
-      this.selTimeStep = tStep;
+    onTimeStepChanged: function (inStep) {
+      this.selTimeStep = inStep;
+      // Set time step
+      let tStep = this.selTimeStep == '1h' ? 1 : this.selTimeStep == '3h' ? 3 : 24;
+      // Calculate number of columns
+      let numCols = this.numDays * 24 / tStep;
+      this.numCols = numCols;
+
+      // Create data array inside dataRows
+      this.dataRows.forEach(dr => {
+        dr.data = [];
+        for (let i = 0; i < this.numCols; i++)
+          dr.data[i] = { value: '', loading: true, key: dr.name ? dr.name + i : dr.key + i };
+      });
+
       // Update table
-      //this.updateTable(this.selDate, this.long * 1, this.lat * 1);
+      this.updateTable(this.selDate, this.long * 1, this.lat * 1);
     },
 
     // PRIVATE METHODS
@@ -396,17 +409,14 @@ export default {
 
       // Set time step
       let tStep = this.selTimeStep == '1h' ? 1 : this.selTimeStep == '3h' ? 3 : 24;
-      // Calculate number of columns
-      let numCols = this.numDays * 24 / tStep;
-      this.numCols = numCols;
 
       // Reset time strings and dates
       this.timeStrs = [];
       this.dates = [];
 
-      for (let i = 0; i < numCols; i++) {
-        this.timeStrs[numCols - 1 - i] = tempDate.toDateString().substring(0, 2) + ' ' + tempDate.getDate() + ' ' + tempDate.getHours();
-        this.dates[numCols - 1 - i] = new Date(tempDate.getTime());
+      for (let i = 0; i < this.numCols; i++) {
+        this.timeStrs[this.numCols - 1 - i] = tempDate.toDateString().substring(0, 2) + ' ' + tempDate.getDate() + ' ' + tempDate.getHours();
+        this.dates[this.numCols - 1 - i] = new Date(tempDate.getTime());
         tempDate.setHours(tempDate.getHours() - tStep);
       }
 
