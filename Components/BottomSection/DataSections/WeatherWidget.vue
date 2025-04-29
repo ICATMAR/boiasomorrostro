@@ -7,7 +7,8 @@
     <!-- Temporal domain options -->
     <div class="time-step-opts-container">
       <div style="padding-right: 5px">{{ $t('Time step') }}:</div>
-      <button v-for="tStep in timeSteps" class="clickable" :class="[selTimeStep == tStep ? 'button-selected' : '']" :key="tStep" @click="onTimeStepChanged(tStep)">{{ $t(tStep) }}</button>
+      <button v-for="tStep in timeSteps" class="clickable" :class="[selTimeStep == tStep ? 'button-selected' : '']"
+        :key="tStep" @click="onTimeStepChanged(tStep)">{{ $t(tStep) }}</button>
     </div>
 
     <!-- Table -->
@@ -19,10 +20,10 @@
           <!-- Col for each time string -->
           <th class="wcol" style="min-width:40px" :key="timeStr" v-for="(timeStr, index) in timeStrs"
             :title="dates[index].toISOString()"
-            :class="[selTime == timeStr ? 'selColumn' : index % 2 == 0 ? 'evenDay' : 'oddDay']">
-            {{ $t(timeStr.split(' ')[0])}}
-            <br>{{timeStr.split(' ')[1] }}
-            <template v-if="selTimeStep.includes('h')"><br>{{timeStr.split(' ')[2]}}h</template>
+            :class="[selTimeStr == timeStr ? 'selColumn' : index % 2 == 0 ? 'evenDay' : 'oddDay']">
+            {{ $t(timeStr.split(' ')[0]) }}
+            <br>{{ timeStr.split(' ')[1] }}
+            <template v-if="selTimeStep.includes('h')"><br>{{ timeStr.split(' ')[2] }}h</template>
           </th>
         </tr>
       </thead>
@@ -99,6 +100,7 @@ export default {
       timeSteps: ['1h', '3h', '1d'],
       selTimeStep: '3h',
       selTimeStr: '',
+      selDate: new Date(),
       // Check https://es.wisuki.com/spot/2617/barceloneta for inspiration
       dataRows: [
         // TODO: no data product for wind? Work on WMTS
@@ -182,7 +184,7 @@ export default {
           direction: true,
           layer: "Sea water velocity",
           color: '#6164ff',//'#71c3eb',
-        },        {
+        }, {
           name: "Sea water velocity",
           abbr: "Current",
           icon: true,
@@ -238,8 +240,6 @@ export default {
       currentDateHTML: '',
       lat: '',
       long: '',
-      selHaulId: undefined,
-
     }
   },
   methods: {
@@ -251,11 +251,8 @@ export default {
     // Time step changed
     onTimeStepChanged: function (tStep) {
       this.selTimeStep = tStep;
-      // Create dates
-      // TODO
-      debugger;
-      // Request data
-      console.log(tStep);
+      // Update table
+      //this.updateTable(this.selDate, this.long * 1, this.lat * 1);
     },
 
     // PRIVATE METHODS
@@ -386,9 +383,10 @@ export default {
 
     // Create dates
     createDates: function (inputDate) {
-
+      // Set selected date
+      this.selDate = inputDate || this.selDate;
       // Set selected time step
-      this.selTime = inputDate.toDateString().substring(0, 2) + ' ' + inputDate.getDate() + ' ' + inputDate.getHours();
+      this.selTimeStr = inputDate.toDateString().substring(0, 2) + ' ' + inputDate.getDate() + ' ' + inputDate.getHours();
 
       // If dates does not exists (initialization)
       this.dates = this.dates == undefined ? this.dates = [] : this.dates;
@@ -398,7 +396,6 @@ export default {
 
       // Set time step
       let tStep = this.selTimeStep == '1h' ? 1 : this.selTimeStep == '3h' ? 3 : 24;
-
       // Calculate number of columns
       let numCols = this.numDays * 24 / tStep;
       this.numCols = numCols;
@@ -529,9 +526,11 @@ table {
 .selColumn {
   background-color: var(--red);
 }
+
 .evenDay {
   background-color: rgb(82 181 217 / 28%);
 }
+
 /* .oddDay {
 } */
 
