@@ -71,10 +71,13 @@ export default {
     // Create data retreiver
     this.dataRetriever = window.WMTSDataRetriever;
 
+    let tStep = this.selTimeStep == '1h' ? 1 : this.selTimeStep == '3h' ? 3 : 24;
+    this.numCols = this.numDays * 24 / tStep;
+
     // Create data array inside dataRows
     this.dataRows.forEach(dr => {
       dr.data = [];
-      for (let i = 0; i < this.numDays; i++)
+      for (let i = 0; i < this.numCols; i++)
         dr.data[i] = { value: '', loading: true, key: dr.name ? dr.name + i : dr.key + i };
     });
   },
@@ -230,6 +233,7 @@ export default {
       ],
       dataProducts: {},
       numDays: 7,
+      numCols: 7,
       timeStrs: [],
       currentDateHTML: '',
       lat: '',
@@ -248,7 +252,8 @@ export default {
     onTimeStepChanged: function (tStep) {
       this.selTimeStep = tStep;
       // Create dates
-
+      // TODO
+      debugger;
       // Request data
       console.log(tStep);
     },
@@ -391,11 +396,21 @@ export default {
       // 3 days forecast
       tempDate.setDate(tempDate.getDate() + 3);
 
+      // Set time step
+      let tStep = this.selTimeStep == '1h' ? 1 : this.selTimeStep == '3h' ? 3 : 24;
 
-      for (let i = 0; i < this.numDays; i++) {
-        this.timeStrs[this.numDays - 1 - i] = tempDate.toDateString().substring(0, 2) + ' ' + tempDate.getDate() + ' ' + tempDate.getHours();
-        this.dates[this.numDays - 1 - i] = new Date(tempDate.getTime());
-        tempDate.setDate(tempDate.getDate() - 1);
+      // Calculate number of columns
+      let numCols = this.numDays * 24 / tStep;
+      this.numCols = numCols;
+
+      // Reset time strings and dates
+      this.timeStrs = [];
+      this.dates = [];
+
+      for (let i = 0; i < numCols; i++) {
+        this.timeStrs[numCols - 1 - i] = tempDate.toDateString().substring(0, 2) + ' ' + tempDate.getDate() + ' ' + tempDate.getHours();
+        this.dates[numCols - 1 - i] = new Date(tempDate.getTime());
+        tempDate.setHours(tempDate.getHours() - tStep);
       }
 
 
@@ -415,7 +430,7 @@ export default {
       await new Promise((resolve) => setTimeout(resolve, 200));
       // Reset loading
       this.dataRows.forEach(dr => {
-        for (let i = 0; i < this.numDays; i++) {
+        for (let i = 0; i < this.numCols; i++) {
           dr.data[i].value = '';
           dr.data[i].loading = true;
         }
