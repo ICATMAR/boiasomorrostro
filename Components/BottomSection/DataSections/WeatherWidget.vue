@@ -19,11 +19,13 @@
       <table>
         <tbody>
           <!-- Empty row for time stamps -->
-          <tr></tr>
+          <tr :style="{ height: (selTimeStep.includes('h') ? '60' : '41') + 'px' }"></tr>
           <!-- Row -->
-          <tr :key="dR.name" v-for="(dR, index) in dataRows">
-            <!-- Row name -->
-            <th scope="row"><span v-if="dR.imgURL == undefined">{{ $t(dR.name) }} ({{ dR.units }})</span></th>
+          <!-- The height changes when there is an icon in the row -->
+          <tr :key="dR.name" :style="{ height: (dR.imgURL == undefined ? '' : '37') + 'px' }"
+            v-for="(dR, index) in dataRows">
+            <!-- Row with text, only if it does not contain an image -->
+            <th scope="row" v-if="dR.imgURL == undefined">{{ $t(dR.name) }} ({{ dR.units }})</th>
           </tr>
         </tbody>
       </table>
@@ -578,6 +580,17 @@ export default {
 table {
   margin-bottom: 30px;
 }
+
+.table-main-container tr {
+  height: 32px;
+  border: 1px solid black;
+}
+
+.table-main-container td,
+.table-main-container th {
+  white-space: nowrap;
+}
+
 
 .wrow {
   /* display: flex;
