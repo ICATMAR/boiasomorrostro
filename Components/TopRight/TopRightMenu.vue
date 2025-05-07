@@ -88,16 +88,16 @@ export default {
 
 
 <style scoped>
-.top-right {
+  .top-right {
     margin: 0;
     position: absolute;
-    top: 80px;
-    right: 10px;
+    top: 50px;
+    right: 15px;
   }
 
   .vertical-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row-reverse;
     width: fit-content;
     padding: 0;
     align-items: flex-end;
