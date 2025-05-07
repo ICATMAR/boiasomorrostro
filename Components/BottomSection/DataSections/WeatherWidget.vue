@@ -16,19 +16,21 @@
 
     <div class="table-main-container">
       <!-- Table with variable names -->
-      <table class="table-var-names">
-        <tbody>
-          <!-- Empty row for time stamps -->
-          <tr :style="{ height: (selTimeStep.includes('h') ? '60' : '41') + 'px' }"></tr>
-          <!-- Row -->
-          <!-- The height changes when there is an icon in the row -->
-          <tr :key="dR.name" :style="{ height: (dR.imgURL == undefined ? '' : '37') + 'px' }"
-            v-for="(dR, index) in dataRows">
-            <!-- Row with text, only if it does not contain an image -->
-            <th scope="row" v-if="dR.imgURL == undefined">{{ $t(dR.name) }} ({{ dR.units }})</th>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-var-names-wrapper">
+        <table class="table-var-names">
+          <tbody>
+            <!-- Empty row for time stamps -->
+            <tr :style="{ height: (selTimeStep.includes('h') ? '60' : '41') + 'px' }"></tr>
+            <!-- Row -->
+            <!-- The height changes when there is an icon in the row -->
+            <tr :key="dR.name" :style="{ height: (dR.imgURL == undefined ? '' : '37') + 'px' }"
+              v-for="(dR, index) in dataRows">
+              <!-- Row with text, only if it does not contain an image -->
+              <th scope="row" v-if="dR.imgURL == undefined">{{ $t(dR.name) }} ({{ dR.units }})</th>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <!-- More data before -->
       <div class="left-button-wrapper">
@@ -591,6 +593,12 @@ export default {
   margin-bottom: 30px;
   justify-content: center;
 }
+
+.table-var-names-wrapper {
+  border-right: solid 10px;
+  border-image: linear-gradient(45deg, rgb(0, 143, 104), rgb(250, 224, 66)) 1;
+}
+
 
 .table-var-names {
   margin-bottom: 10px;
