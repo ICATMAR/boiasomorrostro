@@ -30,8 +30,11 @@
         </tbody>
       </table>
 
+      <!-- More data before -->
+      <button><</button>
+
       <!-- Table with timestamps and data -->
-      <table>
+      <table class="table-data-content">
         <thead>
           <tr>
             <!-- Col for each time string -->
@@ -64,6 +67,9 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- More data after -->
+      <button>></button>
     </div>
 
 
@@ -71,7 +77,7 @@
 
 
     <!-- Table -->
-    <table>
+    <table v-if="false">
       <!-- Table Head - Days -->
       <thead>
         <tr>
@@ -160,6 +166,13 @@ export default {
       selTimeStep: '1d',
       selTimeStr: '',
       selDate: new Date(),
+      dataProducts: {},
+      numDays: 7,
+      numCols: 7,
+      timeStrs: [],
+      currentDateHTML: '',
+      lat: '',
+      long: '',
       // Check https://es.wisuki.com/spot/2617/barceloneta for inspiration
       dataRows: [
         // TODO: no data product for wind? Work on WMTS
@@ -292,13 +305,6 @@ export default {
           color: '#FFAC63'
         }
       ],
-      dataProducts: {},
-      numDays: 7,
-      numCols: 7,
-      timeStrs: [],
-      currentDateHTML: '',
-      lat: '',
-      long: '',
     }
   },
   methods: {
@@ -574,11 +580,12 @@ export default {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-
+  margin-bottom: 30px;
 }
 
-table {
-  margin-bottom: 30px;
+.table-data-content {
+  display: block;
+  overflow-x: auto
 }
 
 .table-main-container tr {
@@ -590,6 +597,7 @@ table {
 .table-main-container th {
   white-space: nowrap;
 }
+
 
 
 .wrow {
