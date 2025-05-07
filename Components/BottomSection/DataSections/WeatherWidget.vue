@@ -16,7 +16,7 @@
 
     <div class="table-main-container">
       <!-- Table with variable names -->
-      <table>
+      <table class="table-var-names">
         <tbody>
           <!-- Empty row for time stamps -->
           <tr :style="{ height: (selTimeStep.includes('h') ? '60' : '41') + 'px' }"></tr>
@@ -138,7 +138,7 @@ export default {
     this.dataRetriever = window.WMTSDataRetriever;
 
     let tStep = this.selTimeStep == '1h' ? 1 : this.selTimeStep == '3h' ? 3 : 24;
-    this.numCols = this.numDays * 24 / tStep;
+    this.numCols = (this.hoursAheadBehind[this.selTimeStep] / tStep) * 2 + 1;
 
     // Create data array inside dataRows
     this.dataRows.forEach(dr => {
@@ -163,12 +163,16 @@ export default {
     return {
       //  Time step
       timeSteps: ['1h', '3h', '1d'],
+      hoursAheadBehind: {
+        '1h': 24,
+        '3h': 24*2,
+        '1d': 24*3,
+      },
       selTimeStep: '1d',
       selTimeStr: '',
       selDate: new Date(),
       dataProducts: {},
       numDays: 7,
-      numCols: 7,
       timeStrs: [],
       currentDateHTML: '',
       lat: '',
@@ -319,8 +323,7 @@ export default {
       // Set time step
       let tStep = this.selTimeStep == '1h' ? 1 : this.selTimeStep == '3h' ? 3 : 24;
       // Calculate number of columns
-      let numCols = this.numDays * 24 / tStep;
-      this.numCols = numCols;
+      this.numCols = (this.hoursAheadBehind[this.selTimeStep] / tStep) * 2 + 1;
 
       // Create data array inside dataRows
       this.dataRows.forEach(dr => {
@@ -469,8 +472,8 @@ export default {
       // If dates does not exists (initialization)
       this.dates = this.dates == undefined ? this.dates = [] : this.dates;
       let tempDate = new Date(inputDate.getTime());
-      // 3 days forecast
-      tempDate.setDate(tempDate.getDate() + 3);
+      // Days ahead and behind
+      tempDate.setHours(tempDate.getHours() + this.hoursAheadBehind[this.selTimeStep]);
 
       // Set time step
       let tStep = this.selTimeStep == '1h' ? 1 : this.selTimeStep == '3h' ? 3 : 24;
@@ -583,9 +586,15 @@ export default {
   margin-bottom: 30px;
 }
 
+.table-var-names {
+  margin-bottom: 10px;
+}
+
+
 .table-data-content {
   display: block;
-  overflow-x: auto
+  overflow-x: scroll;
+  scrollbar-width: thin;
 }
 
 .table-main-container tr {
