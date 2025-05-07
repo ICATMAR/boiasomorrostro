@@ -31,8 +31,9 @@
       </table>
 
       <!-- More data before -->
-      <div class="left-button-wrapper"><button>
-          <</button>
+      <div class="left-button-wrapper">
+        <button>
+          < </button>
       </div>
 
       <!-- Table with timestamps and data -->
@@ -167,8 +168,8 @@ export default {
       timeSteps: ['1h', '3h', '1d'],
       hoursAheadBehind: {
         '1h': 24,
-        '3h': 24*2,
-        '1d': 24*3,
+        '3h': 24 * 2,
+        '1d': 24 * 5,
       },
       selTimeStep: '1d',
       selTimeStr: '',
@@ -586,6 +587,7 @@ export default {
   flex-direction: row;
   flex-wrap: nowrap;
   margin-bottom: 30px;
+  justify-content: center;
 }
 
 .table-var-names {
