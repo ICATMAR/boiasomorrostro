@@ -601,12 +601,16 @@ export default {
 
 .table-main-container tr {
   height: 32px;
-  border: 1px solid black;
+  /* border: 1px solid black; */
 }
 
 .table-main-container td,
 .table-main-container th {
   white-space: nowrap;
+}
+
+.table-var-names th {
+  text-align: end;
 }
 
 
