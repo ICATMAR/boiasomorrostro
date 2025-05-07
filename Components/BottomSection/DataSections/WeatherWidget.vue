@@ -31,7 +31,9 @@
       </table>
 
       <!-- More data before -->
-      <button><</button>
+      <div class="left-button-wrapper"><button>
+          <</button>
+      </div>
 
       <!-- Table with timestamps and data -->
       <table class="table-data-content">
@@ -69,7 +71,7 @@
       </table>
 
       <!-- More data after -->
-      <button>></button>
+      <div><button>></button></div>
     </div>
 
 
@@ -644,5 +646,12 @@ img {
   width: 32px;
   height: 32px;
   background-repeat: no-repeat;
+}
+
+.left-button-wrapper {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  width: 0px;
 }
 </style>
