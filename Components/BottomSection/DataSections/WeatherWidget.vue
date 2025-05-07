@@ -252,7 +252,7 @@ export default {
           imgURL: 'icons.png',
           position: 2,
           defURL: 'https://es.wisuki.com/images/px.png',
-          source: 'Sea surface velocity',
+          source: 'Sea water velocity',
           signRange: [0.25, 1],
           color: '#6164ff',
         },
@@ -304,7 +304,7 @@ export default {
           colorScale: 'boxfill/sst_36'
         },
         {
-          name: "Sea Temperature Anomaly",
+          name: "Sea temperature anomaly",
           abbr: 'SST anomaly',
           units: 'ºC',
           range: [-8, 8],
@@ -348,6 +348,8 @@ export default {
 
 
     getData: function (lat, long) {
+      // Time step (either 'h' or 'd')
+      let tStep = this.selTimeStep.substring(1, 2);
       // Reset used data products
       this.dataProducts = {};
       // Get data
@@ -356,7 +358,7 @@ export default {
           let layerName = rr.direction ? rr.layer : rr.name;
           // Icon row does not load data
           if (layerName !== undefined) {
-            this.dataRetriever.getDataAtPoint(layerName, date.toISOString(), lat, long, 'h', rr.direction)
+            this.dataRetriever.getDataAtPoint(layerName, date.toISOString(), lat, long, tStep, rr.direction)
               .then(value => {
                 if (value == undefined) {
                   rr.data[dIndex].value = 'x';
@@ -369,7 +371,7 @@ export default {
                 rr.data[dIndex].loading = false;
                 // Get product
                 let id = this.dataRetriever.getDataSetIdFromDataName(layerName);
-                let dataSet = this.dataRetriever.getDataSet(id, 'h', date.toISOString());
+                let dataSet = this.dataRetriever.getDataSet(id, tStep, date.toISOString());
                 if (this.dataProducts[dataSet.productName] == undefined) {
                   this.dataProducts[dataSet.productName] = { doi: dataSet.doi };
                 }
