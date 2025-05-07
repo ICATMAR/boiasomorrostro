@@ -79,48 +79,6 @@
 
 
 
-
-
-    <!-- Table -->
-    <table v-if="false">
-      <!-- Table Head - Days -->
-      <thead>
-        <tr>
-          <td></td>
-          <!-- Col for each time string -->
-          <th class="wcol" style="min-width:40px" :key="timeStr" v-for="(timeStr, index) in timeStrs"
-            :title="dates[index].toISOString()"
-            :class="[selTimeStr == timeStr ? 'selColumn' : index % 2 == 0 ? 'evenDay' : 'oddDay']">
-            {{ $t(timeStr.split(' ')[0]) }}
-            <br>{{ timeStr.split(' ')[1] }}
-            <template v-if="selTimeStep.includes('h')"><br>{{ timeStr.split(' ')[2] }}h</template>
-          </th>
-        </tr>
-      </thead>
-      <!-- Table body - Variables -->
-      <tbody>
-        <!-- Row -->
-        <tr :key="dR.name" v-for="(dR, index) in dataRows">
-          <!-- Row name -->
-          <th scope="row"><span v-if="dR.imgURL == undefined">{{ $t(dR.name) }} ({{ dR.units }})</span></th>
-          <!-- Values -->
-          <td class="wcol" :key="dd.key" v-for="dd in dataRows[index].data">
-            <div v-if='dd.loading && !dR.imgURL' class="spinner-border text-light"
-              style="width: 1rem; height: 1rem; position: relative;" role="status">
-              <span class="visually-hidden">Loading...</span>
-            </div>
-            <div v-else-if='dR.direction' :style="{ 'transform': 'rotate(' + (dd.value - 90) + 'deg)' }"
-              :title="dd.value + 'º'">&#10140;</div>
-            <div v-else-if='dR.imgURL'><img :src=dR.defURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
-
-            <div v-else-if='!dd.loading' :style="getStyle(dR, dd)">{{ dd.value }}</div>
-
-          </td>
-        </tr>
-      </tbody>
-
-    </table>
-
     <div>
       <i>Generated using E.U. Copernicus Marine Service Information: </i>
       <i v-for="dPKey in Object.keys(dataProducts)">
