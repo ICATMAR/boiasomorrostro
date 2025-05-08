@@ -73,7 +73,7 @@ export default {
 
 <style scoped>
 .content {
-  margin: min(20px, 2vw);
+  /* margin: min(20px, 2vw); */
   overflow: auto;
   font-size: small;
   max-width: 80vw;
