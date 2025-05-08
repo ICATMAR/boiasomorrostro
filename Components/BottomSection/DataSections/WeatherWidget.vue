@@ -34,7 +34,7 @@
 
       <!-- More data before -->
       <div class="left-button-wrapper">
-        <button>
+        <button style="height: 10px">
           < </button>
       </div>
 
@@ -74,7 +74,7 @@
       </table>
 
       <!-- More data after -->
-      <div><button>></button></div>
+      <div><button style="height: 10px">></button></div>
     </div>
 
 
@@ -553,8 +553,8 @@ export default {
 }
 
 .table-var-names-wrapper {
-  border-right: solid 10px;
-  border-image: linear-gradient(45deg, rgb(0, 143, 104), rgb(250, 224, 66)) 1;
+  border-right: solid 4px;
+  border-image: linear-gradient(90deg, rgb(0 0 0) 99%, rgb(0 0 0 / 0%)) 1;
 }
 
 
