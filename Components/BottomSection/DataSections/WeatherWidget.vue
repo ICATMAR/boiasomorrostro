@@ -33,7 +33,7 @@
       </div>
 
       <!-- More data before -->
-      <div class="left-button-wrapper">
+      <div class="left-button-wrapper" v-if="false">
         <button style="height: 10px">
           < </button>
       </div>
@@ -44,9 +44,8 @@
           <tr>
             <!-- Col for each time string -->
             <th class="wcol" style="min-width:40px" :key="timeStr" v-for="(timeStr, index) in timeStrs"
-              :title="dates[index].toISOString()"
-              :id="[selTimeStr == timeStr ? 'selColumn' : '']"
-              :class="[selTimeStr == timeStr ? 'selColumn' : index % 2 == 0 ? 'evenDay' : 'oddDay']">
+              :title="dates[index].toISOString()" :id="[selTimeStr == timeStr ? 'selColumn' : '']"
+              :class="[selTimeStr == timeStr ? 'selColumn' : selTimeStep.includes('h') ? timeStr.split(' ')[1] % 2 == 0 ? 'evenDay' : 'oddDay' : index % 2 == 0 ? 'evenDay' : 'oddDay']">
               {{ $t(timeStr.split(' ')[0]) }}
               <br>{{ timeStr.split(' ')[1] }}
               <template v-if="selTimeStep.includes('h')"><br>{{ timeStr.split(' ')[2] }}h</template>
@@ -75,7 +74,7 @@
       </table>
 
       <!-- More data after -->
-      <div><button style="height: 10px">></button></div>
+      <div v-if="false"><button style="height: 10px">></button></div>
     </div>
 
 
