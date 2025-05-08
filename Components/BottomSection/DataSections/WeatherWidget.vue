@@ -431,6 +431,9 @@ export default {
     createDates: function (inputDate) {
       // Set selected date
       this.selDate = inputDate || this.selDate;
+      this.selDate.setMinutes(0);
+      this.selDate.setSeconds(0);
+      this.selDate.setMilliseconds(0);
       // Set selected time step
       this.selTimeStr = inputDate.toDateString().substring(0, 2) + ' ' + inputDate.getDate() + ' ' + inputDate.getHours();
 
