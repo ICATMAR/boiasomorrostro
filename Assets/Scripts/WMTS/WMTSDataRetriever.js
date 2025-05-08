@@ -11,6 +11,7 @@ export class WMTSDataRetriever {
 
   // Requests - keep track of what is requested
   activeRequests = [];
+  resolvedRequests = {};
   // Store GetCapabilities XML per product
   productsXML = {};
 
@@ -414,6 +415,12 @@ export class WMTSDataRetriever {
   // var timeScale = 'd';
   //TODO: This will change to GetFeatureInfo in July 2024
   getDataAtPoint = async function (dataName, tmst, lat, long, timeScale, direction) {
+    let requestId = dataName + tmst + lat + long + timeScale + direction;
+
+    if (this.resolvedRequests[requestId] != undefined) {
+      console.log("Already resolved request: " + requestId);
+      return this.resolvedRequests[requestId];
+    }
 
     let id = this.getDataSetIdFromDataName(dataName);
     let dataSet = this.getDataSet(id, timeScale, tmst);
@@ -456,7 +463,13 @@ export class WMTSDataRetriever {
     // If no direction is requested
     if (direction == undefined || direction == false) {
       // Get value from URL
-      return await this.getValueAtPointFromURL(templateURL, dataSet.range, long, lat, tileMatrix);//this.getPreciseValueFromURL(templateURL, dataInfo.range);
+      return this.getValueAtPointFromURL(templateURL, dataSet.range, long, lat, tileMatrix)
+        .then((value) => {
+          this.resolvedRequests[requestId] = value;
+          return value;
+        });
+      
+      //this.getPreciseValueFromURL(templateURL, dataInfo.range);
     }
 
 
@@ -471,6 +484,7 @@ export class WMTSDataRetriever {
       // Get value from URL // WARN, could it happen that it has to go from -360 to 360?
       let value = await this.getValueAtPointFromURL(templateURL, [0, 360], long, lat, tileMatrix);//this.getPreciseValueFromURL(url, [-360, 360]);
       //value = 360 - value; // Inverted colormap! Darker is 0, white is 1 ?
+      this.resolvedRequests[requestId] = value;
       return value;
     }
     // East-North format
@@ -491,9 +505,11 @@ export class WMTSDataRetriever {
 
       if (east == undefined || north == undefined)
         return undefined;
-      else
+      else{
+        let value = Math.atan2(east, north) * (180 / Math.PI);
+        this.resolvedRequests[requestId] = value;
         // Calculate angle
-        return Math.atan2(east, north) * (180 / Math.PI);
+        return value}
     }
 
   }
