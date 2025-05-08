@@ -39,12 +39,13 @@
       </div>
 
       <!-- Table with timestamps and data -->
-      <table class="table-data-content">
+      <table class="table-data-content" ref="tableData">
         <thead>
           <tr>
             <!-- Col for each time string -->
             <th class="wcol" style="min-width:40px" :key="timeStr" v-for="(timeStr, index) in timeStrs"
               :title="dates[index].toISOString()"
+              :id="[selTimeStr == timeStr ? 'selColumn' : '']"
               :class="[selTimeStr == timeStr ? 'selColumn' : index % 2 == 0 ? 'evenDay' : 'oddDay']">
               {{ $t(timeStr.split(' ')[0]) }}
               <br>{{ timeStr.split(' ')[1] }}
@@ -131,7 +132,7 @@ export default {
         '3h': 24 * 2,
         '1d': 24 * 5,
       },
-      selTimeStep: '1d',
+      selTimeStep: '3h',
       selTimeStr: '',
       selDate: new Date(),
       dataProducts: {},
@@ -479,6 +480,15 @@ export default {
       this.createDates(inputDate);
       // Update data
       this.getData(lat, long);
+
+      // Center on column
+      this.$nextTick(() => {
+        let selColumnEl = this.$refs["tableData"].querySelector('#selColumn');
+        if (selColumnEl != undefined) {
+          selColumnEl.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+        }
+      });
+
     },
 
 
