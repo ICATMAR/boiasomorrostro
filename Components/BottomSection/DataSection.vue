@@ -20,8 +20,14 @@
     <div class="content-section">
       <h5>Copernicus Marine Service</h5>
       <!-- Content -->
-      <div>{{ $t('Data from models') }}</div>
       <WeatherWidget></WeatherWidget>
+    </div>
+
+    <!-- OPEN WEATHER API -->
+    <div class="content-section">
+      <h5>{{ $t('Open Weather API') }}</h5>
+      <!-- Content -->
+      <div>{{ $t('Work in progress...') }}</div>
     </div>
 
 
@@ -77,7 +83,7 @@ export default {
   overflow: auto;
   font-size: small;
   max-width: 80vw;
-  max-height: 90%;
+  max-height: 100%;
   width: 100%;
 }
 
