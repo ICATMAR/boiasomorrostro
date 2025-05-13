@@ -131,7 +131,7 @@ export default {
         '3h': 24 * 2,
         '1d': 24 * 5,
       },
-      selTimeStep: '3h',
+      selTimeStep: '1d',
       selTimeStr: '',
       selDate: new Date(),
       dataProducts: {},
