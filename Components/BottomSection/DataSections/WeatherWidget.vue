@@ -135,7 +135,6 @@ export default {
       selTimeStr: '',
       selDate: new Date(),
       dataProducts: {},
-      numDays: 7,
       timeStrs: [],
       currentDateHTML: '',
       lat: '',
