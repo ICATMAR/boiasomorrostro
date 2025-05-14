@@ -140,7 +140,7 @@ export default {
           name: 'Wind speed',
           abbr: 'Wind',
           icon: true,
-          units: 'knts',
+          units: 'm/s',
           source: 'wind.speed', // https://openweathermap.org/forecast5
           range: [0, 20],
           signRange: [4, 15],
@@ -151,7 +151,7 @@ export default {
         {
           name: 'Wind gust',
           abbr: 'Gust',
-          units: 'knts',
+          units: 'm/s',
           source: 'wind.gust', // https://openweathermap.org/forecast5
           range: [0, 20],
           signRange: [4, 15],
