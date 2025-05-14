@@ -111,7 +111,7 @@ export default {
       isSectionOpen: true,
       isMenuFullscreen: false,
       // Selected menu items
-      selectedMenu: 'Waves',
+      selectedMenu: 'Data',
       selectedSubEl: {title: ''},
       // Menu structure
       menu: [
