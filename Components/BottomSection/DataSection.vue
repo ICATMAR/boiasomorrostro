@@ -27,7 +27,7 @@
     <div class="content-section">
       <h5>{{ $t('Open Weather API') }}</h5>
       <!-- Content -->
-      <div>{{ $t('Work in progress...') }}</div>
+      <OpeanWeatherAPIWidget></OpeanWeatherAPIWidget>
     </div>
 
 
@@ -44,6 +44,7 @@
 
 <script>
 import WeatherWidget from "./DataSections/WeatherWidget.vue";
+import OpeanWeatherAPIWidget from "./DataSections/OpeanWeatherAPIWidget.vue";
 
 export default {
   name: "DataSection",
@@ -72,6 +73,7 @@ export default {
   },
   components: {
     WeatherWidget,
+    OpeanWeatherAPIWidget
   },
 }
 </script>
