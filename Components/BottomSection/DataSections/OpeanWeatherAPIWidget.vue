@@ -57,7 +57,7 @@
                 :title="dd.value + 'º'">&#10140;</div>
               <div v-else-if='dR.imgURL'><img :src=emptyPixelBlobURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
 
-              <div v-else-if='!dd.loading' :style="getStyle(dR, dd)" :title="dd.value * 1.9">{{ dd.value }}</div>
+              <div v-else-if='!dd.loading' :style="getStyle(dR, dd)">{{ dd.value }}</div>
 
             </td>
           </tr>
@@ -245,11 +245,22 @@ export default {
             // Icon does not have values
             if (dR.source != undefined) {
               const value = dR.source.split('.').reduce((obj, key) => obj[key], item);
-
               dR.data[dIndex] = {
                 value: value,
                 loading: false,
               }
+              // Change icon depending on weather conditions
+              // https://openweathermap.org/weather-conditions
+              if (dR.source.includes('clouds')){
+                if (item.weather[0].main == 'Rain'){
+                  debugger;
+                  dR.data[dIndex].position = 1;
+                }else if (item.weather[0].main == 'Thunderstorm')
+                  dR.data[dIndex].position = 2;
+                else
+                  dR.data[dIndex].position = 0;
+              }
+              
             }
           });
         });
@@ -313,7 +324,10 @@ export default {
       else
         colorFactor = 3;
 
-      let cssPosition = -dR.position * 32 - colorFactor * 32 * 3;
+      // https://openweathermap.org/weather-conditions
+      let iconId = dd.position || dR.position; // For clouds, it can also have rain, so it depends on the data value, not the data type (wind/temp...)
+      
+      let cssPosition = -iconId * 32 - colorFactor * 32 * 3;
 
       // if (alpha/255 == 0){
       //   color = '#9cc6c8';
