@@ -57,7 +57,7 @@
                 :title="dd.value + 'º'">&#10140;</div>
               <div v-else-if='dR.imgURL'><img :src=emptyPixelBlobURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
 
-              <div v-else-if='!dd.loading' :style="getStyle(dR, dd)">{{ dd.value }}</div>
+              <div v-else-if='!dd.loading' :style="getStyle(dR, dd)" :title="dd.value * 1.9">{{ dd.value }}</div>
 
             </td>
           </tr>
@@ -126,7 +126,7 @@ export default {
           imgURL: 'icons.png',
           position: 0,
           source: 'wind.speed',
-          signRange: [10, 35],
+          signRange: [4, 15],
           color: '#ff0000',
         },
         // Wind direction
@@ -136,7 +136,7 @@ export default {
           units: 'º',
           source: 'wind.deg', // In reference to the object structure of OpenWeatherAPI https://openweathermap.org/forecast5
           direction: true,
-          fromDirection: false,
+          fromDirection: true,
         },
         // Wind speed
         {
@@ -184,8 +184,8 @@ export default {
         // Cloudiness icon
         {
           key: 'cloudsicon',
-          imgURL: 'icons.png',
-          position: 2,
+          imgURL: 'weathericons.png',
+          position: 0,
           source: 'clouds.all',
           signRange: [0, 100],
           color: '#000000',
