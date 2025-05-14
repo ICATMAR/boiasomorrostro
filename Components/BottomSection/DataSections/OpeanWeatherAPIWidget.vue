@@ -53,7 +53,7 @@
                 style="width: 1rem; height: 1rem; position: relative;" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
-              <div v-else-if='dR.direction' :style="{ 'transform': 'rotate(' + (dd.value - 90) + 'deg)' }"
+              <div v-else-if='dR.direction' style="font-size: large" :style="{ 'transform': 'rotate(' + (dd.value - 90) + 'deg)' }"
                 :title="dd.value + 'º'">&#10140;</div>
               <div v-else-if='dR.imgURL'><img :src=emptyPixelBlobURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
 
@@ -147,7 +147,7 @@ export default {
           source: 'wind.speed', // https://openweathermap.org/forecast5
           range: [0, 20],
           signRange: [4, 15],
-          color: '#ff0000',
+          color: '#00ff1d',
           colorScale: 'boxfill/alg', // TODO: USE LEGENDS!
         },
         // Wind gust
@@ -158,7 +158,7 @@ export default {
           source: 'wind.gust', // https://openweathermap.org/forecast5
           range: [0, 20],
           signRange: [4, 15],
-          color: '#ff0000',
+          color: '#00ff1d',
           colorScale: 'boxfill/alg', // TODO: USE LEGENDS!
         },
         // Air Temperature
@@ -249,18 +249,26 @@ export default {
                 value: value,
                 loading: false,
               }
+              // Direction - fromDirection
+              if (dR.fromDirection) {
+                dR.data[dIndex].value = (dR.data[dIndex].value + 180) % 360;
+              }
               // Change icon depending on weather conditions
               // https://openweathermap.org/weather-conditions
-              if (dR.source.includes('clouds')){
-                if (item.weather[0].main == 'Rain'){
-                  debugger;
+              if (dR.source.includes('clouds')) {
+                if (item.weather[0].main == 'Rain') {
                   dR.data[dIndex].position = 1;
-                }else if (item.weather[0].main == 'Thunderstorm')
+                  let intensity = item.weather[0].id.toString().substring(2, 3) * 1; // 0, 1, 2, 3 --> intensity of rain
+                  dR.data[dIndex].intensity = intensity * 25 + 1;
+                }
+                else if (item.weather[0].main == 'Thunderstorm') {
                   dR.data[dIndex].position = 2;
-                else
+                  let intensity = item.weather[0].id.toString().substring(2, 3) * 1; // 0, 1, 2, 3 --> intensity of thunderstorm
+                  dR.data[dIndex].intensity = intensity * 25 + 1;
+                } else
                   dR.data[dIndex].position = 0;
               }
-              
+
             }
           });
         });
@@ -308,7 +316,7 @@ export default {
     getImageStyle: function (dR, dd) {
       let color = dR.color;
       let range = dR.signRange ? dR.signRange : dR.range; // Significant range
-      let value = dd.value;
+      let value = dd.intensity || dd.value; // Intensity for rain/thunderstorm
 
       let alpha = value == 'x' ? 0 : (value - range[0]) / (range[1] - range[0]);
       alpha = Math.max(Math.min(alpha, 1), 0); // Clamp for HEX conversion
