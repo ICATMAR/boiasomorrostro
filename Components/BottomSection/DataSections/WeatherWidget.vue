@@ -62,7 +62,7 @@
                 style="width: 1rem; height: 1rem; position: relative;" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
-              <div v-else-if='dR.direction' :style="{ 'transform': 'rotate(' + (dd.value - 90) + 'deg)' }"
+              <div v-else-if='dR.direction' style="font-size: large" :style="{ 'transform': 'rotate(' + (dd.value - 90) + 'deg)'}"
                 :title="dd.value + 'º'">&#10140;</div>
               <div v-else-if='dR.imgURL'><img :src=emptyPixelBlobURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
 
