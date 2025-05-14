@@ -55,7 +55,7 @@
               </div>
               <div v-else-if='dR.direction' :style="{ 'transform': 'rotate(' + (dd.value - 90) + 'deg)' }"
                 :title="dd.value + 'º'">&#10140;</div>
-              <div v-else-if='dR.imgURL'><img :src=dR.defURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
+              <div v-else-if='dR.imgURL'><img :src=emptyPixelBlobURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
 
               <div v-else-if='!dd.loading' :style="getStyle(dR, dd)">{{ dd.value }}</div>
 
@@ -85,6 +85,10 @@
 export default {
   name: "OpeanWeatherAPIWidget",
   created() {
+    // Create empty pixel blob
+    let canvas = document.createElement('canvas');
+    canvas.width = 1; canvas.height = 1;
+    this.emptyPixelBlobURL = canvas.toDataURL('image/png');
 
     // Create data array inside dataRows
     this.dataRows.forEach(dr => {
@@ -108,20 +112,19 @@ export default {
   data() {
     return {
       //  Time step
-      hoursAhead: 24 * 5,
       selTimeStr: '',
       selDate: new Date(),
       timeStrs: [],
       dates: [],
       lat: '',
       lon: '',
+      emptyPixelBlobURL: '',
       dataRows: [
         // Wind icon
         {
           key: 'windicon',
           imgURL: 'icons.png',
           position: 0,
-          defURL: 'https://es.wisuki.com/images/px.png',
           source: 'wind.speed',
           signRange: [10, 35],
           color: '#ff0000',
@@ -183,7 +186,6 @@ export default {
           key: 'cloudsicon',
           imgURL: 'icons.png',
           position: 2,
-          defURL: 'https://es.wisuki.com/images/px.png',
           source: 'clouds.all',
           signRange: [0, 100],
           color: '#000000',

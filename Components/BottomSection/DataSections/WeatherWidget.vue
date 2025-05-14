@@ -64,7 +64,7 @@
               </div>
               <div v-else-if='dR.direction' :style="{ 'transform': 'rotate(' + (dd.value - 90) + 'deg)' }"
                 :title="dd.value + 'º'">&#10140;</div>
-              <div v-else-if='dR.imgURL'><img :src=dR.defURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
+              <div v-else-if='dR.imgURL'><img :src=emptyPixelBlobURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
 
               <div v-else-if='!dd.loading' :style="getStyle(dR, dd)">{{ dd.value }}</div>
 
@@ -97,6 +97,11 @@ export default {
   // REQUIRES WMTSDataRetriever.js
   name: "weather-info",
   created() {
+    // Create empty pixel blob URL
+    let canvas = document.createElement('canvas');
+    canvas.width = 1; canvas.height = 1;
+    this.emptyPixelBlobURL = canvas.toDataURL('image/png');
+    
     // Create data retreiver
     this.dataRetriever = window.WMTSDataRetriever;
 
@@ -139,6 +144,7 @@ export default {
       currentDateHTML: '',
       lat: '',
       long: '',
+      emptyPixelBlobURL: '',
       // Check https://es.wisuki.com/spot/2617/barceloneta for inspiration
       dataRows: [
         // TODO: no data product for wind? Work on WMTS
@@ -148,7 +154,6 @@ export default {
         //   key: 'windicon',
         //   imgURL: 'icons.png',
         //   position: 0,
-        //   defURL: 'data/emptyPixel.png',
         //   source: 'Wind',
         //   signRange: [5,15],
         //   color: '#6164ff',
@@ -175,7 +180,6 @@ export default {
           key: 'waveicon',
           imgURL: 'icons.png',
           position: 1,
-          defURL: 'https://es.wisuki.com/images/px.png',
           source: 'Wave significant height',
           signRange: [1, 4],
           color: '#6164ff',
@@ -210,7 +214,6 @@ export default {
           key: 'currenticon',
           imgURL: 'icons.png',
           position: 2,
-          defURL: 'https://es.wisuki.com/images/px.png',
           source: 'Sea water velocity',
           signRange: [0.25, 1],
           color: '#6164ff',
