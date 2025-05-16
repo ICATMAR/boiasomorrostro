@@ -55,7 +55,7 @@
               </div>
               <div v-else-if='dR.direction' style="font-size: large" :style="{ 'transform': 'rotate(' + (dd.value - 90) + 'deg)' }"
                 :title="dd.value + 'º'">&#10140;</div>
-              <div v-else-if='dR.imgURL'><img :src=emptyPixelBlobURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
+              <div v-else-if='dR.imgURL' :title="dd.description"><img :src=emptyPixelBlobURL :alt=dR.source :style="getImageStyle(dR, dd)"></div>
 
               <div v-else-if='!dd.loading' :style="getStyle(dR, dd)">{{ dd.value }}</div>
 
@@ -267,6 +267,8 @@ export default {
                   dR.data[dIndex].intensity = intensity * 25 + 1;
                 } else
                   dR.data[dIndex].position = 0;
+
+                dR.data[dIndex].description = item.weather[0].description;
               }
 
             }
