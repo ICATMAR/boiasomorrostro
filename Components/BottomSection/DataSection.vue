@@ -2,26 +2,21 @@
   <div class="content">
 
     <!-- BUOY -->
-    <div class="content-section">
+    <div class="content-section" v-if="false">
       <h5>{{ $t('Buoy') }}</h5>
       <!-- Content -->
       <div>{{ $t('No data available') }}</div>
     </div>
 
     <!-- HF Radar -->
-    <div class="content-section">
+    <div class="content-section" v-if="false">
       <h5>{{ $t('Surface current from HF Radar') }}</h5>
       <!-- Content -->
       <div>{{ $t('Work in progress...') }}</div>
     </div>
 
 
-    <!-- CMEMS -->
-    <div class="content-section">
-      <h5>Copernicus Marine Service</h5>
-      <!-- Content -->
-      <WeatherWidget></WeatherWidget>
-    </div>
+    
 
     <!-- OPEN WEATHER API -->
     <div class="content-section">
@@ -30,9 +25,16 @@
       <OpeanWeatherAPIWidget></OpeanWeatherAPIWidget>
     </div>
 
+    <!-- CMEMS -->
+    <div class="content-section">
+      <h5>Copernicus Marine Service</h5>
+      <!-- Content -->
+      <WeatherWidget></WeatherWidget>
+    </div>
+
 
     <!-- AIS -->
-    <div class="content-section">
+    <div class="content-section" v-if="false">
       <h5>{{ $t('Vessels from AIS') }}</h5>
       <!-- Content -->
       <div>{{ $t('Work in progress...') }}</div>
