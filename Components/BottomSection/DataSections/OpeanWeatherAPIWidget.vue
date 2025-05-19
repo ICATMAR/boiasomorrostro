@@ -68,9 +68,9 @@
 
 
     <div>
-      <i>Generated using OpenWeather: </i>
+      <i>{{ $t('Data from') }} OpenWeather: </i>
       <i>
-        <a href="https://openweathermap.org/" target="_blank" rel="noreferrer noopener"> OpeanWeatherAPI </a>
+        <a href="https://openweather.co.uk/technology" target="_blank" rel="noreferrer noopener"> OpeanWeather Forecasting </a>
       </i>
     </div>
 
@@ -163,7 +163,7 @@ export default {
         },
         // Air Temperature
         {
-          name: "Air Temperature",
+          name: "Air temperature",
           abbr: "AirT",
           units: "ºC",
           source: "main.temp", // https://openweathermap.org/forecast5

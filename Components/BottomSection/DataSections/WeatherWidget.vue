@@ -80,7 +80,7 @@
 
 
     <div>
-      <i>Generated using E.U. Copernicus Marine Service Information: </i>
+      <i>{{ $t('Data from') }} E.U. Copernicus Marine Service Information: </i>
       <i v-for="dPKey in Object.keys(dataProducts)">
         <a :href=dataProducts[dPKey].doi target="_blank" rel="noreferrer noopener"> {{ dPKey }}; </a>
       </i>

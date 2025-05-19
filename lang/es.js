@@ -3,10 +3,12 @@ export default es = {
   "Date": "Fecha",
   "Longitude": "Longitud",
   "Latitude": "Latitud",
+  "Time step": "Paso de tiempo",
 
 
   "Raw data": "Datos crudos",
   "Data": "Datos",
+  "Data from": "Datos de",
 
 
   "About": "Acerca de",
@@ -77,16 +79,21 @@ export default es = {
 
   "Sea current direction": "Dirección de la corriente",
   "Sea surface velocity": "Corriente",
+  "Sea water velocity": "Corriente",
   "Chlorophyll": "Clorofila",
 
   "Wind speed": "Velocidad del viento",
   "Wind direction": "Dirección del viento",
+  "Wind gust": "Ráfaga de viento",
   "Wave significant height": "Altura significante de oleaje",
   "Air temperature": "Temperatura del aire",
   "Atmospheric pressure": "Pressión atmosférica",
   "Sea surface temperature": "Temperatura superficial del mar",
   "Sea bottom temperature": "Temperatura del fondo del mar",
+  "Sea temperature anomaly": "Anomalia de temperatura del mar",
   "Salinity": "Salinidad",
+  "Humidity": "Humedad",
+  "Cloudiness": "Nubosidad",
 
 
   "swellCompositionSVG": "Azul claro: mar total; Amarillo: oleaje de viento; Azul: mar de fondo; Azul oscuro: mar de fondo 2",
@@ -228,5 +235,4 @@ export default es = {
     "Sun": "Do",
   
 
-  "Data": "Datos",
 }
