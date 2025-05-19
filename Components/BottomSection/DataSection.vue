@@ -1,6 +1,8 @@
 <template>
   <div class="content">
 
+    <p>⚠️ {{ $t('dataPanel.dataBuoyNotAvailable') }}</p>
+
     <!-- BUOY -->
     <div class="content-section" v-if="false">
       <h5>{{ $t('Buoy') }}</h5>

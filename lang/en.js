@@ -95,6 +95,9 @@ export default en = {
 
   "swellCompositionSVG": "Light blue: mean wave height; Yellow: wind waves; Blue: primary swell; Dark blue: secondary swell",
 
+  dataPanel: {
+    'dataBuoyNotAvailable': 'The deployment of the buoy is planned for summer/autumn 2025. Oceanographic and weather data shown in this section originates from models and forecasting systems.',
+  },
 
   infoPanel: {
     title: "About",

@@ -97,6 +97,9 @@ export default ca = {
 
   "swellCompositionSVG": "Blau clar: mar total; Groc: onatge de vent; Blau: mar de fons; Blau fosc: mar de fons 2",
 
+  dataPanel: {
+    'dataBuoyNotAvailable': 'El desplegament de la boia està previst per l\'estiu/tardor del 2025. Les dades oceanográfiques i meteorològiques d\'aquesta secció provenen de models i sistemes de predicció.',
+  },
 
   infoPanel: {
     title: "Sobre l'aplicació",

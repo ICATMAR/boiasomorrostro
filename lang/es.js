@@ -98,6 +98,9 @@ export default es = {
 
   "swellCompositionSVG": "Azul claro: mar total; Amarillo: oleaje de viento; Azul: mar de fondo; Azul oscuro: mar de fondo 2",
 
+  dataPanel: {
+    'dataBuoyNotAvailable': 'El despliegue de la boya está previsto para el verano/otoño de 2025. Los datos oceanográficos y meteorológicos mostrados en esta sección proceden de modelos y sistemas de previsión.',
+  },
 
   infoPanel: {
     title: "Acerca de la aplicación",
