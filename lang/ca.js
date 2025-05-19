@@ -3,9 +3,12 @@ export default ca = {
   "Date": "Data",
   "Longitude": "Longitud",
   "Latitude": "Latitud",
+  "Time step": "Pas de temps",
 
 
   "Raw data": "Dades crues",
+  "Data": "Dades",
+  "Data from": "Dades de",
 
 
 
@@ -75,20 +78,28 @@ export default ca = {
 
   "Sea current direction": "Direcció del corrent",
   "Sea surface velocity": "Corrent",
+  "Sea water velocity": "Corrent",
   "Chlorophyll": "Clorofil·la",
 
   "Wind speed": "Velocitat del vent",
   "Wind direction": "Direcció del vent",
+  "Wind gust": "Ràfega de vent",
   "Wave significant height": "Altura significant d'onatge",
   "Air temperature": "Temperatura de l'aire",
   "Atmospheric pressure": "Pressió atmosfèrica",
   "Sea surface temperature": "Temperatura superficial del mar",
   "Sea bottom temperature": "Temperatura del fons del mar",
+  "Sea temperature anomaly": "Anomalia de temperatura del mar",
   "Salinity": "Salinitat",
+  "Humidity": "Humitat",
+  "Cloudiness": "Núvols",
 
 
   "swellCompositionSVG": "Blau clar: mar total; Groc: onatge de vent; Blau: mar de fons; Blau fosc: mar de fons 2",
 
+  dataPanel: {
+    'dataBuoyNotAvailable': 'El desplegament de la boia està previst per l\'estiu/tardor del 2025. Les dades oceanográfiques i meteorològiques d\'aquesta secció provenen de models i sistemes de predicció.',
+  },
 
   infoPanel: {
     title: "Sobre l'aplicació",
@@ -211,5 +222,4 @@ export default ca = {
     "Sat": "Ds",
     "Sun": "Dg",
   
-  "Data": "Dades",
 }

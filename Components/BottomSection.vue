@@ -15,7 +15,7 @@
       <!-- Menu left -->
       <div class="menu-list-left">
         <button v-for="el in menu" :key="el.title" 
-          class="menu-left-button clickable" :class="[selectedMenu == el.title ? 'menu-left-button-sel' : '']" 
+          class="menu-left-button clickable" :class="[selectedMenu == el.title ? 'button-selected' : '']" 
           @click="menuLeftItemClicked(el)">
           <span v-if="el.icon" class="fa" v-html="el.icon"></span>
           <span>{{ $t(el.title) }}</span>
@@ -95,6 +95,7 @@
 // import RenderHeightPanel from './BottomSection/RenderHeightPanel.vue';
 
 import RawData from './BottomSection/RawData.vue';
+import DataSection from './BottomSection/DataSection.vue';
 import MapBuoyLocation from './BottomSection/MapBuoyLocation.vue';
 import AboutPanel from './BottomSection/AboutPanel.vue';
 
@@ -110,14 +111,14 @@ export default {
       isSectionOpen: true,
       isMenuFullscreen: false,
       // Selected menu items
-      selectedMenu: 'Waves',
+      selectedMenu: 'Data',
       selectedSubEl: {title: ''},
       // Menu structure
       menu: [
         {
-          title: 'Raw data',
+          title: 'Data',
           icon: '&#xe69b',
-          component: 'rawData',
+          component: 'dataSection',
         },
         {
           title: 'Map',
@@ -242,6 +243,7 @@ export default {
     // "render-heights": RenderHeightPanel,
     // "render-stereo": RenderStereoPanel,
     "rawData": RawData,
+    "dataSection": DataSection,
     "mapBuoyLocation": MapBuoyLocation,
     "about": AboutPanel,
     
@@ -321,9 +323,7 @@ export default {
   padding-left: 10px;
   padding-right: 10px;
 }
-.menu-left-button-sel{
-  background: var(--blue);
-}
+
 
 .submenu-container {
   width: 100%;
@@ -381,6 +381,8 @@ export default {
 .submenu-item-content{
   overflow: auto;
   justify-items: center;
+  width: 100%;
+  height: 100%;
 }
 
 .top-right-icons {

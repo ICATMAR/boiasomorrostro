@@ -3,10 +3,13 @@ export default en = {
   "Date": "Date",
   "Longitude": "Longitude",
   "Latitude": "Latitude",
+  "Time step": "Time step",
 
 
 
   "Raw data": "Raw data",
+  "Data": "Data",
+  "Data from": "Data from",
 
 
   "About": "About",
@@ -74,19 +77,27 @@ export default en = {
 
   "Sea current direction": "Current direction",
   "Sea surface velocity": "Current",
+  "Sea water velocity": "Current",
   "Chlorophyll": "Chlorophyll",
 
   "Wind speed": "Wind speed",
   "Wind direction": "Wind direction",
+  "Wind gust": "Wind gust",
   "Wave significant height": "Wave significant height",
   "Air temperature": "Air temperature",
   "Atmospheric pressure": "Atmospheric pressure",
   "Sea surface temperature": "Sea surface temperature",
   "Sea bottom temperature": "Sea bottom temperature",
+  "Sea temperature anomaly": "Sea temperature anomaly",
   "Salinity": "Salinity",
+  "Humidity": "Humidity",
+  "Cloudiness": "Cloudiness",
 
   "swellCompositionSVG": "Light blue: mean wave height; Yellow: wind waves; Blue: primary swell; Dark blue: secondary swell",
 
+  dataPanel: {
+    'dataBuoyNotAvailable': 'The deployment of the buoy is planned for summer/autumn 2025. Oceanographic and weather data shown in this section originates from models and forecasting systems.',
+  },
 
   infoPanel: {
     title: "About",
@@ -177,9 +188,5 @@ export default en = {
   },
   
   
-
-
-  "Data": "Data",
-
 
 }

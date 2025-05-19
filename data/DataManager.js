@@ -1,5 +1,4 @@
 import OBSEADataRetriever from "/boiasomorrostro/data/OBSEADataRetriever.js";
-import WMTSDataRetriever from "/boiasomorrostro/Scripts/Assets/WMTSDataRetriever.js";
 
 // Manages where to get the data from (API, WMS, or static files)
 class DataManager{
