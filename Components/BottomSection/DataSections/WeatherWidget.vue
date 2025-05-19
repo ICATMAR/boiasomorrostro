@@ -101,7 +101,7 @@ export default {
     let canvas = document.createElement('canvas');
     canvas.width = 1; canvas.height = 1;
     this.emptyPixelBlobURL = canvas.toDataURL('image/png');
-    
+
     // Create data retreiver
     this.dataRetriever = window.WMTSDataRetriever;
 
@@ -484,15 +484,6 @@ export default {
       this.createDates(inputDate);
       // Update data
       this.getData(lat, long);
-
-      // Center on column
-      this.$nextTick(() => {
-        let selColumnEl = this.$refs["tableData"].querySelector('#selColumn');
-        if (selColumnEl != undefined) {
-          selColumnEl.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
-        }
-      });
-
     },
 
 
@@ -520,6 +511,14 @@ export default {
         }
 
         this.updateTable(this.selHaul.Date, middleCoordinate[0], middleCoordinate[1]);
+
+        // Center on column
+        this.$nextTick(() => {
+          let selColumnEl = this.$refs["tableData"].querySelector('#selColumn');
+          if (selColumnEl != undefined) {
+            selColumnEl.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+          }
+        });
       }
     },
 
