@@ -62,7 +62,7 @@ class DataAggregator {
         return this.getOpenWeatherData(lat, lon).then(data => { // TODO: if no data, continue with next source
           // Check if the timestamp is in the data
           let pastTimeLimit = 1000 * 60 * 60 * 3; // 3 hours
-          if (requestedDate < new Date(data.list[0].dt * 10000 - pastTimeLimit)) {
+          if (requestedDate < new Date(data.list[0].dt * 1000 - pastTimeLimit)) {
             console.warn('OpenWeather only provides forecast data. No data available for this timestamp');
             return undefined; // TODO: use alternative source
           }
@@ -70,9 +70,9 @@ class DataAggregator {
           // Find the closest timestamp
           let selIndex = undefined;
           for (let j = 0; j < data.list.length - 1; j++) {
-            let prevDate = new Date(data.list[j].dt * 10000);
-            let nextDate = new Date(data.list[j + 1].dt * 10000);
-            if (requestedDate >= prevDate && requestedDate < nextDate) {
+            let prevDate = new Date(data.list[j].dt * 1000);
+            let nextDate = new Date(data.list[j + 1].dt * 1000);
+            if (requestedDate >= prevDate && requestedDate < nextDate || requestedDate < prevDate) {
               if (requestedDate.getTime() - prevDate.getTime() < nextDate.getTime() - requestedDate.getTime()) {
                 selIndex = j;
               }
