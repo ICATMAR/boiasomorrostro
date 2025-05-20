@@ -27,18 +27,18 @@ import { TextMeshEntity } from '/boiasomorrostro/Assets/TextMesh/TextMeshEntity.
 import { AISVesselsManager } from '/boiasomorrostro/Assets/AISVessels/AISVesselsManager.js';
 
 
-class SceneManager{
+class SceneManager {
 
   stats;
   prevTime = 0;
   LONGITUDE = window.LONGITUDE; // Somorrostro longitude
   LATITUDE = window.LATITUDE; // Somorrostro latitude
-  
 
-  constructor(canvas){
+
+  constructor(canvas) {
     // Add loading screen
     this.addLoadingScreen();
-    
+
     // Cache
     THREE.Cache.enabled = false;
 
@@ -64,8 +64,8 @@ class SceneManager{
 
     controls.update();
     controls.enableDamping = true;
-  // controls.autoRotate = true;
-  // controls.autoRotateSpeed = 1;
+    // controls.autoRotate = true;
+    // controls.autoRotateSpeed = 1;
 
     // STATS
     let stats = new Stats();
@@ -75,8 +75,8 @@ class SceneManager{
     stats.dom.style.left = '0px';
     stats.isVisible = false;
     stats.showPanel(false);
-    
-    
+
+
 
 
 
@@ -112,10 +112,10 @@ class SceneManager{
 
     // Skybox
     this.skybox = new SkyboxEntity(scene);
-    
+
     // Coastline
     this.coastLine = new CoastLineEntity(scene);
-  
+
 
     // Ocean
     this.ocean = new OceanEntity(scene);
@@ -143,7 +143,7 @@ class SceneManager{
     this.mooring = new HeavyChainsEntity(scene, () => {
       this.mooring.root.position.y = -42.8;
     });
-    
+
     // Sand
     this.sand = new SandEntity(scene);
     this.sand.mesh.position.y = -43;
@@ -151,7 +151,7 @@ class SceneManager{
     // Rosa dels vents
     //his.rosaVents = new RosaVentsEntity(scene);
     //this.rosaVents.root.position.y = 3.5;
-    
+
     // Sea velocity, currents
     this.currents = new CurrentEntity(scene);
 
@@ -164,9 +164,16 @@ class SceneManager{
     // SCENE TEXT
     // SURFACE
     // Wind text mesh
-    // this.windText = new TextMeshEntity(scene, "", 0.25, 0x000000, () => {
-    //   this.windText.textObj.position.y = 3;
-    // });
+    this.windText = new TextMeshEntity(scene, "", 0.25, 0x000000, () => {
+      this.windText.textObj.position.y = 4;
+      // Update wind information
+      window.DataAggregator.getValue("wind speed", Date.now(), this.LATITUDE, this.LONGITUDE).then((value) => {
+        if (value != undefined) {
+          this.windText.updateText(value.toFixed(1) + " km/h");
+        }
+      });
+    });
+
     // Orientation text meshes
     this.Ntext = new TextMeshEntity(scene, "N", 0.5, 0xff0000, () => {
       this.Ntext.textObj.rotation.x = -Math.PI / 2;
@@ -205,7 +212,7 @@ class SceneManager{
 
 
   // ADD LOADING SCREEN
-  addLoadingScreen = function(){
+  addLoadingScreen = function () {
     // Create
     let loadDiv = document.createElement("div");
     loadDiv.style.width = '100vw';//document.body.clientWidth + 'px';
@@ -266,10 +273,10 @@ class SceneManager{
 
     THREE.DefaultLoadingManager.onLoad = function () {
       console.log('Loading Complete!');
-      if (loadDiv.parentElement != null){
+      if (loadDiv.parentElement != null) {
         loadDiv.style.opacity = 0;
         setTimeout(() => document.body.removeChild(loadDiv), 1300);
-        
+
       }
       // Emit event
       window.eventBus.emit('SceneManager_LoadingComplete');
@@ -290,7 +297,7 @@ class SceneManager{
 
   // USER INTERACTIONS
   // Reposition camera
-  focusOnBuoy = function(){
+  focusOnBuoy = function () {
     // Tween camera position
     new TWEEN.Tween(this.camera.position)
       .to({ x: 15, y: 10, z: 15 }, 4000)
@@ -303,7 +310,7 @@ class SceneManager{
       .onUpdate(() => this.controls.update())
       .start();
   }
-  focusOnBase = function(){
+  focusOnBase = function () {
     // Tween camera position
     new TWEEN.Tween(this.camera.position)
       .to({ x: 6, y: -16, z: 6 }, 4000)
@@ -315,27 +322,27 @@ class SceneManager{
       .onUpdate(() => this.controls.update())
       .start();
   }
-  faceNorthward = function(){
+  faceNorthward = function () {
     // Tween camera position to face northward
     let dist = this.camera.position.distanceTo(this.controls.target);
-    let newZ = Math.sqrt(dist * dist - Math.pow(this.camera.position.y-this.controls.target.y, 2));
+    let newZ = Math.sqrt(dist * dist - Math.pow(this.camera.position.y - this.controls.target.y, 2));
 
     new TWEEN.Tween(this.camera.position)
       .to({ x: this.controls.target.x, z: newZ }, 4000)
       .easing(TWEEN.Easing.Cubic.InOut)
-      .onUpdate(()=>this.controls.update())
+      .onUpdate(() => this.controls.update())
       .start();
   }
 
 
 
   // Show/Hide FPS
-  showHideFPS = function(){
+  showHideFPS = function () {
     let stats = this.stats;
-    if (stats.isVisible){
+    if (stats.isVisible) {
       stats.showPanel(false);
       stats.isVisible = false;
-    } else{
+    } else {
       stats.showPanel(0);
       stats.isVisible = true;
     }
@@ -344,7 +351,7 @@ class SceneManager{
 
 
   // WINDOW RESIZE (called from Canvas3D.vue)
-  windowWasResized = function(){
+  windowWasResized = function () {
     if (this.resizeRendererToDisplaySize(this.renderer)) {
       const canvas = this.renderer.domElement;
       this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -361,8 +368,8 @@ class SceneManager{
 
 
   // UPDATE
-  update = function(time){
-    
+  update = function (time) {
+
     if (this.prevTime == 0) this.prevTime = time; // Initial timestamp
     let dt = (time - this.prevTime) / 1000;
     this.prevTime = time;
@@ -382,13 +389,13 @@ class SceneManager{
             let normal = new THREE.Vector3();
             this.ocean.getNormalAndPositionAt(position, normal);
 
-            if (!isNaN(position.x)){
+            if (!isNaN(position.x)) {
 
               // Exponential Moving Average (EMA) for position
               let coef = 0.8; // TODO: SHOULD NOT DEPEND ON FRAMERATE!!
               // dt from 16 to 40
               coef = 0.95 - 0.4 * (1 - dt / 16); // Dependent on frame rate
-              
+
               let somorrostroBuoy = this.somorrostroBuoy;
               somorrostroBuoy.root.position.x = somorrostroBuoy.root.position.x * coef + (1 - coef) * position.x;
               somorrostroBuoy.root.position.y = somorrostroBuoy.root.position.y * coef + (1 - coef) * position.y;
@@ -472,7 +479,7 @@ class SceneManager{
   }
 
 
-  startRender = function(){
+  startRender = function () {
     requestAnimationFrame(this.render.bind(this));
   }
 
@@ -484,7 +491,7 @@ class SceneManager{
 
 
 
-  
+
 
 }
 
