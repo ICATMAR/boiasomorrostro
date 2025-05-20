@@ -60,7 +60,7 @@ class FlagEntity {
 
   // Set wind parameters
   setWindParameters(paramName, value){
-    if (paramName == 'windSpeed'){
+    if (paramName == 'windSpeed'){ // km/h
       this.windIntensity = value;
       // this.setFlagBeaufortColor(this.windIntensity);
     } else if (paramName == 'windDirection')

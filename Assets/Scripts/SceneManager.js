@@ -126,6 +126,17 @@ class SceneManager{
     this.flag = new FlagEntity(scene, () => {
       this.flag.root.position.y = -1;
     });
+    // Get wind intensity and direction
+    window.DataAggregator.getValue("wind speed", Date.now(), this.LATITUDE, this.LONGITUDE).then((value) => {
+      if (value != undefined) {
+        this.flag.setWindParameters("windIntensity", value);
+      }
+    });
+    window.DataAggregator.getValue("wind direction", Date.now(), this.LATITUDE, this.LONGITUDE).then((value) => {
+      if (value != undefined) {
+        this.flag.setWindParameters("windDirection", value);
+      }
+    });
 
 
     // Mooring

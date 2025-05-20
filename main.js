@@ -33,6 +33,11 @@ window.WMTSTileManager = new WMTSTileManagerClass();
 import AISManagerClass from './Assets/Scripts/AIS/AISManager.js';
 window.AISManager = new AISManagerClass();
 
+// Import DataAggregator
+import DataAggregatorClass from './Assets/Scripts/DataAggregator.js';
+window.DataAggregator = new DataAggregatorClass();
+
+
 // Declare translations
 const i18n = VueI18n.createI18n({
   // https://vue-i18n.intlify.dev/guide/essentials/fallback.html#explicit-fallback-with-one-locale
