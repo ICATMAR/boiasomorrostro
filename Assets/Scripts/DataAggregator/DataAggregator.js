@@ -14,14 +14,14 @@ class DataAggregator {
 
   constructor() {
     this.variables = VariableDefinitions;
-    
+
   }
 
 
 
   async getValue(variableName, timestamp, latitude, longitude) {
 
-    let lat = latitude || window.LATITUDE;
+    let lat = latitude || window.LATITUDE; // IN CMEMS SOURCE OTHER COORDINATES ARE USED
     let lon = longitude || window.LONGITUDE;
     let requestedDate = new Date(timestamp);
 
@@ -77,17 +77,24 @@ class DataAggregator {
       else if (source.name == 'cmems') {
         // Get the data from cmems
         let promises = [];
+        let waveParameters = {};
         source.layers.forEach(layer => {
           promises.push(window.WMTSDataRetriever.getDataAtPoint(layer, requestedDate.toISOString(), window.CMEMS_LATITUDE, window.CMEMS_LONGITUDE, 'h', false));
+          waveParameters[layer] = undefined;
         });
 
         return Promise.allSettled(promises).then(data => {
-          debugger;
-          console.log(data);
+          for (let i = 0; i < data.length; i++) {
+            if (data[i].status == 'fulfilled') {
+              let layer = source.layers[i];
+              waveParameters[layer] = data[i].value;
+            }
+          }
+          return waveParameters;
         }).catch(error => {
           console.error('Error fetching data:', error);
         });
-        
+
       }
       // TODO: if source is not openweather, get the data from the source
     }
