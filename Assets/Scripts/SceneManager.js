@@ -118,7 +118,21 @@ class SceneManager {
 
 
     // Ocean
-    this.ocean = new OceanEntity(scene);
+    this.ocean = new OceanEntity(scene, () => {
+      window.DataAggregator.getValue("wave parameters", Date.now(), this.CMEMS_LATITUDE, this.CMEMS_LONGITUDE).then((waveParameters) => {
+        this.ocean.updateOceanParametersCMEMS(waveParameters);
+        // let wwHm0 = dataValues['Wind wave significant height'].value;
+        // let C = 0.08;
+        // let U = Math.sqrt(wwHm0 * 9.81 / C); // wind speed in m/s
+        // this.sceneManager.flag.setWindParameters('windSpeed', U * 3.6); // km/h
+      });
+    });
+    // Function to try from console different dates and values
+    this.updateDateOfOceanParameters = (date) => {
+      window.DataAggregator.getValue("wave parameters", date, this.CMEMS_LATITUDE, this.CMEMS_LONGITUDE).then((waveParameters) => {
+        this.ocean.updateOceanParametersCMEMS(waveParameters);
+      });
+    }
     // Buoy
     this.somorrostroBuoy = new SomorrostroBuoyEntity(scene);
 
