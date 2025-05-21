@@ -28,7 +28,7 @@ Unidir_Ind_ADCP_Waves : Unidirectivity index of waves on the water body by acous
 */
 
 
-export class OceanParameters{
+export class OceanParameters {
 
   oceanParameters = {
     Hm0: 1.04,
@@ -41,14 +41,14 @@ export class OceanParameters{
   }
 
   imgSize;
- 
+
   waveHeights = [];
   waveDirections = [];
   waveSteepness = [];
 
-  WAVE_MAX = 6;
+  WAVE_MAXIMUM_ENCODED_HEIGHT = 6;
 
-  constructor(oceanParameters, imgSize){
+  constructor(oceanParameters, imgSize) {
     // Assign given ocean parameters (if any)
     let keys = Object.keys(oceanParameters);
     keys.forEach(kk => this.oceanParameters[kk] = oceanParameters[kk]);
@@ -63,7 +63,7 @@ export class OceanParameters{
 
 
 
-  generateDistributions = function(){
+  generateDistributions = function () {
     // Calculate target std according to Z Score
     // https://en.wikipedia.org/wiki/Normal_distribution#/media/File:Standard_deviation_diagram_micro.svg
     // https://www.ztable.net/
@@ -71,7 +71,7 @@ export class OceanParameters{
     let z_score_OneTenth = 1.29; // 90% 
 
     // HACK - Use H3 to reduce the mean. We assume that H0 is representing the 66% of the distribution
-    let meanHeight = this.oceanParameters.Hm0 * 0.5/0.66; // H3 is always smaller than Hm0 in the data?
+    let meanHeight = this.oceanParameters.Hm0 * 0.5 / 0.66; // H3 is always smaller than Hm0 in the data?
 
     let stdOneThird = (this.oceanParameters.H3 - meanHeight) / z_score_OneThird;
     let stdOneTenth = (this.oceanParameters.H10 - meanHeight) / z_score_OneTenth;
@@ -85,7 +85,7 @@ export class OceanParameters{
     this.waveHeights = this.generateGaussianDistribution(meanHeight, stdHeight, this.numWaves);
     // Limit wave heights
     this.waveHeights.forEach((el, index) => this.waveHeights[index] = el > this.oceanParameters.hMax ? el / 5 : el);
-    this.waveHeights.forEach((el, index) => this.waveHeights[index] = el < 0 ? Math.abs(meanHeight + stdHeight*(Math.random()- 0.5)) : el); // If negative, resample as Hm0 + sigma*0.5*rand(-1,1);
+    this.waveHeights.forEach((el, index) => this.waveHeights[index] = el < 0 ? Math.abs(meanHeight + stdHeight * (Math.random() - 0.5)) : el); // If negative, resample as Hm0 + sigma*0.5*rand(-1,1);
     //console.log("Maximum wave height: " + Math.max(...this.waveHeights));
     //console.log("Minimum wave height: " + Math.min(...this.waveHeights));
 
@@ -102,7 +102,7 @@ export class OceanParameters{
 
 
   // Given parameters by the csv
-  updateParams = function(params){
+  updateParams = function (params) {
     this.oceanParameters.Hm0 = params.Hm0;
     this.oceanParameters.H3 = params.H3 < 0 ? params.Hm0 : params.H3; // Could have invalid number (-999.99);
     this.oceanParameters.H10 = params.H10;
@@ -118,17 +118,17 @@ export class OceanParameters{
   }
 
   // Update wave significant height
-  updateWaveSignificantHeight = function(Hm0){
+  updateWaveSignificantHeight = function (Hm0) {
     this.oceanParameters.Hm0 = Hm0;
     this.generateDistributions();
     //this.updateHTMLGidget();
   }
-  updateMeanWaveDirection = function(mdir){
+  updateMeanWaveDirection = function (mdir) {
     this.oceanParameters.Mdir = mdir;
     this.generateDistributions();
     //this.updateHTMLGidget();
   }
-  updateDirectionalSpread = function(spr1){
+  updateDirectionalSpread = function (spr1) {
     this.oceanParameters.Spr1 = spr1;
     this.generateDistributions();
   }
@@ -138,7 +138,7 @@ export class OceanParameters{
 
 
 
-  createHTMLGidget = function(){
+  createHTMLGidget = function () {
     this.canvas = document.createElement("canvas");
     let canvas = this.canvas;
     canvas.width = 300;
@@ -150,7 +150,7 @@ export class OceanParameters{
   }
 
 
-  updateHTMLGidget = function(){
+  updateHTMLGidget = function () {
     let canvas = this.canvas;
     let context = canvas.getContext('2d');
 
@@ -169,7 +169,7 @@ export class OceanParameters{
     context.beginPath();
     context.moveTo(0, 100);
     context.lineTo(0, 0);
-    context.lineTo((this.oceanParameters.hMax*1.2) * xFactor, 0);
+    context.lineTo((this.oceanParameters.hMax * 1.2) * xFactor, 0);
     context.stroke();
     // Hm0
     context.strokeStyle = "rgba(255, 255, 0, 0.8)";
@@ -217,7 +217,7 @@ export class OceanParameters{
     context.fillText('Timestamp: ' + this.oceanParameters.timestamp, 0, textSeparation)
     context.font = '10pt Calibri';
     context.fillStyle = "rgba(255, 255, 0, 0.8)";
-    context.fillText('Hm0: ' + this.oceanParameters.Hm0 + "m", 0, textSeparation*2);
+    context.fillText('Hm0: ' + this.oceanParameters.Hm0 + "m", 0, textSeparation * 2);
     context.fillStyle = "rgba(255, 0, 255, 0.8)";
     context.fillText("H3: " + this.oceanParameters.H3 + "m", 0, textSeparation * 3);
     context.fillStyle = "rgba(127, 255, 127, 0.8)";
@@ -291,7 +291,7 @@ export class OceanParameters{
 
 
 
-  getWaveParamsImageData = function(){
+  getWaveParamsImageData = function () {
     // Create a texture
     let canvas = document.createElement("canvas");
     canvas.width = this.imgSize;
@@ -308,7 +308,7 @@ export class OceanParameters{
       imageData.data[i * 4] = 255 * waveSteep;
       // Wave range
       let waveHeight = Math.abs(this.waveHeights[i]);
-      imageData.data[i * 4 + 1] = 255 * waveHeight / this.WAVE_MAX;
+      imageData.data[i * 4 + 1] = 255 * waveHeight / this.WAVE_MAXIMUM_ENCODED_HEIGHT;
       // Direction range (negative for clockwise rotation)
       let dirX = Math.sin((-this.waveDirections[i]) * Math.PI / 180)
       imageData.data[i * 4 + 2] = 255 * (dirX + 1) / 2;
@@ -367,7 +367,7 @@ export class OceanParameters{
 
   // USER ACTIONS
   // Regenerate distribution for waveHeight
-  randomizeWaveHeightDistribution = function(){
+  randomizeWaveHeightDistribution = function () {
     // Generate gaussian distribution for wave height
     this.waveHeights = this.generateGaussianDistribution(this.oceanParameters.Hm0, this.oceanParameters.stdHeight, this.numWaves);
     // Limit wave heights
