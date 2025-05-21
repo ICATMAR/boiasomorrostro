@@ -34,7 +34,7 @@ import AISManagerClass from './Assets/Scripts/AIS/AISManager.js';
 window.AISManager = new AISManagerClass();
 
 // Import DataAggregator
-import DataAggregatorClass from './Assets/Scripts/DataAggregator.js';
+import DataAggregatorClass from './Assets/Scripts/DataAggregator/DataAggregator.js';
 window.DataAggregator = new DataAggregatorClass();
 
 
