@@ -40,21 +40,20 @@ export class OceanParameters {
     timestamp: '2019-11-14 02:05h',
   }
 
-  imgSize;
-
   waveHeights = [];
   waveDirections = [];
   waveSteepness = [];
+  wavePhases = [];
 
-  WAVE_MAXIMUM_ENCODED_HEIGHT = 6;
+  WAVE_MAX = 10;
+  PERIOD_MAX = 20;
 
-  constructor(oceanParameters, imgSize) {
+  constructor(oceanParameters, numWaves) {
     // Assign given ocean parameters (if any)
     let keys = Object.keys(oceanParameters);
     keys.forEach(kk => this.oceanParameters[kk] = oceanParameters[kk]);
 
-    this.numWaves = imgSize * imgSize;
-    this.imgSize = imgSize;
+    this.numWaves = numWaves;
 
     this.generateDistributions();
     this.createHTMLGidget();
@@ -94,7 +93,7 @@ export class OceanParameters {
 
     // Generate steepness distribution
     this.waveSteepness = this.generateGaussianDistribution(0.25, 0.1, this.numWaves);
-    this.waveSteepness.forEach((el, index) => this.waveSteepness[index] = Math.abs(el));
+    this.waveSteepness.forEach((el, index) => this.waveSteepness[index] = 0.1 * Math.abs(el));
     //console.log("Maximum wave steepness: " + Math.max(...this.waveSteepness));
     //console.log("Minimum wave steepness: " + Math.min(...this.waveSteepness));
   }
@@ -291,39 +290,77 @@ export class OceanParameters {
 
 
 
-  getWaveParamsImageData = function () {
+  getWaveParamsImageData = function (dataTextureSize) {
     // Create a texture
+    //let canvas = document.getElementById('imagedata') ||document.createElement("canvas");
     let canvas = document.createElement("canvas");
-    canvas.width = this.imgSize;
-    canvas.height = this.imgSize;
+    canvas.width = dataTextureSize;
+    canvas.height = dataTextureSize;
 
     let context = canvas.getContext('2d');
     // Get pixels
-    let imageData = context.getImageData(0, 0, this.imgSize, this.imgSize);
+    let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
     // Fill pixels and scale values from 0 to 255
     for (let i = 0; i < this.numWaves; i++) {
-      // Steepness range
-      let waveSteep = Math.abs(this.waveSteepness[i]);
-      imageData.data[i * 4] = 255 * waveSteep;
       // Wave range
       let waveHeight = Math.abs(this.waveHeights[i]);
-      imageData.data[i * 4 + 1] = 255 * waveHeight / this.WAVE_MAXIMUM_ENCODED_HEIGHT;
-      // Direction range (negative for clockwise rotation)
-      let dirX = Math.sin((-this.waveDirections[i]) * Math.PI / 180)
-      imageData.data[i * 4 + 2] = 255 * (dirX + 1) / 2;
-      let dirZ = Math.cos((-this.waveDirections[i]) * Math.PI / 180);
-      imageData.data[i * 4 + 3] = 255 * (dirZ + 1) / 2;
+      imageData.data[i * 4 + 1] = 255 * waveHeight / this.WAVE_MAX;
+      // Steepness range
+      // steepness = 4 * Math.PI * Math.PI * hm0 * 0.5 / (T * T * 9.8);
+      // T = Math.sqrt(2*Math.PI*Math.PI*hm0/(9.8 * steepness))
+      let T = Math.sqrt(2 * Math.PI * Math.PI * waveHeight / (9.8 * this.waveSteepness[i]));
+      imageData.data[i * 4] = 255 * T / this.PERIOD_MAX;
 
+      // Direction
+      imageData.data[i * 4 + 2] = 255 * this.waveDirections[i] / 360; // Normalize
+      // Phase
+      imageData.data[i * 4 + 3] = 255 * this.wavePhases[i] / 360; // Normalize
     }
 
 
     // Put data into the texture
-    //context.putImageData(imageData, 0, 0);
+    // context.putImageData(imageData, 0, 0);
+    // canvas.style = `position: absolute; top: 0px; left: 0px; transform: scale(100)`;
+    // canvas.id = 'imagedata';
+    // document.body.appendChild(canvas);
+    // console.log(this.numWaves + ", " + imageData.data.length/4 );
+
     // Return image pixels
     return imageData.data;
   }
 
+
+  // Generate a JSON with wave parameters
+  getDiscreteWavesJSON = function () {
+    let out = [];
+    for (let i = 0; i < this.numWaves; i++) {
+      let wave = {
+        hm0: this.waveHeights[i],
+        dir: this.waveDirections[i],
+        // steepness = 4 * Math.PI * Math.PI * hm0 * 0.5 / (T * T * 9.8);
+        // T = Math.sqrt(2*Math.PI*Math.PI*hm0/(9.8 * steepness))
+        T: Math.sqrt(2 * Math.PI * Math.PI * this.waveHeights[i] / (9.8 * this.waveSteepness[i])),
+        phase: this.wavePhases[i] || 0,
+      };
+      out.push(wave);
+    }
+    return out;
+  }
+
+
+  // Export ocean parameters
+  exportOceanParameters = function () {
+    return new Promise((resolve) => {
+      const link = document.createElement('a');
+      link.download = 'discreteWaves.json';
+      let data = this.getDiscreteWavesJSON();
+      link.href = window.URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'text/json' }));
+      link.click();
+      link.delete;
+      setTimeout(resolve, 10);
+    })
+  }
 
 
 
