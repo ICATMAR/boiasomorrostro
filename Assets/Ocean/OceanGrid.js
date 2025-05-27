@@ -19,7 +19,7 @@ export class OceanGrid {
     // Create grid geometry
     this.size = 5;
     // Public
-    this.gridGeom = this.createPlaneGeometry(numVertices, 20);
+    this.gridGeom = this.createPlaneGeometry(numVertices, 4);
     this.distanceFrontCamera = this.size / Math.tan(this.cameraUser.fov*Math.PI/180); // HACK WARN TODO: CHECK THIS FORMULA
 
     // Compression on the height of the plane geometry (useful when frustrum above horizon)
@@ -86,6 +86,17 @@ export class OceanGrid {
 
     // Move vertex in front of the cameraUser
     // Calculate distance that plane should be from camera according to FOV of camera
+    if (this.cameraUser.fov !== undefined)
+      this.distanceFrontCamera = this.size / Math.tan(this.cameraUser.fov*Math.PI/180); // HACK WARN TODO: CHECK THIS FORMULA
+    else // Orthographic camera
+    {// HACK: EMPIRICAL NUMBER
+      if (this.cameraUser.right * 2 < 30)
+        this.distanceFrontCamera = 2;
+      else if (this.cameraUser.right *2 < 70 )
+        this.distanceFrontCamera = 1;
+      else
+        this.distanceFrontCamera = 0.3;
+    } 
     this.cameraUser.translateZ(-this.distanceFrontCamera);
     this.cameraUser.updateMatrix();
     this.tempVec4 = this.tempVec4.applyMatrix4(this.cameraUser.matrix, this.tempVec4);
@@ -259,14 +270,15 @@ export class OceanGrid {
     let u = material.uniforms;
     u.u_cameraModelMatrix.value = this.cameraGrid.matrix;
     u.u_cameraGridPosition.value = this.cameraGrid.position;
-    u.u_cameraViewportScale.value.x = this.cameraUser.aspect;
+    u.u_cameraViewportScale.value.x = this.cameraUser.aspect || 1; // For ortographic cameras
     u.u_cameraViewportScale.value.y = this.yHeightScale;
   }
 
 
 
   // PUBLIC
-  update = function(oceanMesh){
+  update = function(oceanMesh, camera){
+    this.cameraUser = camera || this.cameraUser;
     // Update camera grid
     this.updateCameraGrid();
 
