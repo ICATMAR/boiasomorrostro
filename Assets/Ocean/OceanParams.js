@@ -62,6 +62,21 @@ export class OceanParameters {
 
 
 
+  generateDistributionFromCMEMSData = function(cmemsWaveParams) {
+    // 'VHM0', 'VMDR', 'VTM02'
+    // 'VHM0_WW', 'VMDR_WW', 'VTM01_WW'
+    // 'VHM0_SW1', 'VMDR_SW1', 'VTM01_SW1'
+    // 'VHM0_SW2', 'VMDR_SW2', 'VTM01_SW2'
+
+    // Ideas
+    // Fix swell one and two
+    // Add wind wave. Check relationship between directional spreading and wind wave from OBSEA. Use it to define distribution of directions
+
+
+  }
+
+
+
   generateDistributions = function () {
     // Calculate target std according to Z Score
     // https://en.wikipedia.org/wiki/Normal_distribution#/media/File:Standard_deviation_diagram_micro.svg
