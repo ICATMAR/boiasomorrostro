@@ -225,6 +225,8 @@ class OceanEntity {
   getGerstnerPosition = function (height, directionAngle, steepness, phase, position, tangent, binormal) { // position is needed if we decide to use xz movements
     let amplitude = height / 2.0;
     let dir = directionAngle = + 90;
+    if (phase == undefined)
+      phase = 0;
 
     // Calculate direction
     let dirX = Math.cos(dir * Math.PI / 180);
