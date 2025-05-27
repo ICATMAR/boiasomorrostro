@@ -27,28 +27,19 @@ class OceanEntity {
   customWaveParameters = [];
   oceanSteepness;
 
-  // Swell parameters
-  swellParameters = [
-    { Hm0: 0.1, Mdir: 0, Steepness: 0.1 },
-    { Hm0: 0.2, Mdir: 129, Steepness: 0.05 },
-  ]
 
-//   0.1, 0.1, 1.0, 0.0)
-// }, // steepness, waveHeight, directionx, directionz
-// u_wave2Params: { value: new THREE.Vector4(0.05, 0.2, 0.5, 1.0) }, // steepness, waveHeight, directionx, directionz
-// u_wave3Params: {
-//   value: new THREE.Vector4(0.1, 0.15, 1.0, 1.0)
 
   
   // Constructor
   constructor(scene){
 
     // Creates a texture that has parameters for generating waves. It includes wave steepness, height, direction X, and direction Z (RGBA).
-    let imgSize = 4;
-    this.imgSize = imgSize;
-    this.oceanParams = new OceanParameters({}, imgSize);
-    let paramsData = this.oceanParams.getWaveParamsImageData();//createWaveParamsImageData({}, imgSize);
-    let paramsTexture = new THREE.DataTexture(paramsData, imgSize, imgSize, THREE.RGBAFormat, THREE.UnsignedByteType);
+    let numWaves = 10;
+    this.numWaves = numWaves;
+    this.dataTextureSize = 32;
+    this.oceanParams = new OceanParameters({}, numWaves);
+    let paramsData = this.oceanParams.getWaveParamsImageData(this.dataTextureSize);
+    let paramsTexture = new THREE.DataTexture(paramsData, this.dataTextureSize, this.dataTextureSize, THREE.RGBAFormat, THREE.UnsignedByteType);
     paramsTexture.magFilter = THREE.NearestFilter;
     paramsTexture.needsUpdate = true;
 
@@ -66,65 +57,86 @@ class OceanEntity {
     videoEl.play();
     let normalTexture = new THREE.VideoTexture(videoEl);
     normalTexture.wrapS = normalTexture.wrapT = THREE.RepeatWrapping;
-    normalTexture.encoding = THREE.linearEncoding; // Normal maps should not have a color correction https://threejs.org/docs/#manual/en/introduction/Color-management
-    // document.body.append(videoEl);
-    // videoEl.style.position = 'absolute';
-    // videoEl.style.top = '0px';
-    // videoEl.style.left = '0px';
-    // <video id="video" loop crossOrigin="anonymous" playsinline style="display:none">
-		// 	<source src="textures/sintel.ogv" type='video/ogg; codecs="theora, vorbis"'>
-		// 	<source src="textures/sintel.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
-		// </video>
+    normalTexture.colorSpace = THREE.LinearSRGBColorSpace; // Normal maps should not have a color correction https://threejs.org/docs/#manual/en/introduction/Color-management
 
 
-    // ************************************************ // 
     
     // Create geometry
-    this.gridEntity = new OceanGrid(scene.camera, 300000);
+    this.gridEntity = new OceanGrid(scene.camera, 1 * 10e5);
     
 
     // Create ocean material
     // Define material and shaders
     let oceanProjectedGridMaterial = new THREE.ShaderMaterial({
-    blending: THREE.NormalBlending,
-    transparent: true,
-    // lights: true, // https://github.com/mrdoob/three.js/issues/16656
-    uniforms: {
-      u_time: { value: this.time },
-      u_fogUnderwaterColor: { value: new THREE.Vector3(scene.fog.color.r, scene.fog.color.g, scene.fog.color.b)},
-      u_fogDensity: {value: scene.fog.density},
-      u_paramsTexture: {value: paramsTexture},
-      u_imgSize: {value: new THREE.Vector2(imgSize, imgSize)},
-      u_steepnessFactor: { value: 0.2 },
-      // u_wavelength: { value: 7.0 },
-      // u_direction: { value: new THREE.Vector2(1, 0) },
-      u_wave1Params: { value: new THREE.Vector4(0.1, 0.1, 0.0, 1.0) }, // steepness, waveHeight, directionx, directionz
-      u_wave2Params: { value: new THREE.Vector4(0.05, 0.2, 0.5, 1.0) }, // steepness, waveHeight, directionx, directionz
-      u_normalTexture: {value: normalTexture}, // TODO: WHAT IF THE TEXTURE TAKES TOO LONG TO LOAD?
+      blending: THREE.NormalBlending,
+      transparent: true,
+      // lights: true, // https://github.com/mrdoob/three.js/issues/16656
+      uniforms: {
+        u_time: { value: this.time },
+        u_fogUnderwaterColor: { value: new THREE.Vector3(scene.fog.color.r, scene.fog.color.g, scene.fog.color.b)},
+        u_fogDensity: {value: scene.fog.density},
+        u_paramsTexture: {value: paramsTexture},
+        u_maxEncodedWaveHeight: {value: this.oceanParams.WAVE_MAX},
+        u_maxEncodedPeriod: {value : this.oceanParams.PERIOD_MAX},
+        u_imgSize: {value: new THREE.Vector2(this.dataTextureSize, this.dataTextureSize)},
+        u_numWaves: {value: numWaves},
+        // u_steepnessFactor: { value: 0.2 },
+        // u_wavelength: { value: 7.0 },
+        // u_direction: { value: new THREE.Vector2(1, 0) },
+        u_normalTexture: {value: normalTexture}, // TODO: WHAT IF THE TEXTURE TAKES TOO LONG TO LOAD?
 
-      // Projected grid parameters
-      u_cameraModelMatrix: {value: this.gridEntity.cameraGrid.matrix},
-      u_cameraGridPosition: {value: this.gridEntity.cameraGrid.position},
-      u_cameraViewportScale: {value: new THREE.Vector2(1, 1)},
-    },
-    vertexShader: OceanProjectedGridVertShader,
-    fragmentShader: OceanProjectedGridFragShader,
-  });
+        // Projected grid parameters
+        u_cameraModelMatrix: {value: this.gridEntity.cameraGrid.matrix},
+        u_cameraGridPosition: {value: this.gridEntity.cameraGrid.position},
+        u_cameraViewportScale: {value: new THREE.Vector2(1, 1)},
+        // Special parameters for recording frames
+        u_grayscale: {value: false},
+        u_paintWaveHeight: {value: false},
+        u_maxWaveHeight: {value: 1.5},
 
-  oceanProjectedGridMaterial.side = THREE.DoubleSide;
+      },
+      vertexShader: OceanProjectedGridVertShader,
+      fragmentShader: OceanProjectedGridFragShader,
+    });
 
-  // Create mesh
-  this.oceanTile = new THREE.Mesh( this.gridEntity.gridGeom, oceanProjectedGridMaterial );
-  this.oceanTile.frustrumCulled = false; // DELETE AT SOME POINT
+    oceanProjectedGridMaterial.side = THREE.DoubleSide;
 
-  scene.add(this.oceanTile);
+    // Create mesh
+    this.oceanTile = new THREE.Mesh( this.gridEntity.gridGeom, oceanProjectedGridMaterial );
+    this.oceanTile.frustrumCulled = false; // DELETE AT SOME POINT
 
-  this.isLoaded = true;
+    scene.add(this.oceanTile);
+
+    this.isLoaded = true;
 
     
   }
 
   
+
+
+  setDiscreteWaves = function(discreteWaves){
+    this.numWaves = discreteWaves.length;
+    let params = this.oceanParams;
+    params.numWaves = this.numWaves;
+    params.waveHeights = [];
+    params.waveSteepness = [];
+    params.waveDirections = [];
+    params.wavePhases = [];
+    for (let i = 0; i < this.numWaves; i++){
+      params.waveHeights[i] = discreteWaves[i].hm0;
+      let T = discreteWaves[i].T;
+      params.waveSteepness[i] = 4 * Math.PI * Math.PI * discreteWaves[i].hm0 * 0.5 / (T * T * 9.8);
+      params.waveDirections[i] = discreteWaves[i].dir;
+      params.wavePhases[i] = discreteWaves[i].phase;
+    }
+
+    this.updateParamsTexture();
+  }
+
+  getDiscreteWaves = function(){
+    return this.oceanParams.getDiscreteWavesJSON();
+  }
 
 
 
@@ -133,35 +145,35 @@ class OceanEntity {
 
   // USER INPUT 
   // Steepness range slider
-  updateSteepness = function(steepness){
-    if (this.oceanTile)
-      this.oceanTile.material.uniforms.u_steepnessFactor.value = steepness;
-  }
-  updateSwell = function(varName, value, index){
-    if (!this.oceanTile)
-      return;
-    index = index || 0;
-    let uniformParams;
-    if (index == 0)
-      uniformParams = this.oceanTile.material.uniforms.u_wave1Params;
-    else if (index == 1)
-      uniformParams = this.oceanTile.material.uniforms.u_wave2Params;
-    if (varName == 'height'){
-      this.swellParameters[index].Hm0 = value;
-      uniformParams.value.y = value;// steepness, waveHeight, directionx, directionz
-    } else if (varName == 'direction'){
-      this.swellParameters[index].Mdir = value;
-      value += 90;
-      let dirX = Math.cos(value * Math.PI / 180);
-      let dirZ = Math.sin(value * Math.PI / 180);
+  // updateSteepness = function(steepnessFactor){
+  //   if (this.oceanTile)
+  //     this.oceanTile.material.uniforms.u_steepnessFactor.value = steepnessFactor;
+  // }
+  // updateSwell = function(varName, value, index){
+  //   if (!this.oceanTile)
+  //     return;
+  //   index = index || 0;
+  //   let uniformParams;
+  //   if (index == 0)
+  //     uniformParams = this.oceanTile.material.uniforms.u_wave1Params;
+  //   else if (index == 1)
+  //     uniformParams = this.oceanTile.material.uniforms.u_wave2Params;
+  //   if (varName == 'height'){
+  //     this.swellParameters[index].Hm0 = value;
+  //     uniformParams.value.y = value;// steepness, waveHeight, directionx, directionz
+  //   } else if (varName == 'direction'){
+  //     this.swellParameters[index].Mdir = value;
+  //     value += 90;
+  //     let dirX = Math.cos(value * Math.PI / 180);
+  //     let dirZ = Math.sin(value * Math.PI / 180);
       
-      uniformParams.value.z = dirX;
-      uniformParams.value.w = dirZ;
-    } else if (varName == 'steepness'){
-      this.swellParameters[index].Steepness = value;
-      uniformParams.value.x = value;
-    }
-  }
+  //     uniformParams.value.z = dirX;
+  //     uniformParams.value.w = dirZ;
+  //   } else if (varName == 'steepness'){
+  //     this.swellParameters[index].Steepness = value;
+  //     uniformParams.value.x = value;
+  //   }
+  // }
   // Update wave significant height
   updateWaveSignificantHeight = function(waveSignificantHeight){
     this.oceanParams.updateWaveSignificantHeight(waveSignificantHeight);
@@ -187,12 +199,15 @@ class OceanEntity {
   updateParamsTexture() {
     if (!this.oceanTile)
       return;
-    let paramsData = this.oceanParams.getWaveParamsImageData();
-    let paramsTexture = new THREE.DataTexture(paramsData, this.imgSize, this.imgSize, THREE.RGBAFormat, THREE.UnsignedByteType);
+    let paramsData = this.oceanParams.getWaveParamsImageData(this.dataTextureSize);
+    let paramsTexture = new THREE.DataTexture(paramsData, this.dataTextureSize, this.dataTextureSize, THREE.RGBAFormat, THREE.UnsignedByteType);
     paramsTexture.magFilter = THREE.NearestFilter;
+    paramsTexture.minFilter = THREE.NearestFilter;
+    paramsTexture.generateMipmaps = false;
     paramsTexture.needsUpdate = true;
     // Update uniforms
     this.oceanTile.material.uniforms.u_paramsTexture.value = paramsTexture;
+    this.oceanTile.material.uniforms.u_numWaves.value = this.numWaves;
   }
 
 
@@ -271,15 +286,15 @@ class OceanEntity {
 
 
 
-  getNormalAndPositionAt = function(position, normal){
+  // getNormalAndPositionAt = function(position, normal){
 
-    let calcNormal = this.getGerstnerNormal(position, 
-      this.swellParameters[0], 
-      this.swellParameters[1]);
+  //   let calcNormal = this.getGerstnerNormal(position, 
+  //     this.swellParameters[0], 
+  //     this.swellParameters[1]);
 
-    normal.set(calcNormal.x, calcNormal.y, calcNormal.z);
+  //   normal.set(calcNormal.x, calcNormal.y, calcNormal.z);
 
-  }
+  // }
 
 
 
