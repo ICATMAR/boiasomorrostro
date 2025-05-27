@@ -3,7 +3,7 @@ import { Vector3 } from 'three';
 import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
 
 import { OceanGrid } from '/boiasomorrostro/Assets/Ocean/OceanGrid.js';
-import {OceanProjectedGridVertShader, OceanProjectedGridFragShader} from '/boiasomorrostro/Assets/Ocean/OceanProjectedGridShader.js';
+import { OceanProjectedGridVertShader, OceanProjectedGridFragShader } from '/boiasomorrostro/Assets/Ocean/OceanProjectedGridShader.js';
 
 import { OceanParameters } from '/boiasomorrostro/Assets/Ocean/OceanParams.js';
 
@@ -18,20 +18,21 @@ class OceanEntity {
 
   direction = new THREE.Vector2();
 
-  tempVec3 = new THREE.Vector3();
+  tempVec3 = new THREE.Vector3(); // getGerstnerPosition
+  tempPos = new THREE.Vector3(); // getNormalAndPositionAt
   tempVec2 = new THREE.Vector2();
 
   // LOD - Ocean resolutions
-  oceanLOD = {'HR': undefined,'MR': undefined, 'LR': undefined, 'LLR': undefined};
+  oceanLOD = { 'HR': undefined, 'MR': undefined, 'LR': undefined, 'LLR': undefined };
 
   customWaveParameters = [];
   oceanSteepness;
 
 
 
-  
+
   // Constructor
-  constructor(scene){
+  constructor(scene) {
 
     // Creates a texture that has parameters for generating waves. It includes wave steepness, height, direction X, and direction Z (RGBA).
     let numWaves = 10;
@@ -60,10 +61,10 @@ class OceanEntity {
     normalTexture.colorSpace = THREE.LinearSRGBColorSpace; // Normal maps should not have a color correction https://threejs.org/docs/#manual/en/introduction/Color-management
 
 
-    
+
     // Create geometry
     this.gridEntity = new OceanGrid(scene.camera, 1 * 10e5);
-    
+
 
     // Create ocean material
     // Define material and shaders
@@ -73,26 +74,26 @@ class OceanEntity {
       // lights: true, // https://github.com/mrdoob/three.js/issues/16656
       uniforms: {
         u_time: { value: this.time },
-        u_fogUnderwaterColor: { value: new THREE.Vector3(scene.fog.color.r, scene.fog.color.g, scene.fog.color.b)},
-        u_fogDensity: {value: scene.fog.density},
-        u_paramsTexture: {value: paramsTexture},
-        u_maxEncodedWaveHeight: {value: this.oceanParams.WAVE_MAX},
-        u_maxEncodedPeriod: {value : this.oceanParams.PERIOD_MAX},
-        u_imgSize: {value: new THREE.Vector2(this.dataTextureSize, this.dataTextureSize)},
-        u_numWaves: {value: numWaves},
+        u_fogUnderwaterColor: { value: new THREE.Vector3(scene.fog.color.r, scene.fog.color.g, scene.fog.color.b) },
+        u_fogDensity: { value: scene.fog.density },
+        u_paramsTexture: { value: paramsTexture },
+        u_maxEncodedWaveHeight: { value: this.oceanParams.WAVE_MAX },
+        u_maxEncodedPeriod: { value: this.oceanParams.PERIOD_MAX },
+        u_imgSize: { value: new THREE.Vector2(this.dataTextureSize, this.dataTextureSize) },
+        u_numWaves: { value: numWaves },
         // u_steepnessFactor: { value: 0.2 },
         // u_wavelength: { value: 7.0 },
         // u_direction: { value: new THREE.Vector2(1, 0) },
-        u_normalTexture: {value: normalTexture}, // TODO: WHAT IF THE TEXTURE TAKES TOO LONG TO LOAD?
+        u_normalTexture: { value: normalTexture }, // TODO: WHAT IF THE TEXTURE TAKES TOO LONG TO LOAD?
 
         // Projected grid parameters
-        u_cameraModelMatrix: {value: this.gridEntity.cameraGrid.matrix},
-        u_cameraGridPosition: {value: this.gridEntity.cameraGrid.position},
-        u_cameraViewportScale: {value: new THREE.Vector2(1, 1)},
+        u_cameraModelMatrix: { value: this.gridEntity.cameraGrid.matrix },
+        u_cameraGridPosition: { value: this.gridEntity.cameraGrid.position },
+        u_cameraViewportScale: { value: new THREE.Vector2(1, 1) },
         // Special parameters for recording frames
-        u_grayscale: {value: false},
-        u_paintWaveHeight: {value: false},
-        u_maxWaveHeight: {value: 1.5},
+        u_grayscale: { value: false },
+        u_paintWaveHeight: { value: false },
+        u_maxWaveHeight: { value: 1.5 },
 
       },
       vertexShader: OceanProjectedGridVertShader,
@@ -102,20 +103,20 @@ class OceanEntity {
     oceanProjectedGridMaterial.side = THREE.DoubleSide;
 
     // Create mesh
-    this.oceanTile = new THREE.Mesh( this.gridEntity.gridGeom, oceanProjectedGridMaterial );
+    this.oceanTile = new THREE.Mesh(this.gridEntity.gridGeom, oceanProjectedGridMaterial);
     this.oceanTile.frustrumCulled = false; // DELETE AT SOME POINT
 
     scene.add(this.oceanTile);
 
     this.isLoaded = true;
 
-    
+
   }
 
-  
 
 
-  setDiscreteWaves = function(discreteWaves){
+
+  setDiscreteWaves = function (discreteWaves) {
     this.numWaves = discreteWaves.length;
     let params = this.oceanParams;
     params.numWaves = this.numWaves;
@@ -123,7 +124,7 @@ class OceanEntity {
     params.waveSteepness = [];
     params.waveDirections = [];
     params.wavePhases = [];
-    for (let i = 0; i < this.numWaves; i++){
+    for (let i = 0; i < this.numWaves; i++) {
       params.waveHeights[i] = discreteWaves[i].hm0;
       let T = discreteWaves[i].T;
       params.waveSteepness[i] = 4 * Math.PI * Math.PI * discreteWaves[i].hm0 * 0.5 / (T * T * 9.8);
@@ -134,7 +135,7 @@ class OceanEntity {
     this.updateParamsTexture();
   }
 
-  getDiscreteWaves = function(){
+  getDiscreteWaves = function () {
     return this.oceanParams.getDiscreteWavesJSON();
   }
 
@@ -166,7 +167,7 @@ class OceanEntity {
   //     value += 90;
   //     let dirX = Math.cos(value * Math.PI / 180);
   //     let dirZ = Math.sin(value * Math.PI / 180);
-      
+
   //     uniformParams.value.z = dirX;
   //     uniformParams.value.w = dirZ;
   //   } else if (varName == 'steepness'){
@@ -175,23 +176,23 @@ class OceanEntity {
   //   }
   // }
   // Update wave significant height
-  updateWaveSignificantHeight = function(waveSignificantHeight){
+  updateWaveSignificantHeight = function (waveSignificantHeight) {
     this.oceanParams.updateWaveSignificantHeight(waveSignificantHeight);
     this.updateParamsTexture();
   }
   // Update mean wave direction
-  updateMeanWaveDirection = function(mdir){
+  updateMeanWaveDirection = function (mdir) {
     this.oceanParams.updateMeanWaveDirection(mdir);
     this.updateParamsTexture();
   }
   // Update wave directional spread
-  updateDirectionalSpread = function(spr1){
+  updateDirectionalSpread = function (spr1) {
     this.oceanParams.updateDirectionalSpread(spr1);
     this.updateParamsTexture();
   }
 
   // Update ocean parameters
-  updateOceanParameters = function(params){
+  updateOceanParameters = function (params) {
     this.oceanParams.updateParams(params);
     this.updateParamsTexture();
   }
@@ -220,14 +221,12 @@ class OceanEntity {
 
 
 
-  // Find normal at 0,0 using Gerstner equation
-  getGerstnerPosition = function(params, position, tangent, binormal) { // position is needed if we decide to use xz movements
-    let steepness = params.Steepness;
-    let amplitude = params.Hm0 / 2.0;
-    let dir = params.Mdir;
-    
+  // Find normal at a given location using Gerstner equation
+  getGerstnerPosition = function (height, directionAngle, steepness, phase, position, tangent, binormal) { // position is needed if we decide to use xz movements
+    let amplitude = height / 2.0;
+    let dir = directionAngle = + 90;
+
     // Calculate direction
-    dir += 90;
     let dirX = Math.cos(dir * Math.PI / 180);
     let dirZ = Math.sin(dir * Math.PI / 180);
     let direction = this.direction.set(dirX, dirZ);
@@ -242,7 +241,7 @@ class OceanEntity {
     let velocity = Math.sqrt(9.8 / k);
 
     direction = direction.normalize();
-    let f = k * (direction.dot(this.tempVec2.set(position.x, position.z)) - velocity * this.time); // assume that we are always at x 0 and z 0 // float f = k * (dot(direction, position.xz) - velocity * u_time);
+    let f = k * (direction.dot(this.tempVec2.set(position.x, position.z)) - velocity * this.time) + phase; // assume that we are always at x 0 and z 0 // float f = k * (dot(direction, position.xz) - velocity * u_time);
 
     this.tempVec3.set(
       -direction.x * direction.x * steepness * Math.sin(f),
@@ -267,34 +266,32 @@ class OceanEntity {
 
 
 
-  getGerstnerNormal = function(position, params1, params2, params3) {
-    
-    this.tangent.set(1,0,0);
+
+
+  getNormalAndPositionAt = function (position, normal) {
+
+    this.tangent.set(1, 0, 0);
     let tangent = this.tangent;
-    this.binormal.set(0,0,1);
+    this.binormal.set(0, 0, 1);
     let binormal = this.binormal;
 
-    this.tempVec3.copy(position);
-    position.add(this.getGerstnerPosition(params1, this.tempVec3, tangent, binormal));
-    position.add(this.getGerstnerPosition(params2, this.tempVec3, tangent, binormal));
+    this.tempPos.copy(position);
 
-    let normal = this.normal;
-    normal.crossVectors(binormal, tangent);
-    normal.normalize();
-    return normal;
+    // Iterate waves
+    let heights = this.oceanParams.waveHeights;
+    let steepnesses = this.oceanParams.waveSteepness;
+    let directions = this.oceanParams.waveDirections;
+    let phases = this.oceanParams.wavePhases;
+    for (let i = 0; i < this.numWaves; i++) {
+      position.add(this.getGerstnerPosition(heights[i], directions[i], steepnesses[i], phases[i], this.tempPos, tangent, binormal));
+    }
+
+    let nTemp = this.normal;
+    nTemp.crossVectors(binormal, tangent);
+    nTemp.normalize();
+    normal.set(nTemp.x, nTemp.y, nTemp.z);
+
   }
-
-
-
-  // getNormalAndPositionAt = function(position, normal){
-
-  //   let calcNormal = this.getGerstnerNormal(position, 
-  //     this.swellParameters[0], 
-  //     this.swellParameters[1]);
-
-  //   normal.set(calcNormal.x, calcNormal.y, calcNormal.z);
-
-  // }
 
 
 
@@ -311,7 +308,7 @@ class OceanEntity {
 
 
   // Update
-  update(dt){
+  update(dt) {
     this.time += dt;
 
     // Update shader parameters
