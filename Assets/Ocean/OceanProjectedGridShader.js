@@ -18,10 +18,7 @@
 // https://brandenstrochinsky.blogspot.com/2016/06/water-effect.html
 // Screen space reflections (SSR)
 // https://www.youtube.com/watch?v=K2rs7K4y_sY&ab_channel=NullPointer
-// https://threejs.org/examples/?q=ssr#webgl_postprocessing_ssr
-// https://threejs.org/examples/jsm/shaders/SSRShader.js
-// Depth
-// https://discourse.threejs.org/t/get-depth-in-fragment-shader/1831
+// /OceanTestSite/lib/three.js/examples/?q=post#webgl_postprocessing_ssr
 // Mirror reflection
 // http://www.shiplab.hials.org/app/simulator/Elias/
 
@@ -46,12 +43,12 @@ export const OceanProjectedGridVertShader = /* glsl */ `
   precision lowp float;
 
   uniform float u_time;
-  uniform vec3 u_imgSize;
+  uniform vec2 u_imgSize;
+  uniform int u_numWaves;
   uniform sampler2D u_paramsTexture;
-  uniform float u_steepnessFactor;
-
-  uniform vec4 u_wave1Params;
-  uniform vec4 u_wave2Params;
+  uniform float u_maxEncodedWaveHeight;
+  uniform float u_maxEncodedPeriod;
+  // uniform float u_steepnessFactor;
 
   // Grid reprojection
   uniform mat4 u_cameraModelMatrix;
@@ -64,8 +61,9 @@ export const OceanProjectedGridVertShader = /* glsl */ `
   varying vec3 v_Normal;
   varying mat3 v_TBN;
   varying vec4 v_OceanColor;
-  // SSR
-  varying float v_distToCam;
+
+  varying vec3 v_wavePosition;
+
 
 
   // Gerstner Wave
@@ -74,10 +72,15 @@ export const OceanProjectedGridVertShader = /* glsl */ `
       vec4 waveParams, vec3 position, 
       inout vec3 tangent, inout vec3 binormal){
 
-    float steepness = max(waveParams.x, 0.01);
     float amplitude = max(waveParams.y, 0.01) / 2.0;
+    float T = waveParams.x;
+    float steepness = 4.0 * PI * PI * amplitude / (T * T * 9.8);
+    steepness = max(steepness, 0.01);
+
     float wavelength = amplitude * 2.0 * PI / steepness;
-    vec2 direction = waveParams.zw;
+    // Direction from angle
+    vec2 direction = vec2(sin(-waveParams.z), cos(-waveParams.z)); // Direction (negative for clockwise rotation)
+    float phase = waveParams.w;
 
     // Wave coefficient
     float k = 2.0 * PI / wavelength;
@@ -87,8 +90,9 @@ export const OceanProjectedGridVertShader = /* glsl */ `
     // Normalize direction
     direction = normalize(direction);
     // Trochoidal wave movement
-    float f = k * (dot(direction, position.xz) - velocity * u_time); // + randomPhase
-
+    //float f = k * (dot(direction, position.xz) - velocity * u_time); // + randomPhase
+    float f = k * (dot(direction, position.xz) - velocity * u_time ) + phase;
+    
     // Tangent
     tangent += vec3(
       -direction.x * direction.x * (steepness * sin(f)),
@@ -156,6 +160,7 @@ export const OceanProjectedGridVertShader = /* glsl */ `
     float distanceStart = 200.0;
     distanceToCenter = min(10000.0, max(distanceStart, distanceToCenter));
     float distanceFactor = max(0.0001, distanceStart/(distanceToCenter));
+    distanceFactor = 1.0;
 
     // Declare tangent and binormal
     vec3 tangent = vec3(1.0, 0.0, 0.0);
@@ -163,42 +168,42 @@ export const OceanProjectedGridVertShader = /* glsl */ `
 
 
     // Gerstner Waves
-    modPos += GerstnerWave(u_wave1Params, modPos, tangent, binormal); 
-    // Attenuation
-    modPos.y *= distanceFactor;
-    tangent.x /= distanceFactor;
-    binormal.z /= distanceFactor;
-    tangent = normalize(tangent);
-    binormal = normalize(binormal);
-
-    modPos += GerstnerWave(u_wave2Params, modPos, tangent, binormal);
-    // Attenuation
-    modPos.y *= distanceFactor;
-    tangent.x /= distanceFactor;
-    binormal.z /= distanceFactor;
-    tangent = normalize(tangent);
-    binormal = normalize(binormal);
-
-
-
     // Iterate over all the waves
-    for (int i = 0; i < int(u_imgSize.x); i++){
-      for (int j = 0; j < int(u_imgSize.y); j++){
+    int counter = 0;
+    for (int j = 0; j < int(u_imgSize.y); j++){
+      for (int i = 0; i < int(u_imgSize.x); i++){
+        // u_paramsTexture(period, wave height, cos(dir), sin(dir))
         vec4 params = texture2D(u_paramsTexture, vec2(float(i)/u_imgSize.x, float(j)/u_imgSize.y));
-        // Steepness factor
-        params.r = params.r * u_steepnessFactor;
-        // Wave height factor
-        //params.g = params.g/(u_imgSize.x*u_imgSize.y);
-        // Direction
-        params.b = params.b - 0.5;
-        params.a = params.a - 0.5;
-        modPos += GerstnerWave(params, modPos, tangent, binormal);
-        // Attenuation
-        modPos.y *= distanceFactor;
-        tangent.x /= distanceFactor;
-        binormal.z /= distanceFactor;
-        tangent = normalize(tangent);
-        binormal = normalize(binormal);
+        // Skip if height or steepness are zero
+        //if (params.r == 0.0 || params.g == 0.0){
+
+        //} else {
+
+          // Wave height encoded
+          params.y = params.y * u_maxEncodedWaveHeight;
+          // Period encoded
+          params.x = params.x * u_maxEncodedPeriod;
+          // Direction
+          params.z = params.z * 360.0 * PI / 180.0;
+          // Phase
+          params.w = params.w * 360.0 * PI / 180.0;
+          
+          // Interate position
+          modPos += GerstnerWave(params, modPos, tangent, binormal);
+          
+          // Attenuation
+          //modPos.y *= distanceFactor;
+          //tangent.x /= distanceFactor;
+          //binormal.z /= distanceFactor;
+          tangent = normalize(tangent);
+          binormal = normalize(binormal);
+        //}
+
+        counter++;
+        if (counter == u_numWaves){
+          i = int(u_imgSize.x);
+          j = int(u_imgSize.y);
+        }
       }
     }
 
@@ -211,16 +216,15 @@ export const OceanProjectedGridVertShader = /* glsl */ `
     //vec4 worldPosition = modelMatrix * vec4(modPos, 1.0);
     //v_WorldPosition = worldPosition.xyz;
     v_WorldPosition = intersectionPoint;
+    v_wavePosition = modPos;
 
     // Model
     v_TBN = mat3(tangent, binormal, normal);
 
+
     // Screen space position
     //gl_Position = projectionMatrix * modelViewMatrix * vec4(modPos, 1.0);
     gl_Position = projectionMatrix * viewMatrix * vec4(modPos, 1.0);
-
-    // Depth from gl_Position
-    v_distToCam = gl_Position.z;
   }
   `;
 
@@ -243,13 +247,20 @@ export const OceanProjectedGridFragShader = /* glsl */`
   varying vec3 v_Normal;
   varying mat3 v_TBN;
 
-  varying float v_distToCam;
+  varying vec3 v_wavePosition;
 
   uniform sampler2D u_normalTexture;
   uniform float u_time;
   // Fog
   uniform vec3 u_fogUnderwaterColor;
   uniform float u_fogDensity;
+  
+  // Special uniforms for rendering frames
+  // Grayscale
+  uniform bool u_grayscale;
+  // Render wave heights
+  uniform bool u_paintWaveHeight;
+  uniform float u_maxWaveHeight;
 
   //varying vec4 v_OceanColor;
 
@@ -262,6 +273,13 @@ export const OceanProjectedGridFragShader = /* glsl */`
 
 
   void main(){
+
+    // Render wave heights
+    if (u_paintWaveHeight){
+      float value = (v_wavePosition.y + u_maxWaveHeight) / (u_maxWaveHeight * 2.0);
+      gl_FragColor = vec4(value, value, value, 1.0);
+      return;
+    }
 
     // Bump texture for specular reflections
     vec2 scale = vec2(2.0,2.0);
@@ -351,7 +369,12 @@ export const OceanProjectedGridFragShader = /* glsl */`
     // Add fog
     color = mix( color, fogColor, fogFactor );
 
-    gl_FragColor = vec4(color, 0.9 + fogFactor*0.1);
+    if (u_grayscale == false) {
+      gl_FragColor = vec4(color, 1.0);//0.9 + fogFactor*0.1);
+    } else {
+      float luminance = color.r * 0.3 + color.g * 0.59 + color.b * 0.11;// https://en.wikipedia.org/wiki/Grayscale
+      gl_FragColor = vec4(luminance, luminance, luminance, 1.0);//0.9 + fogFactor*0.1);
+    }
     //gl_FragColor = vec4(skyFresnel + waterFresnel + diffuseColor + specularColor, 0.92);
     
 
@@ -381,6 +404,5 @@ export const OceanProjectedGridFragShader = /* glsl */`
     //gl_FragColor = vec4(normalize(v_WorldPosition), 1.0);
     //gl_FragColor = vec4((cameraPosition), 1.0);
     //gl_FragColor = vec4((normalTexel), 1.0);
-    //gl_FragColor = vec4(vec3(v_distToCam / 255.0), 1.0);
   }
   `;
