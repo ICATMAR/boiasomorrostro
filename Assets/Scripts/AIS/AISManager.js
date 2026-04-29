@@ -95,7 +95,7 @@ export class AISManager {
 
 
     // Default values
-    const shipName = metaData.ShipName || this.ships[MMSI].shipName || "Unknown Ship";
+    let shipName = metaData.ShipName || this.ships[MMSI].shipName || "Unknown Ship";
     const lat = metaData.latitude;
     const long = metaData.longitude;
 
@@ -132,6 +132,10 @@ export class AISManager {
       heading = standardClassBPositionReport.TrueHeading;
       sog = standardClassBPositionReport.Sog;
       if (typeOfMessages.includes("StandardClassBPositionReport") == false) typeOfMessages.push("StandardClassBPositionReport");
+    }
+    // AidsToNavigationReport
+    if (message.Message.AidsToNavigationReport) {
+      shipName = message.Message.AidsToNavigationReport.Name;
     }
     // Other kind of messages
     if (!message.Message.ShipStaticData && !message.Message.PositionReport && !message.Message.StandardClassBPositionReport) {

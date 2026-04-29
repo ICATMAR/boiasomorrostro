@@ -16,6 +16,11 @@ class AISVesselsManager {
 
       Object.keys(aisShips).forEach((key) => {
         let shipInfo = aisShips[key];
+        // Ignore aids to navigation reports
+        if (shipInfo.typeOfMessages.includes("AidsToNavigationReport")) {
+          console.log("⚠️⛵ Ignoring AidsToNavigationReport for "+ shipInfo.shipName +", MMSI " + shipInfo.MMSI + ", at "+ shipInfo.latitude + "º N, " + shipInfo.longitude + "º E");
+          return;
+        }
         // Create ship entity
         this.createShip(shipInfo, scene);
       });
@@ -37,6 +42,10 @@ class AISVesselsManager {
 
 
   handleAISMessage = (shipInfo) => {
+    if (shipInfo.typeOfMessages.includes("AidsToNavigationReport")) {
+      console.log("⚠️⛵ Ignoring AidsToNavigationReport for "+ shipInfo.shipName +", MMSI " + shipInfo.MMSI + ", at "+ shipInfo.latitude + "º N, " + shipInfo.longitude + "º E");
+      return;
+    }
     // Heading correction
     let heading;
     if (shipInfo.heading === 511) {
