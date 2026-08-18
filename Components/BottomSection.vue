@@ -304,8 +304,9 @@ export default {
 
 .section-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow: auto;
-  justify-items: center;
   width: 100%;
   min-height: 0;
 }
