@@ -26,12 +26,15 @@
 
 
     <!-- LEFT ICONS -->
-    <a href="https://icatmar.cat/">
+    <div class="logos-container">
+      <a href="https://icatmar.cat/">
       <img class="logo clickable icatmar-logo" src="Assets/Logos/icatmar-mini-logo.svg">
-    </a>
-    <a href="https://icatmar.cat/visors/xarxa-observacional/">
+      </a>
+      <a href="https://icatmar.cat/visors/xarxa-observacional/">
       <img class="logo clickable obs-logo" src="Assets/Logos/ocea-mini-1.svg">
-    </a>
+      </a>
+    </div>
+    
 
     <!-- RIGHT ICONS -->
     <div class="top-right-icons-container">
@@ -127,21 +130,25 @@ export default {
 }
 
   .logo {
-  width: clamp(70px, 7vw, 100px);
-  height: clamp(70px, 7vw, 100px);
+  width: clamp(35px, 7vw, 100px);
+  height: clamp(35px, 7vw, 100px);
+  z-index: 10;
+}
+
+.logos-container {
+  left: clamp(10px, 7vw, 70px);
+  display: flex;
   position: fixed;
   top: 10px;
   padding: 0px;
   margin: 0px;
-  z-index: 10;
 }
 
 .icatmar-logo {
-  left: 50px;
 }
 
 .obs-logo {
-  left: clamp(110px, 9vw, 140px);
+  transform: translateX(-20%);
 }
 
 .top-right-icons-container{
