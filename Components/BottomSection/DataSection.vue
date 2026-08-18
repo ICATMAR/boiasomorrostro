@@ -54,7 +54,7 @@ export default {
 td.group-cell {
   text-align: left;
   padding-left: 10px;
-  background: var(--darkBlue);
+  background: #afafaf;
 }
 td.group-cell > span,
 td.group-cell > a {
