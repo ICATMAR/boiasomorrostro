@@ -7,20 +7,14 @@
         <span>{{ day.textLong }}</span>
       </td>
     </tr>
-    <!-- Hours: single label per cell (sub-daily) or 0/12 anchors per day (daily) -->
+    <!-- Hours: single label per cell -->
     <tr>
       <td v-for="(cell, index) in cells" :key="index" class="hourCell">
-        <template v-if="$gui.timelineIntervalMinutes < 1440">
-          <span :style="{ opacity: ($gui.timelineHours(cell) < 6 || $gui.timelineHours(cell) >= 21) ? '0.4' : '1' }">{{ $gui.timelineHours(cell) }}</span>
-        </template>
-        <template v-else>
-          <span>0</span>
-          <span class="hourCell-noon">12</span>
-        </template>
+        <span :style="{ opacity: ($gui.timelineHours(cell) < 6 || $gui.timelineHours(cell) >= 21) ? '0.4' : '1' }">{{ $gui.timelineHours(cell) }}</span>
       </td>
     </tr>
-    <!-- Data rows provided by the DataTimeline -->
-    <slot></slot>
+    <!-- Data rows provided by the caller -->
+    <slot :cells="cells"></slot>
   </tbody>
 </table>
 </template>
@@ -30,10 +24,16 @@
 
 export default {
   name: "DTTimelineGrid",
-  props: {
-    cells: Array, // [Date], one per column
-  },
   computed: {
+    cells() {
+      const startTime = this.$gui.timelineStartDate.getTime();
+      const endTime = this.$gui.timelineEndDate.getTime();
+      const stepMs = this.$gui.timelineIntervalMinutes * 60 * 1000;
+      let cells = [];
+      for (let t = startTime; t < endTime; t += stepMs)
+        cells.push(new Date(t));
+      return cells;
+    },
     days() {
       let days = [];
       for (const cell of this.cells) {
@@ -97,9 +97,5 @@ export default {
   top: 50%;
   transform: translate(-50%, -50%);
   white-space: nowrap;
-}
-
-.hourCell-noon {
-  left: 50% !important;
 }
 </style>

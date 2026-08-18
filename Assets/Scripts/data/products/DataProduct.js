@@ -18,9 +18,9 @@ class DataProduct {
   }
 
   // Value of a standard variable code at a date, from the first source that has it
-  async getValueAt(code, date, timeScale) {
+  async getValueAt(code, date, intervalMinutes) {
     for (const source of this.sources) {
-      const value = await source.getValueAt(code, date, timeScale).catch(error => {
+      const value = await source.getValueAt(code, date, intervalMinutes).catch(error => {
         console.error(`${this.name}: could not read ${code} on ${date.toISOString()}`, error);
         return undefined;
       });

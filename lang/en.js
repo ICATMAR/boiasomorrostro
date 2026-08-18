@@ -80,13 +80,13 @@ export default en = {
   "Sea water velocity": "Current",
   "Chlorophyll": "Chlorophyll",
 
-  "Wind speed": "Wind speed",
+  "Wind speed": "Wind",
   "Wind direction": "Wind direction",
-  "Wind gust": "Wind gust",
-  "Wave significant height": "Wave significant height",
-  "Air temperature": "Air temperature",
+  "Wind gust": "Gust",
+  "Wave significant height": "Waves",
+  "Air temperature": "Air temp.",
   "Atmospheric pressure": "Atmospheric pressure",
-  "Sea surface temperature": "Sea surface temperature",
+  "Sea surface temperature": "Sea temp.",
   "Sea bottom temperature": "Sea bottom temperature",
   "Sea temperature anomaly": "Sea temperature anomaly",
   "Salinity": "Salinity",
@@ -94,10 +94,6 @@ export default en = {
   "Cloudiness": "Cloudiness",
 
   "swellCompositionSVG": "Light blue: mean wave height; Yellow: wind waves; Blue: primary swell; Dark blue: secondary swell",
-
-  dataPanel: {
-    'dataBuoyNotAvailable': 'The deployment of the buoy is planned for summer/autumn 2025. Oceanographic and weather data shown in this section originates from models and forecasting systems.',
-  },
 
   infoPanel: {
     title: "About",

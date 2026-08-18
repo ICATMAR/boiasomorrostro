@@ -1,31 +1,37 @@
 <template>
   <div class="content">
-
-    <p>⚠️ {{ $t('dataPanel.dataBuoyNotAvailable') }}</p>
-
-    <!-- One timeline per data product -->
-    <div class="content-section" v-for="dp in $dataService.dataProducts" :key="dp.name">
-      <h5>{{ $t(dp.name) }}</h5>
-      <!-- Content -->
-      <DataTimeline :product="dp.product"></DataTimeline>
-      <!-- Attribution -->
-      <div class="attribution">
-        <i>{{ $t('Data from') }} {{ dp.product.sources[0].institution }}: </i>
-        <i><a :href="dp.product.link" target="_blank" rel="noreferrer noopener">{{ dp.product.link }}</a></i>
-      </div>
-    </div>
-
+    <!-- One shared header/scroll for every data product; each product starts
+         with a row naming it and linking to its source -->
+    <DTLayout :groups="$dataService.dataProducts">
+      <template #grid>
+        <DTTimelineGrid v-slot="{ cells }">
+          <template v-for="dp in $dataService.dataProducts" :key="dp.name">
+            <tr class="group-row">
+              <td :colspan="cells.length" class="group-cell">
+                <span>{{ $t(dp.name) }} — {{ $t('Data from') }} </span>
+                <a :href="dp.product.link" target="_blank" rel="noreferrer noopener">{{ dp.product.sources[0].institution }}</a>
+              </td>
+            </tr>
+            <DataTimeline :product="dp.product" :cells="cells"></DataTimeline>
+          </template>
+        </DTTimelineGrid>
+      </template>
+    </DTLayout>
   </div>
 </template>
 
 
 <script>
+import DTLayout from "./DataTimeline/DTLayout.vue";
+import DTTimelineGrid from "./DataTimeline/DTTimelineGrid.vue";
 import DataTimeline from "./DataTimeline/DataTimeline.vue";
 
 export default {
   name: "DataSection",
   components: {
-    DataTimeline
+    DTLayout,
+    DTTimelineGrid,
+    DataTimeline,
   },
 }
 </script>
@@ -38,18 +44,24 @@ export default {
   max-height: 100%;
   width: 100%;
 }
+</style>
 
-.content-section {
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0 0 4px black;
-  margin: 10px 10px 20px 10px;
+
+<!-- Non-scoped: the group row is slotted into DTTimelineGrid's table, rendered outside
+     this component. Selectors are prefixed with td.group-cell to outweigh DTTimelineGrid's
+     ".dt-table td > *" reset (same specificity would otherwise depend on style load order). -->
+<style>
+td.group-cell {
+  text-align: left;
+  padding-left: 10px;
+  background: var(--darkBlue);
 }
-
-.attribution {
-  padding-top: 5px;
-  font-size: 0.7rem;
+td.group-cell > span,
+td.group-cell > a {
+  font-size: 0.65rem;
+  color: white;
+}
+td.group-cell > a {
+  text-decoration: underline;
 }
 </style>

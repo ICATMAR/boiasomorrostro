@@ -17,14 +17,16 @@
       <div class="horizontal interval-picker">
         <span class="clickable" style="text-decoration: underline;" @click="$gui.timelineUseLocalTime = !$gui.timelineUseLocalTime">{{ $gui.timelineTimezoneLabel }}</span>
       </div>
-      <!-- Variable names and units -->
-      <div class="horizontal variable-names-row">
-        <div class="vertical variable-names-subcontainer">
-          <span v-for="v in variables" :key="v.code">{{ $t(v.name) }}</span>
-        </div>
-        <div class="vertical variable-names-subcontainer">
-          <span v-for="v in variables" :key="v.code">{{ v.unit }}</span>
-        </div>
+      <!-- Variable names and units, grouped per data product -->
+      <div class="vertical variable-names-list">
+        <template v-for="group in groups" :key="group.name">
+          <!-- Spacer matching the product row on the right (see DataSection.vue) -->
+          <div class="group-spacer"></div>
+          <div class="horizontal name-row" v-for="v in group.product.variables" :key="v.code">
+            <span class="var-name">{{ $t(v.name) }}</span>
+            <span class="var-unit">{{ v.unit }}</span>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -35,8 +37,10 @@
 
       <!-- Timeline container -->
       <div class="horizontal table-container" ref="tableContainer">
-        <div class="vertical" style="align-self: flex-start">
+        <div class="vertical timeline-inner">
           <slot name="grid"></slot>
+          <!-- Current time marker, non-interactive -->
+          <div class="now-line" :style="{ left: nowLineLeft + 'px' }"></div>
         </div>
       </div>
     </div>
@@ -46,17 +50,22 @@
 
 <script>
 
+const CELL_WIDTH_PX = 40; // must match .dt-table td width in DTTimelineGrid.vue
+
 export default {
   name: "DTLayout",
   props: {
-    variables: Array, // [{ code, name, unit }]
+    groups: Array, // [{ name, product }], see $dataService.dataProducts
   },
   mounted() {
     this.resetScroll();
+    // Move the current time marker forward as time passes
+    this.nowTimer = setInterval(() => { this.now = Date.now(); }, 60000);
   },
   // Clean up global listeners if component is destroyed
   beforeUnmount() {
     this.stopDragging();
+    clearInterval(this.nowTimer);
   },
   data() {
     return {
@@ -64,6 +73,7 @@ export default {
       isDragging: false,
       startX: 0,
       scrollLeft: 0,
+      now: Date.now(),
     }
   },
   methods: {
@@ -134,6 +144,12 @@ export default {
     canZoomOut() {
       return this.currentScaleIdx() > 0;
     },
+    // Horizontal offset of the current-time marker, in pixels along the grid
+    nowLineLeft() {
+      const elapsedMs = this.now - this.$gui.timelineStartDate.getTime();
+      const cellMs = this.$gui.timelineIntervalMinutes * 60 * 1000;
+      return (elapsedMs / cellMs) * CELL_WIDTH_PX;
+    },
   }
 }
 
@@ -165,6 +181,21 @@ export default {
   height: 100%;
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.85);
+}
+
+.timeline-inner {
+  align-self: flex-start;
+  position: relative;
+}
+
+.now-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--red);
+  pointer-events: none;
+  z-index: 2;
 }
 
 .variable-names-container {
@@ -210,26 +241,32 @@ export default {
   background: rgba(0, 0, 0, 0.1);
 }
 
-.variable-names-row {
+.variable-names-list {
+  width: 100%;
   padding-right: 10px;
-  text-align: right;
-  align-self: flex-end;
-}
-
-.variable-names-subcontainer {
   align-self: flex-start;
-  padding-top: 3px;
 }
 
-.variable-names-subcontainer > span {
+/* Matches the height of the product row on the right (a plain .dt-table td) */
+.group-spacer {
+  height: 22px;
+}
+
+.name-row {
+  height: 22px;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.name-row > span {
   color: black;
   text-shadow: none;
   font-size: 0.7rem;
-  height: 23px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding-left: 5px;
+  padding: 0;
+}
+
+.var-unit {
+  text-decoration: underline;
 }
 
 </style>

@@ -55,8 +55,6 @@ export default {
   },
   data () {
     return {
-      isSectionOpen: true,
-      isMenuFullscreen: false,
       // Menu structure. id is what the URL hash holds (see GUIManager)
       menu: [
         {
@@ -147,7 +145,7 @@ export default {
     // USER ACTIONS
     // Shows / Hides bottom section
     bottomSectionClicked: function (e){
-      this.isSectionOpen = !this.isSectionOpen;
+      this.$gui.panelState = this.$gui.panelState == 'hidden' ? 'visible' : 'hidden';
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
       }, 750);
@@ -157,7 +155,7 @@ export default {
       this.bottomSectionClicked();
     },
     fullscreenClicked: function(){
-      this.isMenuFullscreen = !this.isMenuFullscreen;
+      this.$gui.panelState = this.$gui.panelState == 'fullscreen' ? 'visible' : 'fullscreen';
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
       }, 750);
@@ -167,6 +165,12 @@ export default {
     // Menu entry of the section selected in the URL hash
     selectedSection: function(){
       return this.menu.find(el => el.id == this.$gui.selectedSection);
+    },
+    isSectionOpen: function(){
+      return this.$gui.panelState != 'hidden';
+    },
+    isMenuFullscreen: function(){
+      return this.$gui.panelState == 'fullscreen';
     },
   },
   components: {
@@ -241,13 +245,18 @@ export default {
   position: absolute;
 }
 
-/* Above the section, like the cross of the VISOC data timeline */
+/* Above the section content, like the cross of the VISOC data timeline */
 .top-left-icons {
   position: absolute;
-  top: -15px;
-  left: 25px;
-  gap: 8px;
-  z-index: 12;
+  top: -26px;
+  left: 8px;
+  gap: 6px;
+  z-index: 20;
+}
+.top-left-icons .close-x {
+  width: 30px;
+  height: 30px;
+  font-size: 0.9rem;
 }
 
 .section-content {

@@ -47,6 +47,10 @@ export default {
     // EVENTS
     // AIS messages
     window.eventBus.on('AISManager_receivedAISMessage', this.handleAISMessage);
+    // Map fills its container (see .map-container), so it must be told to
+    // resize when the container does - e.g. the fullscreen toggle, which
+    // dispatches this same 'resize' event once its CSS transition ends.
+    window.addEventListener('resize', this.invalidateMapSize);
 
     // UPDATE
     this.startUpdateLoop();
@@ -58,10 +62,15 @@ export default {
     }
     // Unhook event listener
     window.eventBus.off('AISManager_receivedAISMessage', this.handleAISMessage);
+    window.removeEventListener('resize', this.invalidateMapSize);
   },
 
 
   methods: {
+    // Recompute Leaflet's internal size after the container has resized
+    invalidateMapSize() {
+      this.map.invalidateSize();
+    },
     // Function to handle the received AIS messages
     handleAISMessage(shipInfo) {
       // Heading
@@ -161,8 +170,8 @@ export default {
 
 <style scoped>
 .map-container {
-  height: 400px;
-  width: 60vw;
-  margin: auto;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }
 </style>

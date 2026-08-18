@@ -10,9 +10,11 @@ class Source {
 
   // Subclasses implement: fetch (if not already loaded) and return the value of a
   // standard variable code at the given date, or undefined if there is no data.
-  // Standardizing (raw name/unit -> standard code) is the source's job, so the
-  // DataProduct above only deals with standard codes.
-  async getValueAt(code, date, timeScale) { throw new Error('getValueAt() not implemented'); }
+  // intervalMinutes is the width of the timeline cell the value is shown in
+  // (a source may average finer samples to cover it). Standardizing (raw
+  // name/unit -> standard code) is the source's job, so the DataProduct above
+  // only deals with standard codes.
+  async getValueAt(code, date, intervalMinutes) { throw new Error('getValueAt() not implemented'); }
 
 }
 

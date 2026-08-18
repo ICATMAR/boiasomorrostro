@@ -2,9 +2,8 @@
 // before and after the current hour (finer scales show a shorter span, so the
 // number of requested cells stays similar on every scale).
 const TIMESCALES = [
-  { id: '1d', minutes: 1440, hoursAheadBehind: 120 },
-  { id: '3h', minutes: 180,  hoursAheadBehind: 48  },
-  { id: '1h', minutes: 60,   hoursAheadBehind: 24  },
+  { id: '3h', minutes: 180, hoursAheadBehind: 48 },
+  { id: '1h', minutes: 60,  hoursAheadBehind: 24 },
 ];
 
 
@@ -12,6 +11,7 @@ class GUIManager {
 
   timescales = TIMESCALES;
   sections = ['data', 'map', 'about'];
+  panelStates = ['fullscreen', 'visible', 'hidden'];
 
   // BOTTOM SECTION
   _selectedSection = 'data';
@@ -24,6 +24,14 @@ class GUIManager {
     else window.location.removeHash('TIMESCALE');
   }
 
+  // Whether the bottom section is fullscreen, visible (normal height) or hidden
+  _panelState = 'visible';
+  get panelState() { return this._panelState; }
+  set panelState(state) {
+    this._panelState = state;
+    window.location.setHashValue('PANEL', state);
+  }
+
   // TIMELINE SCALE
   _timelineScaleId = '3h';
   get timelineScaleId() { return this._timelineScaleId; }
@@ -33,8 +41,6 @@ class GUIManager {
   }
   get timelineScale() { return TIMESCALES.find(t => t.id == this._timelineScaleId); }
   get timelineIntervalMinutes() { return this.timelineScale.minutes; }
-  // Time scale as expected by the CMEMS WMTS retriever ('h' or 'd')
-  get timelineWMTSTimeScale() { return this.timelineIntervalMinutes >= 1440 ? 'd' : 'h'; }
 
   // TIMELINE TIMEZONE
   timelineUseLocalTime = true;
@@ -68,11 +74,6 @@ class GUIManager {
     let date = new Date();
     date.setMinutes(0, 0, 0);
     date.setHours(date.getHours() - this.timelineScale.hoursAheadBehind);
-    // Daily cells must start at midnight so each cell is one day
-    if (this.timelineIntervalMinutes >= 1440) {
-      if (this.timelineUseLocalTime) date.setHours(0, 0, 0, 0);
-      else date.setUTCHours(0, 0, 0, 0);
-    }
     return date;
   }
   get timelineEndDate() {
@@ -93,8 +94,13 @@ class GUIManager {
     let timescale = window.location.getHashValue('TIMESCALE');
     if (timescale != undefined && TIMESCALES.some(t => t.id == timescale))
       this._timelineScaleId = timescale;
+    // Panel state <PANEL=fullscreen|visible|hidden>
+    let panelState = window.location.getHashValue('PANEL');
+    if (panelState != undefined && this.panelStates.includes(panelState.toLowerCase()))
+      this._panelState = panelState.toLowerCase();
     // Write back the state the app starts with
     this.selectedSection = this._selectedSection;
+    this.panelState = this._panelState;
   }
 
 }

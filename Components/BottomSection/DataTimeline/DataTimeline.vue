@@ -1,27 +1,19 @@
 <template>
-  <DTLayout :variables="product.variables">
-    <template #grid>
-      <DTTimelineGrid :cells="cells">
-        <!-- One row per variable: coloured cell with the value and, if the
-             variable has a direction, an arrow pointing where it goes -->
-        <tr v-for="v in product.variables" :key="v.code">
-          <td v-for="(cell, index) in cells" :key="index" class="value-cell"
-            :style="{ background: cellColor(v, index) }"
-            :title="cellTitle(v, cell, index)">
-            <i v-if="arrowAngle(v, index) != undefined" class="fa-solid fa-location-arrow cell-arrow"
-              :style="{ transform: `rotate(${arrowAngle(v, index) - 45}deg)` }"></i>
-            <span class="cell-value">{{ cellText(v, index) }}</span>
-          </td>
-        </tr>
-      </DTTimelineGrid>
-    </template>
-  </DTLayout>
+  <!-- One row per variable: coloured cell with the value and, if the
+       variable has a direction, an arrow pointing where it goes -->
+  <tr v-for="v in product.variables" :key="v.code">
+    <td v-for="(cell, index) in cells" :key="index" class="value-cell"
+      :style="{ background: cellColor(v, index) }"
+      :title="cellTitle(v, cell, index)">
+      <i v-if="arrowAngle(v, index) != undefined" class="fa-solid fa-location-arrow cell-arrow"
+        :style="{ transform: `rotate(${arrowAngle(v, index) - 45}deg)` }"></i>
+      <span class="cell-value">{{ cellText(v, index) }}</span>
+    </td>
+  </tr>
 </template>
 
 
 <script>
-import DTLayout from './DTLayout.vue';
-import DTTimelineGrid from './DTTimelineGrid.vue';
 
 // Value colour scale (normalized 0..1 over the variable range): white -> cyan -> green -> yellow -> red
 const COLOR_STOPS = [
@@ -36,9 +28,10 @@ export default {
   name: "DataTimeline",
   props: {
     product: Object, // DataProduct, see Assets/Scripts/data/products/
+    cells: Array,    // [Date], one per column - shared across every product in the timeline
   },
   created() {
-    this.loadToken = 0; // discards responses of a previous time scale (not reactive)
+    this.loadToken = 0; // discards responses of a previous request (not reactive)
   },
   mounted() {
     this.loadValues();
@@ -54,7 +47,7 @@ export default {
     loadValues() {
       const token = ++this.loadToken;
       const cells = this.cells;
-      const timeScale = this.$gui.timelineWMTSTimeScale;
+      const intervalMinutes = this.$gui.timelineIntervalMinutes;
 
       const values = {};
       this.codes.forEach(code => values[code] = new Array(cells.length));
@@ -62,8 +55,8 @@ export default {
 
       this.codes.forEach(code => {
         cells.forEach((cell, index) => {
-          this.product.getValueAt(code, cell, timeScale).then(value => {
-            if (token != this.loadToken) return; // time scale changed while loading
+          this.product.getValueAt(code, cell, intervalMinutes).then(value => {
+            if (token != this.loadToken) return; // cells changed while loading
             this.values[code][index] = value;
           });
         });
@@ -112,15 +105,6 @@ export default {
     },
   },
   computed: {
-    cells() {
-      const startTime = this.$gui.timelineStartDate.getTime();
-      const endTime = this.$gui.timelineEndDate.getTime();
-      const stepMs = this.$gui.timelineIntervalMinutes * 60 * 1000;
-      let cells = [];
-      for (let t = startTime; t < endTime; t += stepMs)
-        cells.push(new Date(t));
-      return cells;
-    },
     // Variables shown as rows, plus the directions they need
     codes() {
       const codes = [];
@@ -132,14 +116,11 @@ export default {
     },
   },
   watch: {
-    '$gui.timelineScaleId'() {
+    // cells only changes reference when the timeline scale changes
+    cells() {
       this.loadValues();
     },
   },
-  components: {
-    DTLayout,
-    DTTimelineGrid,
-  }
 }
 
 </script>

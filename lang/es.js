@@ -82,13 +82,13 @@ export default es = {
   "Sea water velocity": "Corriente",
   "Chlorophyll": "Clorofila",
 
-  "Wind speed": "Velocidad del viento",
+  "Wind speed": "Viento",
   "Wind direction": "Dirección del viento",
-  "Wind gust": "Ráfaga de viento",
-  "Wave significant height": "Altura significante de oleaje",
-  "Air temperature": "Temperatura del aire",
+  "Wind gust": "Ráfaga",
+  "Wave significant height": "Oleaje",
+  "Air temperature": "Temp. aire",
   "Atmospheric pressure": "Pressión atmosférica",
-  "Sea surface temperature": "Temperatura superficial del mar",
+  "Sea surface temperature": "Temp. mar",
   "Sea bottom temperature": "Temperatura del fondo del mar",
   "Sea temperature anomaly": "Anomalia de temperatura del mar",
   "Salinity": "Salinidad",
@@ -97,10 +97,6 @@ export default es = {
 
 
   "swellCompositionSVG": "Azul claro: mar total; Amarillo: oleaje de viento; Azul: mar de fondo; Azul oscuro: mar de fondo 2",
-
-  dataPanel: {
-    'dataBuoyNotAvailable': 'El despliegue de la boya está previsto para el verano/otoño de 2025. Los datos oceanográficos y meteorológicos mostrados en esta sección proceden de modelos y sistemas de previsión.',
-  },
 
   infoPanel: {
     title: "Acerca de la aplicación",
