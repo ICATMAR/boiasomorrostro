@@ -27,7 +27,7 @@
       <div class="horizontal wrap button-group bottom-bar">
         <button v-for="el in menu" :key="el.id" class="clickable"
           :class="{ 'selectedOption': $gui.selectedSection === el.id }"
-          @click="$gui.selectedSection = el.id"><span>{{ $t(el.title) }}</span></button>
+          @click="sectionClicked(el.id)"><span>{{ $t(el.title) }}</span></button>
       </div>
     </div>
   </div>
@@ -51,7 +51,9 @@ export default {
   name: "BottomSection",
   created() {},
   mounted() {
-
+    // The section's height is now driven by its content, so Canvas3D needs a
+    // resize signal once that content has actually settled after mount.
+    this.$nextTick(() => window.dispatchEvent(new Event('resize')));
   },
   data () {
     return {
@@ -143,6 +145,13 @@ export default {
   },
   methods: {
     // USER ACTIONS
+    // Switches the visible tab - each one has a different natural height, so
+    // Canvas3D needs to resize to whatever space that leaves it once the new
+    // tab has rendered.
+    sectionClicked: function (id){
+      this.$gui.selectedSection = id;
+      this.$nextTick(() => window.dispatchEvent(new Event('resize')));
+    },
     // Shows / Hides bottom section
     bottomSectionClicked: function (e){
       this.$gui.panelState = this.$gui.panelState == 'hidden' ? 'visible' : 'hidden';
@@ -201,9 +210,21 @@ export default {
   background: rgb(200 240 255);;
 }
 
+/* max-height (not height) so the section shrink-wraps its content - Data,
+   Map and About each end up only as tall as they need (see their own
+   max-height/clamp() for Map/About). The generous cap only exists so the
+   open/close transition below has two numeric endpoints to animate between.
+   No overflow:hidden here - .top-left-icons intentionally pokes out above
+   this box (see its negative top), and clipping would cut it off. */
 .bottom-section-open {
-  height: 100%;
+  max-height: 500px;
   transition: all 0.7s ease-in-out;
+  /* Never squeezed below its content's need - Canvas3D (the other flex item
+     in .full-screen-container) absorbs the size change instead. Fullscreen
+     keeps the default flex-shrink: it relies on being squeezed to make its
+     disproportionate height:900% dominate while still leaving Canvas3D some
+     space (see .bottom-section-fullscreen). */
+  flex-shrink: 0;
 }
 .bottom-section-fullscreen{
   height: 900%;
@@ -211,7 +232,7 @@ export default {
 }
 
 .bottom-section-closed {
-  height: 0;
+  max-height: 0;
   transition: all 0.7s ease-in-out;
 }
 
@@ -240,9 +261,17 @@ export default {
 .menu-section-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
   width: 100%;
-  position: absolute;
+  /* In normal flow (not absolute) so #bottom-section's height is driven by
+     this container's actual content instead of a fixed percentage. */
+}
+/* Fullscreen: #bottom-section is genuinely tall (see .bottom-section-fullscreen),
+   so fill it - this stretches .section-content (flex:1 below) to match, which in
+   turn lets Map/About grow to cover it (their own "fullscreen" class) and pushes
+   .bottom-bar down to the actual bottom of the page instead of floating right
+   under a capped-height panel. */
+.bottom-section-fullscreen .menu-section-container {
+  height: 100%;
 }
 
 /* Above the section content, like the cross of the VISOC data timeline */

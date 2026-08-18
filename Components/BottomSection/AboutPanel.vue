@@ -1,6 +1,6 @@
 <template>
   
-  <div id="about-panel" class="content">
+  <div id="about-panel" class="content" :class="{ fullscreen: $gui.panelState === 'fullscreen' }">
 
     <p>{{$t('intro')}}</p>
 
@@ -92,6 +92,14 @@ export default {
   overflow: auto;
   font-size: small;
   max-width: 700px;
+  /* Fixed-ish size in "visible" mode, matching MapBuoyLocation - the text can
+     vary in length, so this keeps the panel a reasonable, consistent size. */
+  height: clamp(250px, 45vh, 400px);
+  box-sizing: border-box;
+}
+/* Fullscreen: cover the whole (now genuinely tall) container instead of staying capped */
+.content.fullscreen {
+  height: 100%;
 }
 
 p {

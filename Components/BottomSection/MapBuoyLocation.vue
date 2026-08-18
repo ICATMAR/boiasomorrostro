@@ -1,5 +1,5 @@
 <template>
-  <div id="map" class="map-container"></div>
+  <div id="map" class="map-container" :class="{ fullscreen: $gui.panelState === 'fullscreen' }"></div>
 </template>
 
 <script>
@@ -171,7 +171,13 @@ export default {
 <style scoped>
 .map-container {
   width: 100%;
-  height: 100%;
+  /* Fixed-ish size in "visible" mode: the map has no natural content height,
+     so this keeps the panel a reasonable size regardless of viewport. */
+  height: clamp(250px, 45vh, 400px);
   z-index: 1;
+}
+/* Fullscreen: cover the whole (now genuinely tall) container instead of staying capped */
+.map-container.fullscreen {
+  height: 100%;
 }
 </style>
