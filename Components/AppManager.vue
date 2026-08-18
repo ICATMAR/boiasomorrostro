@@ -130,8 +130,8 @@ export default {
 }
 
   .logo {
-  width: clamp(35px, 7vw, 100px);
-  height: clamp(35px, 7vw, 100px);
+  width: clamp(35px, 7vw, 60px);
+  height: clamp(35px, 7vw, 60px);
   z-index: 10;
 }
 

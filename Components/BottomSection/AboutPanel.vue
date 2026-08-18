@@ -20,6 +20,8 @@
     <!-- References -->
     <p>{{$t('howtocite')}}</p>
 
+    <p class="citation">Llorach Tó, G., Martí Comas, A., Pitarch Claramunt, X., Ribera Altimir, J., Molina, D., Casals Baixas, C., ... & Ballabrera Poy, J. (2025). Data flow, infrastructure, harmonization and 3d visualization: the use case of somorrostro’s moored buoy’s deployment. Instrumentation viewpoint, (24), 32-33.</p>
+
     <p class="citation">Llorach-Tó, G., Martínez, E., Fernández, J. D. R., & García-Ladona, E. (2023, June). Experience OBSEA: a web-based 3D virtual environment of a seafloor observatory. In OCEANS 2023-Limerick (pp. 1-6). IEEE.</p>
 
     <p class="citation">Llorach-Tó, G., Martínez, E., Del-Río, J., Simarro, G., Pani, M., Bucchi, A., ... & García-Ladona, E. (2024). 3D Digital Twins of the Ocean: towards an intuitive and realistic visualization of wave parameters (No. EGU24-19105). Copernicus Meetings.</p>
@@ -91,7 +93,7 @@ export default {
   padding: 20px;
   overflow: auto;
   font-size: small;
-  max-width: 700px;
+  max-width: 800px;
   /* Fixed-ish size in "visible" mode, matching MapBuoyLocation - the text can
      vary in length, so this keeps the panel a reasonable, consistent size. */
   height: clamp(250px, 45vh, 400px);
