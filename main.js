@@ -13,6 +13,13 @@ window.CMEMS_LATITUDE = 41.373;
 
 
 
+// Utils for hash and routing
+import {setHashValue, getHashValue, removeHash} from './Assets/Scripts/utils.js';
+window.location.setHashValue = setHashValue;
+window.location.getHashValue = getHashValue;
+window.location.removeHash = removeHash;
+
+
 // Load classes
 // SceneManager
 import SceneManager from "/boiasomorrostro/Assets/Scripts/SceneManager.js"
@@ -23,7 +30,10 @@ window.SceneManager = SceneManager;
 
 // Import WMTSDataRetriever
 import WMTSDataRetrieverClass from './Assets/Scripts/WMTS/WMTSDataRetriever.js';
-window.WMTSDataRetriever = new WMTSDataRetrieverClass();
+// Resolves once the capabilities of every CMEMS product are loaded (SourceCMEMS waits for it)
+window.WMTSDataRetrieverLoaded = new Promise(resolve => {
+  window.WMTSDataRetriever = new WMTSDataRetrieverClass(resolve);
+});
 // Import tile manager
 import WMTSTileManagerClass from './Assets/Scripts/WMTS/WMTSTileManager.js'
 window.WMTSTileManager = new WMTSTileManagerClass();
@@ -32,6 +42,13 @@ window.WMTSTileManager = new WMTSTileManagerClass();
 // Import AISManager
 import AISManagerClass from './Assets/Scripts/AIS/AISManager.js';
 window.AISManager = new AISManagerClass();
+
+// GUI and data
+import GUIManager from './Assets/Scripts/GUIManager.js';
+import FetchManager from './Assets/Scripts/data/FetchManager.js';
+import DataService from './Assets/Scripts/data/DataService.js';
+window.GUIManager = Vue.reactive(new GUIManager());
+window.DataService = new DataService(FetchManager);
 
 // Declare translations
 const i18n = VueI18n.createI18n({
@@ -86,4 +103,8 @@ i18n.global.mergeLocaleMessage('ca', ca);
 i18n.global.mergeLocaleMessage('en', en);
 i18n.global.mergeLocaleMessage('es', es);
 app.use(i18n);
+
+// Global properties
+app.config.globalProperties.$gui = window.GUIManager;
+app.config.globalProperties.$dataService = window.DataService;
 app.mount(document.body);

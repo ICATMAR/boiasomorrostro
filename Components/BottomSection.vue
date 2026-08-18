@@ -11,76 +11,23 @@
 
 
     <div class="menu-section-container" v-show="isSectionOpen">
-      
-      <!-- Menu left -->
-      <div class="menu-list-left">
-        <button v-for="el in menu" :key="el.title" 
-          class="menu-left-button clickable" :class="[selectedMenu == el.title ? 'button-selected' : '']" 
-          @click="menuLeftItemClicked(el)">
-          <span v-if="el.icon" class="fa" v-html="el.icon"></span>
-          <span>{{ $t(el.title) }}</span>
-        </button>
-      </div>
-      
-      <!-- Submenu center -->
-      <div class="submenu-container">
-        <div v-for="el in menu" :key="el.title" :class="[selectedMenu == el.title ? 'h100':'']">
-          
-          <!-- In submenu -->
-          <div v-if="selectedMenu == el.title && selectedSubEl.title == ''">
-            <!-- Submenu title -->
-            <div class="submenu-title">
-              <div class="fa" v-html="el.icon"></div>
-              {{ $t(el.title) }}
-            </div>
-            <!-- Submenu items -->
-            <div class="submenu-items-container">
-              <!-- Children elements -->
-              <div v-for="subEl in el.children" class="clickable" @click="submenuItemClicked(subEl)">
-                <div>
-                  <span v-if="subEl.icon" class="fa" v-html="subEl.icon"></span>
-                  <span v-else-if="el.icon" class="fa" v-html="el.icon"></span>
-                  <span>{{subEl.title }}</span>
-                </div>
-                
-                <span class="fa" v-if="subEl.component">&#xf0da;</span>
-                <span class="fa" v-else-if="subEl.isClickEvent">&#xf019;</span>
 
-              </div>
-            </div>
-            <!-- Component -->
-            <div class="submenu-item-content">
-              <component v-if="el.component" :is="el.component" />
-            </div>
-          </div>
-
-          <!-- In item of submenu -->
-          <div v-else-if="selectedMenu == el.title && selectedSubEl.title != ''">
-            <!-- Submenu Item title -->
-            <div class="submenu-item-title clickable" @click="backToSubmenu()">
-              <!-- Return arrow -->
-              <div class="fa">&#xf060;</div>
-              <!-- Title -->
-              <div>
-                {{ selectedSubEl.title }}
-              </div>
-              
-            </div>
-            
-            <!-- Component? -->
-            <div class="submenu-item-content">
-              <component v-if="selectedSubEl.component" :is="selectedSubEl.component" />
-            </div>
-          </div>
-
-
-        </div>
+      <!-- Cross and top-left icons -->
+      <div class="horizontal top-left-icons">
+        <i class="clickable close-x fa-solid fa-xmark" @click="closeClicked"></i>
+        <i class="clickable close-x" :class="isMenuFullscreen ? 'fa-solid fa-compress' : 'fa-solid fa-expand'" @click="fullscreenClicked"></i>
       </div>
 
-      <!-- Top-right icons -->
-      <div class="top-right-icons">
-        <div class="icon-str fa clickable" @click="fullscreenClicked">&#xf065;</div>
-        <div class="icon-str fa clickable" @click="closeClicked">&#xf00d;</div>
+      <!-- Selected section -->
+      <div class="section-content">
+        <component :is="selectedSection.component" />
+      </div>
+
+      <!-- Bottom options -->
+      <div class="horizontal wrap button-group bottom-bar">
+        <button v-for="el in menu" :key="el.id" class="clickable"
+          :class="{ 'selectedOption': $gui.selectedSection === el.id }"
+          @click="$gui.selectedSection = el.id"><span>{{ $t(el.title) }}</span></button>
       </div>
     </div>
   </div>
@@ -110,24 +57,21 @@ export default {
     return {
       isSectionOpen: true,
       isMenuFullscreen: false,
-      // Selected menu items
-      selectedMenu: 'Data',
-      selectedSubEl: {title: ''},
-      // Menu structure
+      // Menu structure. id is what the URL hash holds (see GUIManager)
       menu: [
         {
           title: 'Data',
-          icon: '&#xe69b',
+          id: 'data',
           component: 'dataSection',
         },
         {
           title: 'Map',
-          icon: '&#xf5a0',
+          id: 'map',
           component: 'mapBuoyLocation'
         },
         {
           title: 'About',
-          icon: '&#xf05a',
+          id: 'about',
           component: 'about',
         } // End of about
         // {
@@ -208,25 +152,7 @@ export default {
         window.dispatchEvent(new Event('resize'));
       }, 750);
     },
-    // Menu option on the left clicked
-    menuLeftItemClicked: function(el){
-      this.selectedMenu = el.title;
-      this.selectedSubEl = {title: ''};
-    },
-    // Submenu item clicked
-    submenuItemClicked: function(subEl){
-      if (subEl.isClickEvent){
-        subEl.event();
-      } else {
-        this.selectedSubEl = subEl;
-      }
-    },
-    // Submenu title clicked
-    backToSubmenu: function(){
-      this.selectedSubEl = {title: ''};
-    },
-
-    // Top-right-icons
+    // Top-left-icons
     closeClicked: function(){
       this.bottomSectionClicked();
     },
@@ -235,6 +161,12 @@ export default {
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
       }, 750);
+    },
+  },
+  computed: {
+    // Menu entry of the section selected in the URL hash
+    selectedSection: function(){
+      return this.menu.find(el => el.id == this.$gui.selectedSection);
     },
   },
   components: {
@@ -303,95 +235,35 @@ export default {
 
 .menu-section-container {
   display: flex;
-  padding: 20px;
+  flex-direction: column;
   height: 100%;
   width: 100%;
   position: absolute;
 }
 
-.menu-list-left {
-  padding: 10px;
-}
-.menu-list-left > button {
-  margin-bottom: 10px;
-  width: 100%;
-}
-.menu-list-left > button > span {
-  text-wrap-mode: nowrap;
-}
-.menu-left-button {
-  padding-left: 10px;
-  padding-right: 10px;
+/* Above the section, like the cross of the VISOC data timeline */
+.top-left-icons {
+  position: absolute;
+  top: -15px;
+  left: 25px;
+  gap: 8px;
+  z-index: 12;
 }
 
-
-.submenu-container {
-  width: 100%;
-  padding-left: 10px;
-  padding-right: 20px;
-}
-
-.submenu-container > div >div {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.submenu-title {
-  padding-top: 10px;
-  padding-bottom: 10px;
-  text-align: center;
-}
-
-.submenu-items-container {
-  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.304);
-  border-radius: 15px;
-  background: var(--lightBlue);
-  max-width: 500px;
-  width: 100%;
-}
-.submenu-items-container > div {
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 15px;
-  box-shadow: 0 0 4px #0000003b;
-}
-
-.submenu-items-container > div:hover {
-  background: var(--blue);
-  border-radius: 15px;
-}
-
-.submenu-item-title {
-  display: flex;
-  align-items: center;
-  box-shadow: 0px 0px 4px black;
-  border-radius: 20px;
-  padding: 10px;
-  font-size: small;
-}
-.submenu-item-title > *{
-  padding-left: 10px;
-  padding-right: 10px;
-}
-.submenu-item-content{
+.section-content {
+  flex: 1;
   overflow: auto;
   justify-items: center;
   width: 100%;
-  height: 100%;
+  min-height: 0;
 }
 
-.top-right-icons {
-  position: absolute;
-  right: 10px;
-  display: flex;
+.bottom-bar {
+  border-top: 1px white solid;
+  background: var(--blue);
 }
-
-.h100{
-  height: 100%;
+.bottom-bar > * {
+  padding-left: 10px;
+  font-size: small;
 }
 </style>

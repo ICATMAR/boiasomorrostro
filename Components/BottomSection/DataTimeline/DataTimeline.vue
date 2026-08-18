@@ -1,0 +1,165 @@
+<template>
+  <DTLayout :variables="product.variables">
+    <template #grid>
+      <DTTimelineGrid :cells="cells">
+        <!-- One row per variable: coloured cell with the value and, if the
+             variable has a direction, an arrow pointing where it goes -->
+        <tr v-for="v in product.variables" :key="v.code">
+          <td v-for="(cell, index) in cells" :key="index" class="value-cell"
+            :style="{ background: cellColor(v, index) }"
+            :title="cellTitle(v, cell, index)">
+            <i v-if="arrowAngle(v, index) != undefined" class="fa-solid fa-location-arrow cell-arrow"
+              :style="{ transform: `rotate(${arrowAngle(v, index) - 45}deg)` }"></i>
+            <span class="cell-value">{{ cellText(v, index) }}</span>
+          </td>
+        </tr>
+      </DTTimelineGrid>
+    </template>
+  </DTLayout>
+</template>
+
+
+<script>
+import DTLayout from './DTLayout.vue';
+import DTTimelineGrid from './DTTimelineGrid.vue';
+
+// Value colour scale (normalized 0..1 over the variable range): white -> cyan -> green -> yellow -> red
+const COLOR_STOPS = [
+  [0.00, [255, 255, 255]],
+  [0.25, [0, 255, 255]],
+  [0.50, [0, 180, 0]],
+  [0.75, [255, 255, 0]],
+  [1.00, [255, 0, 0]],
+];
+
+export default {
+  name: "DataTimeline",
+  props: {
+    product: Object, // DataProduct, see Assets/Scripts/data/products/
+  },
+  created() {
+    this.loadToken = 0; // discards responses of a previous time scale (not reactive)
+  },
+  mounted() {
+    this.loadValues();
+  },
+  data() {
+    return {
+      values: {}, // { standardCode: [value per cell] }
+    }
+  },
+  methods: {
+    // Requests every variable (and its direction) on every visible cell. Cells are
+    // filled as the requests resolve, so the timeline shows data progressively.
+    loadValues() {
+      const token = ++this.loadToken;
+      const cells = this.cells;
+      const timeScale = this.$gui.timelineWMTSTimeScale;
+
+      const values = {};
+      this.codes.forEach(code => values[code] = new Array(cells.length));
+      this.values = values;
+
+      this.codes.forEach(code => {
+        cells.forEach((cell, index) => {
+          this.product.getValueAt(code, cell, timeScale).then(value => {
+            if (token != this.loadToken) return; // time scale changed while loading
+            this.values[code][index] = value;
+          });
+        });
+      });
+    },
+    // Value of a variable on a cell, undefined if it has not loaded or has no data
+    valueAt(code, index) {
+      return this.values[code] == undefined ? undefined : this.values[code][index];
+    },
+    cellText(v, index) {
+      const value = this.valueAt(v.code, index);
+      return value == undefined ? '' : value.toFixed(v.decimals);
+    },
+    // Arrows point where the variable goes, so directions given as where it comes
+    // from (wind, waves) are turned around
+    arrowAngle(v, index) {
+      if (v.directionCode == undefined) return undefined;
+      const direction = this.valueAt(v.directionCode, index);
+      if (direction == undefined) return undefined;
+      const angle = v.fromDirection ? direction + 180 : direction;
+      return (angle % 360 + 360) % 360; // currents come as -180..180
+    },
+    cellColor(v, index) {
+      const value = this.valueAt(v.code, index);
+      if (value == undefined) return 'transparent';
+      const t = Math.min(Math.max((value - v.range[0]) / (v.range[1] - v.range[0]), 0), 1);
+      for (let i = 0; i < COLOR_STOPS.length - 1; i++) {
+        const [t0, c0] = COLOR_STOPS[i];
+        const [t1, c1] = COLOR_STOPS[i + 1];
+        if (t <= t1) {
+          const f = (t - t0) / (t1 - t0);
+          const r = Math.round(c0[0] + (c1[0] - c0[0]) * f);
+          const g = Math.round(c0[1] + (c1[1] - c0[1]) * f);
+          const b = Math.round(c0[2] + (c1[2] - c0[2]) * f);
+          return `rgb(${r}, ${g}, ${b})`;
+        }
+      }
+      return 'rgb(255, 0, 0)';
+    },
+    cellTitle(v, cell, index) {
+      const value = this.valueAt(v.code, index);
+      if (value == undefined) return this.$t('No data available');
+      const direction = this.arrowAngle(v, index);
+      const directionStr = direction == undefined ? '' : ` · ${direction.toFixed(0)}º`;
+      return `${cell.toISOString()}\n${this.$t(v.name)}: ${value.toFixed(v.decimals)} ${v.unit}${directionStr}`;
+    },
+  },
+  computed: {
+    cells() {
+      const startTime = this.$gui.timelineStartDate.getTime();
+      const endTime = this.$gui.timelineEndDate.getTime();
+      const stepMs = this.$gui.timelineIntervalMinutes * 60 * 1000;
+      let cells = [];
+      for (let t = startTime; t < endTime; t += stepMs)
+        cells.push(new Date(t));
+      return cells;
+    },
+    // Variables shown as rows, plus the directions they need
+    codes() {
+      const codes = [];
+      this.product.variables.forEach(v => {
+        codes.push(v.code);
+        if (v.directionCode) codes.push(v.directionCode);
+      });
+      return codes;
+    },
+  },
+  watch: {
+    '$gui.timelineScaleId'() {
+      this.loadValues();
+    },
+  },
+  components: {
+    DTLayout,
+    DTTimelineGrid,
+  }
+}
+
+</script>
+
+
+<style scoped>
+.value-cell {
+  border-bottom: 1px solid #0000002e;
+  padding: 0;
+}
+
+.cell-value {
+  font-size: 0.65rem;
+  color: black;
+  text-shadow: none;
+  padding: 0px 1px;
+}
+
+.cell-arrow {
+  font-size: 9px;
+  color: rgba(0, 0, 0, 0.75);
+}
+</style>

@@ -103,6 +103,54 @@ button:hover {
 }
 
 
+.button-group{
+  display: flex;
+  justify-content: flex-start;
+  padding: 4px;
+}
+.button-group > button {
+  border-radius: 10px;
+  padding: 0px 12px;
+  border: none;
+  background: rgb(0 0 0 / 0%);
+}
+.button-group > button.selectedOption {
+  background: var(--red);
+  box-shadow: 0 0 4px black;
+}
+
+
+.close-x {
+  width: 30px;
+  height: 30px;
+
+  background: var(--red);
+  color: white;
+  box-shadow: 0 0 4px black;
+  border-radius: 50%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.vertical {
+  display: flex;
+  flex-direction: column;
+}
+
+.horizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+
 .clickable {
   cursor: pointer;
   pointer-events: auto;
