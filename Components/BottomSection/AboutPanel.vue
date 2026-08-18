@@ -97,9 +97,9 @@ export default {
   height: clamp(250px, 45vh, 400px);
   box-sizing: border-box;
 }
-/* Fullscreen: cover the whole (now genuinely tall) container instead of staying capped */
+
 .content.fullscreen {
-  height: 100%;
+  flex: auto;
 }
 
 p {

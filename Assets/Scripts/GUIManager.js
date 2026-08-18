@@ -1,4 +1,5 @@
 import UNIT_GROUPS from './data/units.js';
+import COLOR_LEGENDS from './data/colorLegends.js';
 
 // Time scales of the data timeline. hoursAheadBehind sets how much data is shown
 // before and after the current hour (finer scales show a shorter span, so the
@@ -63,6 +64,12 @@ class GUIManager {
     const options = UNIT_GROUPS[group];
     this._unitIndex[group] = ((this._unitIndex[group] || 0) + 1) % options.length;
     localStorage.setItem(UNITS_STORAGE_KEY, JSON.stringify(this._unitIndex));
+  }
+
+  // COLOR LEGENDS
+  // Cell colour scale (see Assets/Scripts/data/colorLegends.js) for a variable code
+  colorLegend(varCode) {
+    return COLOR_LEGENDS[varCode] || COLOR_LEGENDS['BLANK'];
   }
 
   // TIMELINE TIMEZONE

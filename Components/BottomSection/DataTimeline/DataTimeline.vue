@@ -15,15 +15,6 @@
 
 <script>
 
-// Value colour scale (normalized 0..1 over the variable range): white -> cyan -> green -> yellow -> red
-const COLOR_STOPS = [
-  [0.00, [255, 255, 255]],
-  [0.25, [0, 255, 255]],
-  [0.50, [0, 180, 0]],
-  [0.75, [255, 255, 0]],
-  [1.00, [255, 0, 0]],
-];
-
 export default {
   name: "DataTimeline",
   props: {
@@ -96,9 +87,10 @@ export default {
       if (value == undefined) return 'transparent';
       const { range } = this.unitOption(v);
       const t = Math.min(Math.max((value - range[0]) / (range[1] - range[0]), 0), 1);
-      for (let i = 0; i < COLOR_STOPS.length - 1; i++) {
-        const [t0, c0] = COLOR_STOPS[i];
-        const [t1, c1] = COLOR_STOPS[i + 1];
+      const colorStops = this.$gui.colorLegend(v.code);
+      for (let i = 0; i < colorStops.length - 1; i++) {
+        const [t0, c0] = colorStops[i];
+        const [t1, c1] = colorStops[i + 1];
         if (t <= t1) {
           const f = (t - t0) / (t1 - t0);
           const r = Math.round(c0[0] + (c1[0] - c0[0]) * f);
@@ -107,7 +99,10 @@ export default {
           return `rgb(${r}, ${g}, ${b})`;
         }
       }
-      return 'rgb(255, 0, 0)';
+      // t clamped to [0,1] should always match a segment above; this is just
+      // a safety net, so use the legend's own last colour instead of a fixed one
+      const [, lastColor] = colorStops[colorStops.length - 1];
+      return `rgb(${lastColor[0]}, ${lastColor[1]}, ${lastColor[2]})`;
     },
     cellTitle(v, cell, index) {
       const value = this.displayValue(v, index);
