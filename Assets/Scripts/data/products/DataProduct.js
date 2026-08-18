@@ -17,6 +17,19 @@ class DataProduct {
     console.log(`${this.constructor.name}: sources loaded`, this.sources);
   }
 
+  // Resolves once every source that loads upfront has finished
+  async ready() {
+    await Promise.all(this.sources.map(source => source.loadingPromise));
+  }
+
+  // Timeline rows for the current panel state: only the ones flagged `compact`
+  // when the bottom section is compact, all of them in fullscreen. A product
+  // without any compact variable always shows all of them.
+  visibleVariables(isCompact) {
+    const compact = this.variables.filter(v => v.compact);
+    return (isCompact && compact.length) ? compact : this.variables;
+  }
+
   // Value of a standard variable code at a date, from the first source that has it
   async getValueAt(code, date, intervalMinutes) {
     for (const source of this.sources) {

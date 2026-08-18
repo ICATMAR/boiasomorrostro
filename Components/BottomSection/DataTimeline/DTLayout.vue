@@ -20,9 +20,9 @@
       <!-- Variable names and units, grouped per data product -->
       <div class="vertical variable-names-list">
         <template v-for="group in groups" :key="group.name">
-          <!-- Spacer matching the product row on the right (see DataSection.vue) -->
+          <!-- Spacer matching the product row on the right (see the sections) -->
           <div class="group-spacer"></div>
-          <div class="horizontal name-row" v-for="v in group.product.variables" :key="v.code">
+          <div class="horizontal name-row" v-for="v in group.variables" :key="v.code">
             <span class="var-name">{{ $t(v.name) }}</span>
             <span class="var-unit" :class="{ clickable: v.unitGroup }" @click="v.unitGroup && $gui.cycleUnit(v.unitGroup)">{{ unitLabel(v) }}</span>
           </div>
@@ -38,9 +38,10 @@
       <!-- Timeline container -->
       <div class="horizontal table-container" ref="tableContainer">
         <div class="vertical timeline-inner">
-          <slot name="grid"></slot>
-          <!-- Current time marker, non-interactive -->
-          <div class="now-line" :style="{ left: nowLineLeft + 'px' }"></div>
+          <slot name="grid" :cells="cells"></slot>
+          <!-- Current time marker, non-interactive. Hidden when now falls
+               outside the range (the buoy can lag days behind). -->
+          <div v-if="isNowInRange" class="now-line" :style="{ left: nowLineLeft + 'px' }"></div>
         </div>
       </div>
     </div>
@@ -55,7 +56,10 @@ const CELL_WIDTH_PX = 40; // must match .dt-table td width in DTTimelineGrid.vue
 export default {
   name: "DTLayout",
   props: {
-    groups: Array, // [{ name, product }], see $dataService.dataProducts
+    groups: Array,      // [{ name, product, variables }] - variables already filtered for the panel state
+    startDate: Date,    // timeline range, so each section can span its own dates
+    endDate: Date,
+    scrollTo: String,   // 'center' (default) or 'end', where to park the horizontal scroll
   },
   mounted() {
     this.resetScroll();
@@ -93,12 +97,14 @@ export default {
       this.$gui.timelineScaleId = this.$gui.timescales[this.currentScaleIdx() - 1].id;
       this.resetScroll();
     },
-    // Reset scroll position so the current time is centered
+    // Park the scroll on the newest data ('end') or on the middle of the range
     resetScroll() {
       this.$nextTick(() => {
         const slidingContainer = this.$refs.tableSlidingContainer;
         const tableContainer = this.$refs.tableContainer;
-        slidingContainer.scrollLeft = Math.max(0, (tableContainer.offsetWidth - slidingContainer.offsetWidth) / 2);
+        if (!slidingContainer || !tableContainer) return;
+        const hidden = Math.max(0, tableContainer.offsetWidth - slidingContainer.offsetWidth);
+        slidingContainer.scrollLeft = this.scrollTo === 'end' ? hidden : hidden / 2;
       });
     },
 
@@ -142,17 +148,38 @@ export default {
     },
   },
   computed: {
+    // One column per time step. Owned here so the names column, the grid and
+    // the now-line all measure the same range.
+    cells() {
+      const startTime = this.startDate.getTime();
+      const endTime = this.endDate.getTime();
+      const stepMs = this.$gui.timelineIntervalMinutes * 60 * 1000;
+      let cells = [];
+      for (let t = startTime; t < endTime; t += stepMs)
+        cells.push(new Date(t));
+      return cells;
+    },
     canZoomIn() {
       return this.currentScaleIdx() < this.$gui.timescales.length - 1;
     },
     canZoomOut() {
       return this.currentScaleIdx() > 0;
     },
+    isNowInRange() {
+      return this.now >= this.startDate.getTime() && this.now <= this.endDate.getTime();
+    },
     // Horizontal offset of the current-time marker, in pixels along the grid
     nowLineLeft() {
-      const elapsedMs = this.now - this.$gui.timelineStartDate.getTime();
+      const elapsedMs = this.now - this.startDate.getTime();
       const cellMs = this.$gui.timelineIntervalMinutes * 60 * 1000;
       return (elapsedMs / cellMs) * CELL_WIDTH_PX;
+    },
+  },
+  watch: {
+    // A new range (scale change, or the buoy's latest datum arriving) needs the
+    // scroll parked again
+    cells() {
+      this.resetScroll();
     },
   }
 }

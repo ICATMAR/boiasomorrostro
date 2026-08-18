@@ -42,7 +42,9 @@
 // import RenderHeightPanel from './BottomSection/RenderHeightPanel.vue';
 
 import RawData from './BottomSection/RawData.vue';
-import DataSection from './BottomSection/DataSection.vue';
+import ForecastSection from './BottomSection/ForecastSection.vue';
+import ObservationsSection from './BottomSection/ObservationsSection.vue';
+import WindSection from './BottomSection/WindSection.vue';
 import MapBuoyLocation from './BottomSection/MapBuoyLocation.vue';
 import AboutPanel from './BottomSection/AboutPanel.vue';
 
@@ -60,9 +62,19 @@ export default {
       // Menu structure. id is what the URL hash holds (see GUIManager)
       menu: [
         {
-          title: 'Data',
-          id: 'data',
-          component: 'dataSection',
+          title: 'Forecast',
+          id: 'forecast',
+          component: 'forecastSection',
+        },
+        {
+          title: 'Observations',
+          id: 'observations',
+          component: 'observationsSection',
+        },
+        {
+          title: 'Wind',
+          id: 'wind',
+          component: 'windSection',
         },
         {
           title: 'Map',
@@ -154,7 +166,7 @@ export default {
     },
     // Shows / Hides bottom section
     bottomSectionClicked: function (e){
-      this.$gui.panelState = this.$gui.panelState == 'hidden' ? 'visible' : 'hidden';
+      this.$gui.panelState = this.$gui.panelState == 'hidden' ? 'compact' : 'hidden';
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
       }, 750);
@@ -164,7 +176,7 @@ export default {
       this.bottomSectionClicked();
     },
     fullscreenClicked: function(){
-      this.$gui.panelState = this.$gui.panelState == 'fullscreen' ? 'visible' : 'fullscreen';
+      this.$gui.panelState = this.$gui.panelState == 'fullscreen' ? 'compact' : 'fullscreen';
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
       }, 750);
@@ -188,7 +200,9 @@ export default {
     // "render-heights": RenderHeightPanel,
     // "render-stereo": RenderStereoPanel,
     "rawData": RawData,
-    "dataSection": DataSection,
+    "forecastSection": ForecastSection,
+    "observationsSection": ObservationsSection,
+    "windSection": WindSection,
     "mapBuoyLocation": MapBuoyLocation,
     "about": AboutPanel,
     

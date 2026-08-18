@@ -14,7 +14,7 @@
       </td>
     </tr>
     <!-- Data rows provided by the caller -->
-    <slot :cells="cells"></slot>
+    <slot></slot>
   </tbody>
 </table>
 </template>
@@ -24,16 +24,10 @@
 
 export default {
   name: "DTTimelineGrid",
+  props: {
+    cells: Array, // [Date], one per column - owned by DTLayout
+  },
   computed: {
-    cells() {
-      const startTime = this.$gui.timelineStartDate.getTime();
-      const endTime = this.$gui.timelineEndDate.getTime();
-      const stepMs = this.$gui.timelineIntervalMinutes * 60 * 1000;
-      let cells = [];
-      for (let t = startTime; t < endTime; t += stepMs)
-        cells.push(new Date(t));
-      return cells;
-    },
     days() {
       let days = [];
       for (const cell of this.cells) {
@@ -97,5 +91,34 @@ export default {
   top: 50%;
   transform: translate(-50%, -50%);
   white-space: nowrap;
+}
+
+/* Row naming a data product, slotted in by the sections. Prefixed with td to
+   outweigh the ".dt-table td > *" reset above. The td spans every column
+   (colspan) so its background covers the full row; .group-cell-label inside
+   it sticks to the left edge of the scrolling viewport (see
+   .table-and-info-container in DTLayout.vue) so the label stays visible
+   while the row's data cells scroll underneath it. */
+td.group-cell {
+  text-align: left;
+  padding: 0;
+  background: #a9a9a9;
+}
+/* td.group-cell prefix (not just .group-cell-label) to outweigh the
+   ".dt-table td > *" reset's own padding:0 - same specificity trick as above */
+td.group-cell > .group-cell-label {
+  position: sticky;
+  left: 0;
+  display: inline-block;
+  padding-left: 10px;
+  white-space: nowrap;
+}
+.group-cell-label > span,
+.group-cell-label > a {
+  font-size: 0.65rem;
+  color: white;
+}
+.group-cell-label > a {
+  text-decoration: underline;
 }
 </style>

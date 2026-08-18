@@ -86,13 +86,43 @@ export default ca = {
   "Wind gust": "Ràfega",
   "Wave significant height": "Onatge",
   "Air temperature": "Temp. aire",
-  "Atmospheric pressure": "Pressió atmosfèrica",
+  "Atmospheric pressure": "Pressió",
   "Sea surface temperature": "Temp. mar",
   "Sea bottom temperature": "Temperatura del fons del mar",
   "Sea temperature anomaly": "Anomalia de temperatura del mar",
   "Salinity": "Salinitat",
   "Humidity": "Humitat",
   "Cloudiness": "Núvols",
+
+  // Sensor METEO de la boia, abreujat per a la línia temporal
+  "Dew point temperature": "Punt de rosada",
+  "Wet bulb temperature": "Bulb humit",
+  "Relative wind speed": "Vent relatiu",
+  "Relative wind direction": "Direcció vent relatiu",
+  "Air density": "Densitat aire",
+
+  // Secció inferior
+  "Forecast": "Predicció",
+  "Observations": "Observacions",
+
+  timeAgo: {
+    now: "Ara mateix",
+    minutes: "Fa {n} min",
+    hour: "Fa 1 h",
+    hours: "Fa {n} h",
+    day: "Fa 1 dia",
+    days: "Fa {n} dies",
+    moreThanWeek: "Fa més de 7 dies",
+  },
+
+  buoyStatus: {
+    noData: "No hi ha dades disponibles de la boia en els últims tres dies.",
+    tooManyRequests: "Massa peticions al servidor de dades en aquest moment. Torneu-ho a provar d'aquí una estona.",
+    serverError: "El servidor de dades no està disponible en aquest moment.",
+    timeout: "El servidor de dades ha trigat massa a respondre.",
+    genericError: "No s'ha pogut connectar amb el servidor de dades.",
+    contactPrefix: "Si necessiteu aquesta informació amb urgència, contacteu amb",
+  },
 
 
   "swellCompositionSVG": "Blau clar: mar total; Groc: onatge de vent; Blau: mar de fons; Blau fosc: mar de fons 2",

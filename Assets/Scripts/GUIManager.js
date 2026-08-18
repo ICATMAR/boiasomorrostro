@@ -14,34 +14,38 @@ const UNITS_STORAGE_KEY = 'boiasomorrostro_units';
 class GUIManager {
 
   timescales = TIMESCALES;
-  sections = ['data', 'map', 'about'];
-  panelStates = ['fullscreen', 'visible', 'hidden'];
+  sections = ['forecast', 'observations', 'wind', 'map', 'about'];
+  panelStates = ['fullscreen', 'compact', 'hidden'];
+  // Sections that show a data timeline, and therefore a time scale
+  timelineSections = ['forecast', 'observations'];
 
   // BOTTOM SECTION
-  _selectedSection = 'data';
+  _selectedSection = 'forecast';
   get selectedSection() { return this._selectedSection; }
   set selectedSection(id) {
     this._selectedSection = id;
     window.location.setHashValue('SECTION', id);
-    // The time scale only makes sense while the data timeline is shown
-    if (id == 'data') window.location.setHashValue('TIMESCALE', this._timelineScaleId);
+    // The time scale only makes sense while a data timeline is shown
+    if (this.timelineSections.includes(id)) window.location.setHashValue('TIMESCALE', this._timelineScaleId);
     else window.location.removeHash('TIMESCALE');
   }
 
-  // Whether the bottom section is fullscreen, visible (normal height) or hidden
-  _panelState = 'visible';
+  // Whether the bottom section is fullscreen, compact (normal height) or hidden
+  _panelState = 'compact';
   get panelState() { return this._panelState; }
   set panelState(state) {
     this._panelState = state;
     window.location.setHashValue('PANEL', state);
   }
+  // Compact hides the secondary timeline variables (see Catalogue's `compact`)
+  get isCompact() { return this._panelState != 'fullscreen'; }
 
   // TIMELINE SCALE
   _timelineScaleId = '3h';
   get timelineScaleId() { return this._timelineScaleId; }
   set timelineScaleId(id) {
     this._timelineScaleId = id;
-    if (this._selectedSection == 'data') window.location.setHashValue('TIMESCALE', id);
+    if (this.timelineSections.includes(this._selectedSection)) window.location.setHashValue('TIMESCALE', id);
   }
   get timelineScale() { return TIMESCALES.find(t => t.id == this._timelineScaleId); }
   get timelineIntervalMinutes() { return this.timelineScale.minutes; }
@@ -87,7 +91,7 @@ class GUIManager {
     return date.toLocaleString(locale, options);
   }
 
-  // TIMELINE RANGE
+  // FORECAST TIMELINE RANGE
   // Data is forecast as well as past, so the range is centered on the current hour
   get timelineStartDate() {
     let date = new Date();
@@ -99,6 +103,21 @@ class GUIManager {
     let date = new Date(this.timelineStartDate.getTime());
     date.setHours(date.getHours() + 2 * this.timelineScale.hoursAheadBehind);
     return date;
+  }
+
+  // OBSERVATIONS TIMELINE RANGE
+  // Anchored on the latest measurement instead of on "now": the buoy can lag by
+  // days, and the timeline should always end just after the newest data. Covers
+  // the three days SourceErddapBuoy loads, plus half a day of empty cells.
+  observationsDaysLoaded = 3;
+  observationsHoursAhead = 12;
+  observationsRange(latestDate) {
+    let end = new Date((latestDate || new Date()).getTime());
+    end.setMinutes(0, 0, 0);
+    end.setHours(end.getHours() + 1 + this.observationsHoursAhead);
+    let start = new Date(end.getTime());
+    start.setHours(start.getHours() - this.observationsHoursAhead - 24 * this.observationsDaysLoaded);
+    return { start, end };
   }
 
 

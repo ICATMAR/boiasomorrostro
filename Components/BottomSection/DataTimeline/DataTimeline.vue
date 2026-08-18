@@ -1,7 +1,7 @@
 <template>
   <!-- One row per variable: coloured cell with the value and, if the
        variable has a direction, an arrow pointing where it goes -->
-  <tr v-for="v in product.variables" :key="v.code">
+  <tr v-for="v in variables" :key="v.code">
     <td v-for="(cell, index) in cells" :key="index" class="value-cell"
       :style="{ background: cellColor(v, index) }"
       :title="cellTitle(v, cell, index)">
@@ -27,8 +27,9 @@ const COLOR_STOPS = [
 export default {
   name: "DataTimeline",
   props: {
-    product: Object, // DataProduct, see Assets/Scripts/data/products/
-    cells: Array,    // [Date], one per column - shared across every product in the timeline
+    product: Object,  // DataProduct, see Assets/Scripts/data/products/
+    variables: Array, // rows to show - already filtered for the panel state
+    cells: Array,     // [Date], one per column - shared across every product in the timeline
   },
   created() {
     this.loadToken = 0; // discards responses of a previous request (not reactive)
@@ -121,7 +122,7 @@ export default {
     // Variables shown as rows, plus the directions they need
     codes() {
       const codes = [];
-      this.product.variables.forEach(v => {
+      this.variables.forEach(v => {
         codes.push(v.code);
         if (v.directionCode) codes.push(v.directionCode);
       });
@@ -129,8 +130,12 @@ export default {
     },
   },
   watch: {
-    // cells only changes reference when the timeline scale changes
+    // cells changes when the timeline scale or its date range does
     cells() {
+      this.loadValues();
+    },
+    // Compact/fullscreen swaps the rows, so the extra ones need loading
+    variables() {
       this.loadValues();
     },
   },

@@ -87,13 +87,43 @@ export default es = {
   "Wind gust": "Ráfaga",
   "Wave significant height": "Oleaje",
   "Air temperature": "Temp. aire",
-  "Atmospheric pressure": "Pressión atmosférica",
+  "Atmospheric pressure": "Presión",
   "Sea surface temperature": "Temp. mar",
   "Sea bottom temperature": "Temperatura del fondo del mar",
   "Sea temperature anomaly": "Anomalia de temperatura del mar",
   "Salinity": "Salinidad",
   "Humidity": "Humedad",
   "Cloudiness": "Nubosidad",
+
+  // Sensor METEO de la boya, abreviado para la línea temporal
+  "Dew point temperature": "Punto de rocío",
+  "Wet bulb temperature": "Bulbo húmedo",
+  "Relative wind speed": "Viento relativo",
+  "Relative wind direction": "Dirección viento relativo",
+  "Air density": "Densidad aire",
+
+  // Sección inferior
+  "Forecast": "Predicción",
+  "Observations": "Observaciones",
+
+  timeAgo: {
+    now: "Ahora mismo",
+    minutes: "Hace {n} min",
+    hour: "Hace 1 h",
+    hours: "Hace {n} h",
+    day: "Hace 1 día",
+    days: "Hace {n} días",
+    moreThanWeek: "Hace más de 7 días",
+  },
+
+  buoyStatus: {
+    noData: "No hay datos disponibles de la boya en los últimos tres días.",
+    tooManyRequests: "Demasiadas peticiones al servidor de datos en este momento. Inténtelo de nuevo en un momento.",
+    serverError: "El servidor de datos no está disponible en este momento.",
+    timeout: "El servidor de datos ha tardado demasiado en responder.",
+    genericError: "No se ha podido conectar con el servidor de datos.",
+    contactPrefix: "Si necesita esta información con urgencia, contacte con",
+  },
 
 
   "swellCompositionSVG": "Azul claro: mar total; Amarillo: oleaje de viento; Azul: mar de fondo; Azul oscuro: mar de fondo 2",

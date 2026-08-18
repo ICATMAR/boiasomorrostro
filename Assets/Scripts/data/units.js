@@ -26,6 +26,13 @@ const UNIT_GROUPS = {
     { unit: 'ºF', decimals: 0, range: [50, 86],   toDisplay: v => v * 9 / 5 + 32 },
     { unit: 'K',  decimals: 0, range: [283, 303], toDisplay: v => v + 273.15 },
   ],
+  // hPa is what the buoy reports and what forecasts use; mmHg and inHg are the
+  // barometer units still common in Spain and in English-speaking countries.
+  pressure: [
+    { unit: 'hPa',  decimals: 0, range: [990, 1030],       toDisplay: v => v },
+    { unit: 'mmHg', decimals: 0, range: [743, 772],        toDisplay: v => v * 0.750062 },
+    { unit: 'inHg', decimals: 2, range: [29.23, 30.42],    toDisplay: v => v * 0.02953 },
+  ],
 };
 
 export default UNIT_GROUPS;

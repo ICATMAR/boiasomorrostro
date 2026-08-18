@@ -85,13 +85,43 @@ export default en = {
   "Wind gust": "Gust",
   "Wave significant height": "Waves",
   "Air temperature": "Air temp.",
-  "Atmospheric pressure": "Atmospheric pressure",
+  "Atmospheric pressure": "Pressure",
   "Sea surface temperature": "Sea temp.",
   "Sea bottom temperature": "Sea bottom temperature",
   "Sea temperature anomaly": "Sea temperature anomaly",
   "Salinity": "Salinity",
   "Humidity": "Humidity",
   "Cloudiness": "Cloudiness",
+
+  // Buoy METEO sensor, shortened for the data timeline
+  "Dew point temperature": "Dew point",
+  "Wet bulb temperature": "Wet bulb",
+  "Relative wind speed": "Rel. wind",
+  "Relative wind direction": "Rel. wind direction",
+  "Air density": "Air density",
+
+  // Bottom section
+  "Forecast": "Forecast",
+  "Observations": "Observations",
+
+  timeAgo: {
+    now: "Just now",
+    minutes: "{n} min ago",
+    hour: "1h ago",
+    hours: "{n}h ago",
+    day: "1 day ago",
+    days: "{n} days ago",
+    moreThanWeek: "More than 7 days ago",
+  },
+
+  buoyStatus: {
+    noData: "No data available from the buoy in the last three days.",
+    tooManyRequests: "Too many requests to the data server right now. Please try again in a moment.",
+    serverError: "The data server is currently unavailable.",
+    timeout: "The data server took too long to respond.",
+    genericError: "Could not reach the data server.",
+    contactPrefix: "If you need this information urgently, please contact",
+  },
 
   "swellCompositionSVG": "Light blue: mean wave height; Yellow: wind waves; Blue: primary swell; Dark blue: secondary swell",
 
