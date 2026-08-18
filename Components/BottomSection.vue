@@ -306,9 +306,11 @@ export default {
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   overflow: auto;
   width: 100%;
   min-height: 0;
+  max-height: 87vh;
 }
 
 .bottom-bar {

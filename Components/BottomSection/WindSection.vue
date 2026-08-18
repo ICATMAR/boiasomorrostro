@@ -11,26 +11,33 @@
              to the ring's radius), coloured by colorLegends.js instead of a
              fixed colour. -->
         <div class="history-rings" v-if="isFullscreen">
-          <!-- Ring outlines -->
-          <div class="history-ring" v-for="h in historyRings" :key="'ring-' + h.key" :class="{ 'no-data': !h.hasData }"
-            :style="{ width: h.diameter + 'px', height: h.diameter + 'px', opacity: h.opacity }"></div>
+          <!-- Ring outlines - hovering this ring's chip or hour label thickens
+               and fully opacifies it (see hoveredRing) -->
+          <div class="history-ring" v-for="h in historyRings" :key="'ring-' + h.key"
+            :class="{ 'no-data': !h.hasData, 'ring-hovered': hoveredRing === h.key }"
+            :style="{ width: h.diameter + 'px', height: h.diameter + 'px', opacity: hoveredRing === h.key ? 1 : h.opacity }"></div>
 
-          <!-- Value + arrow chips (painted after the rings so they sit on top) -->
+          <!-- Value + arrow chips (painted after the rings so they sit on top).
+               Hovering highlights this same ring + its hour label too. -->
           <template v-for="h in historyRings" :key="'chip-' + h.key">
-            <div v-if="h.hasData" class="history-chip horizontal" :style="{
-              rotate: (h.direction - 90) + 'deg',
-              transform: `translateX(calc(-50% + ${h.radius}px))`,
-              background: h.color,
-              opacity: 1,
-            }">
+            <div v-if="h.hasData" class="history-chip horizontal clickable"
+              @mouseenter="hoveredRing = h.key" @mouseleave="hoveredRing = null"
+              :style="{
+                rotate: (h.direction - 90) + 'deg',
+                transform: `translateX(calc(-50% + ${h.radius}px))`,
+                background: h.color,
+                opacity: 1,
+              }">
               <div class="history-chip-arrow" :style="{ background: h.color }"></div>
               <span :style="{ rotate: textRotation(h.direction), display: 'block' }">{{ h.speedText }}</span>
             </div>
           </template>
 
-          <!-- Hour labels, bottom-right of each ring -->
-          <span class="history-hour" v-for="h in historyRings" :key="'hour-' + h.key"
-            :style="{ left: h.hourX + 'px', top: h.hourY + 'px', opacity: h.opacity }">{{ h.hourText }}</span>
+          <!-- Hour labels, bottom-right of each ring. Hovering also highlights
+               this ring + its chip (same effect as hovering the chip itself). -->
+          <span class="history-hour clickable" v-for="h in historyRings" :key="'hour-' + h.key"
+            @mouseenter="hoveredRing = h.key" @mouseleave="hoveredRing = null"
+            :style="{ left: h.hourX + 'px', top: h.hourY + 'px', opacity: hoveredRing === h.key ? 1 : h.opacity }">{{ h.hourText }}</span>
         </div>
 
         <!-- Compass rose. The arrow sits on the ring at the bearing the wind comes
@@ -110,6 +117,7 @@ export default {
       now: Date.now(),
       loaded: false, // product.status isn't meaningful until ready() resolves
       history: [], // [{ date, WSPD, WDIR }], 15 min apart, oldest last - see loadHistory()
+      hoveredRing: null, // key of the history ring currently hovered (via its chip or hour label)
     }
   },
   methods: {
@@ -263,19 +271,19 @@ export default {
   justify-content: center;
   padding: 10px;
   width: 100%;
-
 }
 
 /* Fills (and is capped by) whatever height .section-content gives this panel
    in fullscreen, instead of growing past the viewport once the wind-history
-   rings expand .rose-wrapper to 860px - min-height:0 lets it shrink below
-   that natural size so this element's own overflow:auto scrolls internally,
-   keeping the top-left icons and bottom tab bar on screen. */
+   rings expand .rose-wrapper to 860px - min-height:0 lets IT shrink so its
+   own overflow:auto scrolls internally, keeping the top-left icons and bottom
+   tab bar on screen. align-items/justify-content start (not center) so the
+   scrollable area has no "unreachable" region on either axis. */
 .content-full-screen {
   flex: 1;
   min-height: 0;
-  overflow: auto;
   justify-content: flex-start;
+  overflow: hidden;
 }
 
 .rose-wrapper {
@@ -288,7 +296,12 @@ export default {
 .rose-wrapper.expanded {
   width: 860px;
   height: 860px;
-  margin: auto;
+  /* Never squeezed by flex-shrink: every ring/chip below is positioned with
+     px math that assumes this box is exactly 860x860 - if flex shrank it,
+     .history-rings (inset:0) would shrink with it while its children kept
+     their large computed sizes, spilling far outside the smaller box. Fixed
+     size + the scroll container above is what keeps it contained instead. */
+  flex-shrink: 0;
 }
 
 .rose {
@@ -298,6 +311,7 @@ export default {
   transform: translate(-50%, -50%);
   width: 220px;
   height: 220px;
+  pointer-events: none;
 }
 
 .rose-ring {
@@ -396,7 +410,9 @@ export default {
 }
 
 /* No explicit top/left: its "static position" (see CSS abspos-flex-item
-   rules) is the flex-centered one, i.e. the shared center of every ring */
+   rules) is the flex-centered one, i.e. the shared center of every ring.
+   Transition so hovering its chip/hour (a sibling, so :hover itself doesn't
+   apply here) still animates smoothly. */
 .history-ring {
   position: absolute;
   box-sizing: border-box;
@@ -408,12 +424,17 @@ export default {
   border-width: 0.5px;
 }
 
+.history-ring.ring-hovered {
+  border-width: 2px;
+}
+
 /* Same shape as VISOC's MapCircleArrows .variableValue/.variableArrow: a
    rounded-on-one-side chip with a diamond "pointer" behind it, rotated to the
    wind's bearing then pushed out to the ring's radius. Colour set inline
    (colorForSpeed) instead of VISOC's fixed var(--blue). */
 .history-chip {
   position: absolute;
+  pointer-events: auto; /* hoverable despite .history-rings' pointer-events:none */
   font-size: 0.65rem;
   padding-right: 3px;
   padding-left: 5px;
@@ -430,10 +451,11 @@ export default {
 .history-chip-arrow {
   position: absolute;
   left: 0;
-  transform: translate(-25%) rotate(45deg);
-  height: 8px;
-  width: 8px;
+  transform: translate(4%) rotate(45deg);
+      height: 40px;
+    width: 40px;
   z-index: 0;
+  border-radius: 0 100px 0 0;
 }
 
 .history-hour {
@@ -443,9 +465,10 @@ export default {
   color: var(--darkBlue);
   text-shadow: none;
   white-space: nowrap;
-  pointer-events: none;
+  pointer-events: auto; /* hoverable now (see hoveredRing) - .clickable's own auto would work too, but set explicitly to be sure */
   background: #ffffff94;
   border-radius: 8px;
   padding: 0px 4px;
+  transition: opacity 0.2s ease-in-out;
 }
 </style>
