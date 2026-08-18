@@ -8,6 +8,9 @@ import DPCMEMS from './DPCMEMS.js';
 // Data products
 // variables -> rows of the data timeline. Each cell is coloured according to
 // range, and shows an arrow when directionCode points at another variable.
+// unitGroup (see Assets/Scripts/data/units.js) makes a variable's unit
+// clickable, cycling through that group's options; plain unit/range/decimals
+// are used as-is for variables without one.
 const dataProducts = [
 
   // Open Weather API
@@ -18,11 +21,11 @@ const dataProducts = [
     type: 'forecast',
     link: 'https://openweather.co.uk/technology',
     variables: [
-      { code: 'WSPD',  name: 'Wind speed',      unit: 'm/s', range: [0, 20],  decimals: 1, directionCode: 'WDIR', fromDirection: true },
-      { code: 'GUST',  name: 'Wind gust',       unit: 'm/s', range: [0, 20],  decimals: 1 },
-      { code: 'DRYT',  name: 'Air temperature', unit: 'ºC',  range: [0, 40],  decimals: 1 },
-      { code: 'RELH',  name: 'Humidity',        unit: '%',   range: [0, 100], decimals: 0 },
-      { code: 'CLOUD', name: 'Cloudiness',      unit: '%',   range: [0, 100], decimals: 0 },
+      { code: 'WSPD',  name: 'Wind speed',      unitGroup: 'wind',    directionCode: 'WDIR', fromDirection: true },
+      { code: 'GUST',  name: 'Wind gust',       unitGroup: 'wind' },
+      { code: 'DRYT',  name: 'Air temperature', unitGroup: 'airTemp' },
+      { code: 'RELH',  name: 'Humidity',        unit: '%', range: [0, 100], decimals: 0 },
+      { code: 'CLOUD', name: 'Cloudiness',      unit: '%', range: [0, 100], decimals: 0 },
     ],
     sources: [
       {
@@ -51,12 +54,12 @@ const dataProducts = [
     type: 'forecast',
     link: 'https://data.marine.copernicus.eu/products',
     variables: [
-      { code: 'VHM0',  name: 'Wave significant height',  unit: 'm',      range: [0, 4],       decimals: 1, directionCode: 'VMDR', fromDirection: true },
-      { code: 'VTM02', name: 'Wave period',              unit: 's',      range: [0, 15],      decimals: 1 },
-      { code: 'HCSP',  name: 'Sea water velocity',       unit: 'm/s',    range: [0, 1],       decimals: 2, directionCode: 'HCDT' },
-      { code: 'TEMP',  name: 'Sea surface temperature',  unit: 'ºC',     range: [10, 30],     decimals: 1 },
-      { code: 'PSAL',  name: 'Salinity',                 unit: '‰',      range: [36, 39],     decimals: 1 },
-      { code: 'CHLA',  name: 'Chlorophyll',              unit: 'mg/m³',  range: [0.01, 0.4],  decimals: 2 },
+      { code: 'VHM0',  name: 'Wave significant height',  unitGroup: 'waves',   directionCode: 'VMDR', fromDirection: true },
+      { code: 'VTM02', name: 'Wave period',              unit: 's',     range: [0, 15],      decimals: 1 },
+      { code: 'HCSP',  name: 'Sea water velocity',       unitGroup: 'current', directionCode: 'HCDT' },
+      { code: 'TEMP',  name: 'Sea surface temperature',  unitGroup: 'seaTemp' },
+      { code: 'PSAL',  name: 'Salinity',                 unit: '‰',     range: [36, 39],     decimals: 1 },
+      { code: 'CHLA',  name: 'Chlorophyll',              unit: 'mg/m³', range: [0.01, 0.4],  decimals: 2 },
     ],
     sources: [
       {

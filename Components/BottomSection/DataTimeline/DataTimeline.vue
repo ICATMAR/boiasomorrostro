@@ -66,9 +66,20 @@ export default {
     valueAt(code, index) {
       return this.values[code] == undefined ? undefined : this.values[code][index];
     },
+    // { unit, decimals, range }: the variable's own, or its group's selected unit
+    unitOption(v) {
+      return v.unitGroup ? this.$gui.unitOption(v.unitGroup) : v;
+    },
+    // Value converted to the currently selected unit (a no-op without a unitGroup)
+    displayValue(v, index) {
+      const raw = this.valueAt(v.code, index);
+      if (raw == undefined) return undefined;
+      const option = this.unitOption(v);
+      return option.toDisplay ? option.toDisplay(raw) : raw;
+    },
     cellText(v, index) {
-      const value = this.valueAt(v.code, index);
-      return value == undefined ? '' : value.toFixed(v.decimals);
+      const value = this.displayValue(v, index);
+      return value == undefined ? '' : value.toFixed(this.unitOption(v).decimals);
     },
     // Arrows point where the variable goes, so directions given as where it comes
     // from (wind, waves) are turned around
@@ -80,9 +91,10 @@ export default {
       return (angle % 360 + 360) % 360; // currents come as -180..180
     },
     cellColor(v, index) {
-      const value = this.valueAt(v.code, index);
+      const value = this.displayValue(v, index);
       if (value == undefined) return 'transparent';
-      const t = Math.min(Math.max((value - v.range[0]) / (v.range[1] - v.range[0]), 0), 1);
+      const { range } = this.unitOption(v);
+      const t = Math.min(Math.max((value - range[0]) / (range[1] - range[0]), 0), 1);
       for (let i = 0; i < COLOR_STOPS.length - 1; i++) {
         const [t0, c0] = COLOR_STOPS[i];
         const [t1, c1] = COLOR_STOPS[i + 1];
@@ -97,11 +109,12 @@ export default {
       return 'rgb(255, 0, 0)';
     },
     cellTitle(v, cell, index) {
-      const value = this.valueAt(v.code, index);
+      const value = this.displayValue(v, index);
       if (value == undefined) return this.$t('No data available');
       const direction = this.arrowAngle(v, index);
       const directionStr = direction == undefined ? '' : ` · ${direction.toFixed(0)}º`;
-      return `${cell.toISOString()}\n${this.$t(v.name)}: ${value.toFixed(v.decimals)} ${v.unit}${directionStr}`;
+      const option = this.unitOption(v);
+      return `${cell.toISOString()}\n${this.$t(v.name)}: ${value.toFixed(option.decimals)} ${option.unit}${directionStr}`;
     },
   },
   computed: {

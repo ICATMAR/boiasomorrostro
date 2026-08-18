@@ -24,7 +24,7 @@
           <div class="group-spacer"></div>
           <div class="horizontal name-row" v-for="v in group.product.variables" :key="v.code">
             <span class="var-name">{{ $t(v.name) }}</span>
-            <span class="var-unit">{{ v.unit }}</span>
+            <span class="var-unit" :class="{ clickable: v.unitGroup }" @click="v.unitGroup && $gui.cycleUnit(v.unitGroup)">{{ unitLabel(v) }}</span>
           </div>
         </template>
       </div>
@@ -77,6 +77,10 @@ export default {
     }
   },
   methods: {
+    // Unit currently shown for a variable: its group's selection, or its own fixed unit
+    unitLabel(v) {
+      return v.unitGroup ? this.$gui.unitOption(v.unitGroup).unit : v.unit;
+    },
     // Index of the selected time scale, ordered coarse -> fine (zoom out -> zoom in)
     currentScaleIdx() {
       return this.$gui.timescales.findIndex(t => t.id === this.$gui.timelineScaleId);
@@ -265,7 +269,7 @@ export default {
   padding: 0;
 }
 
-.var-unit {
+.var-unit.clickable {
   text-decoration: underline;
 }
 

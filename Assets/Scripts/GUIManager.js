@@ -1,3 +1,5 @@
+import UNIT_GROUPS from './data/units.js';
+
 // Time scales of the data timeline. hoursAheadBehind sets how much data is shown
 // before and after the current hour (finer scales show a shorter span, so the
 // number of requested cells stays similar on every scale).
@@ -5,6 +7,8 @@ const TIMESCALES = [
   { id: '3h', minutes: 180, hoursAheadBehind: 48 },
   { id: '1h', minutes: 60,  hoursAheadBehind: 24 },
 ];
+
+const UNITS_STORAGE_KEY = 'boiasomorrostro_units';
 
 
 class GUIManager {
@@ -41,6 +45,21 @@ class GUIManager {
   }
   get timelineScale() { return TIMESCALES.find(t => t.id == this._timelineScaleId); }
   get timelineIntervalMinutes() { return this.timelineScale.minutes; }
+
+  // UNIT PREFERENCES
+  // Selected unit index per group (see Assets/Scripts/data/units.js), persisted
+  // in localStorage - a device preference, unlike the shareable URL hash state.
+  _unitIndex = {};
+  // Currently selected unit option for a group ({ unit, decimals, range, toDisplay })
+  unitOption(group) {
+    return UNIT_GROUPS[group][this._unitIndex[group] || 0];
+  }
+  // Cycle to the next unit option for a group, wrapping around, and persist the choice
+  cycleUnit(group) {
+    const options = UNIT_GROUPS[group];
+    this._unitIndex[group] = ((this._unitIndex[group] || 0) + 1) % options.length;
+    localStorage.setItem(UNITS_STORAGE_KEY, JSON.stringify(this._unitIndex));
+  }
 
   // TIMELINE TIMEZONE
   timelineUseLocalTime = true;
@@ -101,6 +120,17 @@ class GUIManager {
     // Write back the state the app starts with
     this.selectedSection = this._selectedSection;
     this.panelState = this._panelState;
+
+    // localStorage - unit preferences
+    try {
+      const savedUnits = JSON.parse(localStorage.getItem(UNITS_STORAGE_KEY)) || {};
+      Object.keys(UNIT_GROUPS).forEach(group => {
+        const idx = savedUnits[group];
+        if (Number.isInteger(idx) && UNIT_GROUPS[group][idx] != undefined) this._unitIndex[group] = idx;
+      });
+    } catch (e) {
+      console.warn('Could not read unit preferences from localStorage', e);
+    }
   }
 
 }
