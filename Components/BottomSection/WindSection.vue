@@ -1,5 +1,5 @@
 <template>
-  <div class="vertical content">
+  <div class="vertical content" :class="{ 'content-full-screen': $gui.panelState === 'fullscreen' }">
     <BuoyStatusMessage v-if="loaded && $dataService.buoy.status !== 'ok'" :product="$dataService.buoy"></BuoyStatusMessage>
 
     <template v-else>
@@ -142,6 +142,11 @@ export default {
   justify-content: center;
   padding: 10px;
   width: 100%;
+  
+}
+
+.content-full-screen {
+  transform: translateY(50%)
 }
 
 .rose {
@@ -170,6 +175,7 @@ export default {
   border-radius: 10px;
   padding-left: 5px;
   padding-right: 5px;
+  pointer-events: none;
 }
 
 /* Rotates around the rose center; the arrow itself sits on the ring */
