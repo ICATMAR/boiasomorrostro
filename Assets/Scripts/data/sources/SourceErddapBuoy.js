@@ -43,7 +43,7 @@ class SourceErddapBuoy extends Source {
 
     const columns = Object.keys(this.mapping);
     const variables = columns.map(code => this.mapping[code].source);
-    const url = `${this.baseUrl}/tabledap/${this.dataset}.csv?time,${variables.join(',')}`
+    const url = `${this.baseUrl}tabledap/${this.dataset}.csv?time,${variables.join(',')}`
       + `&time>=${this.startDate.toISOString()}`;
 
     const text = await this.fetchManager.fetch(this.proxied(url), 10)
@@ -60,7 +60,7 @@ class SourceErddapBuoy extends Source {
   // ERDDAP's allDatasets lists every dataset on the server with its time range.
   // Cached by FetchManager, so both sensors of a server share the one request.
   async fetchAllDatasets() {
-    const url = `${this.baseUrl}/tabledap/allDatasets.jsonlKVP`;
+    const url = `${this.baseUrl}tabledap/allDatasets.jsonlKVP`;
     const text = await this.fetchManager.fetch(this.proxied(url), 10).then(res => res.text());
     return text.trim().split('\n').filter(line => line).map(line => JSON.parse(line));
   }

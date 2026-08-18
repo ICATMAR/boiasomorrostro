@@ -62,14 +62,14 @@ export default {
       // Menu structure. id is what the URL hash holds (see GUIManager)
       menu: [
         {
-          title: 'Forecast',
-          id: 'forecast',
-          component: 'forecastSection',
-        },
-        {
           title: 'Observations',
           id: 'observations',
           component: 'observationsSection',
+        },
+        {
+          title: 'Forecast',
+          id: 'forecast',
+          component: 'forecastSection',
         },
         {
           title: 'Wind',
