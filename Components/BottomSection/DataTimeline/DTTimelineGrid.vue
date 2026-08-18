@@ -102,7 +102,7 @@ export default {
 td.group-cell {
   text-align: left;
   padding: 0;
-  background: #a9a9a9;
+  background: var(--lightBlue);
 }
 /* td.group-cell prefix (not just .group-cell-label) to outweigh the
    ".dt-table td > *" reset's own padding:0 - same specificity trick as above */
