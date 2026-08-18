@@ -20,6 +20,7 @@
         <!-- Speed at the center -->
         <div class="vertical rose-center">
           <span class="rose-speed">{{ speedText }}</span>
+          <span class="rose-direction">{{ directionText }}</span>
           <span class="rose-unit clickable" @click="$gui.cycleUnit('wind')">{{ windUnit.unit }}</span>
         </div>
       </div>
@@ -45,7 +46,8 @@ const LABEL_RADIUS = 90;  // where the direction labels sit
 // names the 8 traditional Mediterranean winds instead.
 const COMPASS = {
   en: ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'],
-  es: ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'],
+  //es: ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'],
+  es: ['Tramontana', 'Gregal', 'Levante', 'Siroco', 'Ostro', 'Garbino', 'Poniente', 'Mistral'],
   ca: ['Tramuntana', 'Gregal', 'Llevant', 'Xaloc', 'Migjorn', 'Garbí', 'Ponent', 'Mestral'],
 };
 
@@ -92,6 +94,17 @@ export default {
       if (speed == undefined) return '--';
       return this.windUnit.toDisplay(speed).toFixed(this.windUnit.decimals);
     },
+    directionText() {
+      const direction = this.direction;
+      if (direction == undefined || Number.isNaN(Number(direction))) return '--';
+      const names = COMPASS[this.$i18n.locale] || COMPASS.en;
+      const step = 360 / names.length;
+      // Normalize bearing to [0, 360)
+      const bearing = ((Number(direction) % 360) + 360) % 360;
+      // Round to the nearest compass point
+      const index = Math.floor((bearing + step / 2) / step) % names.length;
+      return names[index];
+    },
     // Bearing the wind comes from, as measured (WDIR is wind_from_direction)
     direction() {
       return this.row?.values.WDIR;
@@ -103,8 +116,8 @@ export default {
         const rad = (i * step - 90) * Math.PI / 180; // -90: 0º points up
         return {
           text,
-          x: RADIUS + LABEL_RADIUS * Math.cos(rad),
-          y: RADIUS + LABEL_RADIUS * Math.sin(rad),
+          x: RADIUS + LABEL_RADIUS * 1.2 * Math.cos(rad),
+          y: RADIUS + LABEL_RADIUS * 1.1 * Math.sin(rad),
         };
       });
     },
@@ -153,6 +166,10 @@ export default {
   color: var(--darkBlue);
   white-space: nowrap;
   pointer-events: none;
+  background: #ffffff94;
+  border-radius: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
 /* Rotates around the rose center; the arrow itself sits on the ring */
@@ -164,10 +181,10 @@ export default {
 
 .rose-arrow {
   position: absolute;
-  top: 12px;
+  top: 3px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 22px;
+  font-size: 50px;
   color: var(--red);
 }
 
@@ -184,6 +201,13 @@ export default {
 .rose-speed {
   font-size: 2.2rem;
   line-height: 1;
+  padding-top: 10px;
+  color: var(--darkBlue);
+  text-shadow: none;
+}
+
+.rose-direction {
+  font-size: 1.5rem;
   color: var(--darkBlue);
   text-shadow: none;
 }
