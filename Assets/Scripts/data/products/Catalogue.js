@@ -112,12 +112,12 @@ const dataProducts = [
     link: 'https://erddap.icatmar.cat/erddap/info/BUOY_SOMO_METEO/index.html',
     variables: [
       { code: 'WSPD', name: 'Wind speed',              unitGroup: 'wind',     directionCode: 'WDIR', fromDirection: true, compact: true },
+      { code: 'WRSP', name: 'Relative wind speed',     unitGroup: 'wind',     directionCode: 'WRDR', fromDirection: true },
       { code: 'DRYT', name: 'Air temperature',         unitGroup: 'airTemp',  compact: true },
-      { code: 'ATMS', name: 'Atmospheric pressure',    unitGroup: 'pressure', compact: true },
-      { code: 'RELH', name: 'Humidity',                unit: '%',      range: [0, 100],   decimals: 0, compact: true },
       { code: 'DEWT', name: 'Dew point temperature',   unitGroup: 'airTemp' },
       { code: 'WETT', name: 'Wet bulb temperature',    unitGroup: 'airTemp' },
-      { code: 'WRSP', name: 'Relative wind speed',     unitGroup: 'wind',     directionCode: 'WRDR', fromDirection: true },
+      { code: 'ATMS', name: 'Atmospheric pressure',    unitGroup: 'pressure', compact: true },
+      { code: 'RELH', name: 'Humidity',                unit: '%',      range: [0, 100],   decimals: 0, compact: true },
       { code: 'ADNS', name: 'Air density',             unit: 'kg/m³',  range: [1.1, 1.3],  decimals: 2 },
     ],
     // Same sensor on both servers; whichever is ahead answers first (see DPBuoy)
