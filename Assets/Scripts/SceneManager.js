@@ -15,7 +15,7 @@ import * as FogShader from '/boiasomorrostro/Assets/Terrain/FogShader.js'
 import { OceanEntity } from '/boiasomorrostro/Assets/Ocean/OceanEntity.js';
 
 import { SomorrostroBuoyEntity } from '/boiasomorrostro/Assets/SomorrostroBuoy/SomorrostroBuoyEntity.js';
-import { HeavyChainsEntity } from '/boiasomorrostro/Assets/Mooring/HeavyChainsEntity.js';
+// import { HeavyChainsEntity } from '/boiasomorrostro/Assets/Mooring/HeavyChainsEntity.js';
 
 
 //import { WindsockEntity } from '/boiasomorrostro/Assets/Windsock/WindsockEntity.js';
@@ -125,13 +125,14 @@ class SceneManager{
     // Flag
     this.flag = new FlagEntity(scene, () => {
       this.flag.root.position.y = -1;
+      this.loadFlagWind();
     });
 
 
     // Mooring
-    this.mooring = new HeavyChainsEntity(scene, () => {
-      this.mooring.root.position.y = -42.8;
-    });
+    // this.mooring = new HeavyChainsEntity(scene, () => {
+    //   this.mooring.root.position.y = -42.8;
+    // });
     
     // Sand
     this.sand = new SandEntity(scene);
@@ -272,6 +273,27 @@ class SceneManager{
     THREE.DefaultLoadingManager.onError = function (url) {
       console.log('There was an error loading ' + url);
     };
+  }
+
+
+
+
+  // FLAG WIND
+  // Sets the flag from the buoy's latest observation (see DataService.buoy,
+  // Assets/Scripts/data/products/DPBuoy.js). Same units/convention as the
+  // (currently unused) wind updates in Canvas3D.vue: km/h, and setWindParameters
+  // itself flips the "from" bearing WDIR reports into the "blowing toward" one
+  // the flag needs.
+  loadFlagWind = async function(){
+    const buoy = window.DataService.buoy;
+    await buoy.ready();
+    const row = buoy.latestRow('WSPD');
+    if (row == undefined || row.values.WDIR == undefined) {
+      return;
+    }
+    this.flag.showFlag();
+    this.flag.setWindParameters('windSpeed', row.values.WSPD * 3.6); // m/s -> km/h
+    this.flag.setWindParameters('windDirection', row.values.WDIR);
   }
 
 
