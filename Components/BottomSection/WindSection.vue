@@ -25,7 +25,6 @@
               :style="{
                 rotate: (h.direction - 90) + 'deg',
                 transform: `translateX(calc(-50% + ${h.radius}px))`,
-                background: h.color,
                 opacity: 1,
               }">
               <div class="history-chip-arrow" :style="{ background: h.color }"></div>
@@ -81,9 +80,9 @@ const RADIUS = 110;       // half of the 220px rose
 const LABEL_RADIUS = 90;  // where the direction labels sit
 
 // Wind history (fullscreen only): concentric rings going back in time
-const HISTORY_COUNT = 8;             // 2 hours of 15-min steps
+const HISTORY_COUNT = 12;             // 2 hours of 15-min steps
 const HISTORY_STEP_MINUTES = 15;
-const HISTORY_RADIUS_STEP = 40;      // px added per step
+const HISTORY_RADIUS_STEP = 20;      // px added per step
 const HISTORY_OPACITY_START = 0.75;  // at 15 min
 const HISTORY_OPACITY_FLOOR = 0.4;   // reached at 1h, held for the rest
 const HISTORY_OPACITY_FLOOR_MINUTES = 60;
@@ -251,8 +250,8 @@ export default {
           direction: hasData ? h.WDIR : undefined,
           speedText: hasData ? this.windUnit.toDisplay(h.WSPD).toFixed(this.windUnit.decimals) : '',
           color: hasData ? this.colorForSpeed(h.WSPD) : undefined,
-          hourX: HISTORY_CENTER + radius * Math.cos(bottomRightRad),
-          hourY: HISTORY_CENTER + radius * Math.sin(bottomRightRad),
+          hourX: HISTORY_CENTER + RADIUS*2/3,// + radius * Math.cos(bottomRightRad),
+          hourY: HISTORY_CENTER + RADIUS + radius * Math.sin(bottomRightRad),
           hourText: this.formatHour(h.date),
         };
       });
@@ -446,14 +445,17 @@ export default {
   color: black;
   text-shadow: none;
   z-index: 1;
+  font-size: 0.6rem;
+  margin: 0;
+  padding: 0;
 }
 
 .history-chip-arrow {
   position: absolute;
   left: 0;
-  transform: translate(4%) rotate(45deg);
-      height: 40px;
-    width: 40px;
+  transform: translate(27%) rotate(45deg);
+  height: 20px;
+  width: 20px;
   z-index: 0;
   border-radius: 0 100px 0 0;
 }
@@ -461,7 +463,7 @@ export default {
 .history-hour {
   position: absolute;
   transform: translate(-50%, -50%);
-  font-size: 0.55rem;
+  font-size: 0.7rem;
   color: var(--darkBlue);
   text-shadow: none;
   white-space: nowrap;
