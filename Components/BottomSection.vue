@@ -241,7 +241,7 @@ export default {
   flex-shrink: 0;
 }
 .bottom-section-fullscreen{
-  height: 900%;
+  max-height: 87vh;
   transition: all 0.7s ease-in-out;
 }
 
@@ -309,7 +309,7 @@ export default {
   align-items: center;
   overflow: auto;
   width: 100%;
-  min-height: 0;
+  min-height: 200px;
   max-height: 87vh;
 }
 

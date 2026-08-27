@@ -1,9 +1,11 @@
 <template>
   <div class="vertical content" :class="{ 'content-full-screen': $gui.panelState === 'fullscreen' }">
-    <BuoyStatusMessage v-if="loaded && $dataService.buoy.status !== 'ok'" :product="$dataService.buoy"></BuoyStatusMessage>
+    <div v-if="!loaded" class="wind-loading"><span class="spinner-border"></span></div>
+
+    <BuoyStatusMessage v-else-if="$dataService.buoy.status !== 'ok'" :product="$dataService.buoy"></BuoyStatusMessage>
 
     <template v-else>
-      <div class="rose-wrapper" :class="{ expanded: isFullscreen }">
+      <div class="rose-wrapper" :class="{ expanded: isFullscreen }" :style="{ width: wrapperSize + 'px', height: wrapperSize + 'px' }">
 
         <!-- Wind history (fullscreen only): one bigger, fainter ring per 15-min
              step back from the current reading. Value + arrow reuse VISOC's
@@ -12,10 +14,12 @@
              fixed colour. -->
         <div class="history-rings" v-if="isFullscreen">
           <!-- Ring outlines - hovering this ring's chip or hour label thickens
-               and fully opacifies it (see hoveredRing) -->
+               and fully opacifies it (see hoveredRing). Border style marks the
+               ring's own clock time: solid on the hour, dashed at :30, dotted
+               otherwise (see ringBorderStyle). -->
           <div class="history-ring" v-for="h in historyRings" :key="'ring-' + h.key"
             :class="{ 'no-data': !h.hasData, 'ring-hovered': hoveredRing === h.key }"
-            :style="{ width: h.diameter + 'px', height: h.diameter + 'px', opacity: hoveredRing === h.key ? 1 : h.opacity }"></div>
+            :style="{ width: h.diameter + 'px', height: h.diameter + 'px', opacity: hoveredRing === h.key ? 1 : h.opacity, borderStyle: h.borderStyle }"></div>
 
           <!-- Value + arrow chips (painted after the rings so they sit on top).
                Hovering highlights this same ring + its hour label too. -->
@@ -53,19 +57,18 @@
             <i class="fa-solid fa-caret-down rose-arrow"></i>
           </div>
 
-          <!-- Speed at the center -->
+          <!-- Speed (+ unit) at the center, wind name, then how old the
+               measurement is and its ISO timestamp -->
           <div class="vertical rose-center">
-            <span class="rose-speed">{{ speedText }}</span>
+            <div class="horizontal rose-speed-row">
+              <span class="rose-speed">{{ speedText }}</span>
+              <span class="rose-unit clickable" @click="$gui.cycleUnit('wind')">{{ windUnit.unit }}</span>
+            </div>
             <span class="rose-direction">{{ directionText }}</span>
-            <span class="rose-unit clickable" @click="$gui.cycleUnit('wind')">{{ windUnit.unit }}</span>
+            <span class="rose-time-ago">{{ timeAgo }}</span>
+            <span class="rose-tmst">{{ timestamp }}</span>
           </div>
         </div>
-      </div>
-
-      <!-- How old the measurement is -->
-      <div class="vertical rose-time">
-        <span>{{ timeAgo }}</span>
-        <span class="rose-tmst">{{ timestamp }}</span>
       </div>
     </template>
 
@@ -183,6 +186,16 @@ export default {
     textRotation(angle) {
       return angle > 180 ? '180deg' : '0deg';
     },
+    // A ring's own clock time, rounded to the nearest quarter-hour in case the
+    // buoy's own timestamps aren't clock-aligned: on the hour -> solid, at
+    // :30 -> dashed, :15/:45 -> dotted.
+    ringBorderStyle(date) {
+      const rawMinute = this.$gui.timelineUseLocalTime ? date.getMinutes() : date.getUTCMinutes();
+      const m = Math.round(rawMinute / 15) * 15 % 60;
+      if (m === 0) return 'solid';
+      if (m === 30) return 'dashed';
+      return 'dotted';
+    },
   },
   computed: {
     windUnit() {
@@ -230,6 +243,13 @@ export default {
     isFullscreen() {
       return this.$gui.panelState === 'fullscreen';
     },
+    // .rose-wrapper's own size: fixed 220px normally, or exactly enough to fit
+    // every history ring when expanded - kept in sync with HISTORY_CENTER (the
+    // rings' own shared center) instead of a hardcoded CSS size, since the
+    // hour labels below are positioned relative to that same center.
+    wrapperSize() {
+      return this.isFullscreen ? HISTORY_CENTER * 2 : RADIUS * 2;
+    },
     // Ring geometry/content for each 15-min step back from the reference row
     historyRings() {
       if (!this.row) return [];
@@ -250,8 +270,11 @@ export default {
           direction: hasData ? h.WDIR : undefined,
           speedText: hasData ? this.windUnit.toDisplay(h.WSPD).toFixed(this.windUnit.decimals) : '',
           color: hasData ? this.colorForSpeed(h.WSPD) : undefined,
-          hourX: HISTORY_CENTER + RADIUS*2/3,// + radius * Math.cos(bottomRightRad),
-          hourY: HISTORY_CENTER + RADIUS + radius * Math.sin(bottomRightRad),
+          borderStyle: this.ringBorderStyle(h.date),
+          // On this ring's own circle, at its bottom-right (same centre as the
+          // ring itself - see HISTORY_CENTER/wrapperSize).
+          hourX: HISTORY_CENTER + radius * Math.cos(bottomRightRad),
+          hourY: HISTORY_CENTER + radius * Math.sin(bottomRightRad),
           hourText: this.formatHour(h.date),
         };
       });
@@ -274,32 +297,31 @@ export default {
 
 /* Fills (and is capped by) whatever height .section-content gives this panel
    in fullscreen, instead of growing past the viewport once the wind-history
-   rings expand .rose-wrapper to 860px - min-height:0 lets IT shrink so its
-   own overflow:auto scrolls internally, keeping the top-left icons and bottom
-   tab bar on screen. align-items/justify-content start (not center) so the
-   scrollable area has no "unreachable" region on either axis. */
+   rings expand .rose-wrapper (see wrapperSize) - min-height:0 lets IT shrink
+   so its own overflow:auto scrolls internally, keeping the top-left icons and
+   bottom tab bar on screen. align-items/justify-content start (not center) so
+   the scrollable area has no "unreachable" region on either axis. */
 .content-full-screen {
   flex: 1;
   min-height: 0;
   justify-content: flex-start;
-  overflow: hidden;
+  overflow: auto;
 }
 
+/* Size set inline (see wrapperSize) so it always matches HISTORY_CENTER - the
+   same center the hour labels/rings below are positioned relative to. */
 .rose-wrapper {
   position: relative;
-  width: 220px;
-  height: 220px;
   flex-shrink: 0;
 }
 
 .rose-wrapper.expanded {
-  width: 860px;
-  height: 860px;
   /* Never squeezed by flex-shrink: every ring/chip below is positioned with
-     px math that assumes this box is exactly 860x860 - if flex shrank it,
-     .history-rings (inset:0) would shrink with it while its children kept
-     their large computed sizes, spilling far outside the smaller box. Fixed
-     size + the scroll container above is what keeps it contained instead. */
+     px math that assumes this box is exactly wrapperSize x wrapperSize - if
+     flex shrank it, .history-rings (inset:0) would shrink with it while its
+     children kept their large computed sizes, spilling far outside the
+     smaller box. Fixed size + the scroll container above is what keeps it
+     contained instead. */
   flex-shrink: 0;
 }
 
@@ -361,16 +383,21 @@ export default {
 
 /* Explicit colours: the global span style is white-on-shadow, unreadable on
    the rose's light background */
+.rose-speed-row {
+  align-items: baseline;
+  gap: 4px;
+  margin-top: -6px;
+}
+
 .rose-speed {
   font-size: 2.2rem;
   line-height: 1;
-  padding-top: 10px;
   color: var(--darkBlue);
   text-shadow: none;
 }
 
 .rose-direction {
-  font-size: 1.5rem;
+  font-size: 1rem;
   color: var(--darkBlue);
   text-shadow: none;
 }
@@ -383,19 +410,22 @@ export default {
   text-shadow: none;
 }
 
-.rose-time {
-  align-items: center;
-  padding-top: 8px;
-}
-
-.rose-time > span {
+.rose-time-ago {
+  font-size: 0.7rem;
   color: var(--darkBlue);
   text-shadow: none;
+  padding-top: 4px;
 }
 
 .rose-tmst {
   font-size: 0.6rem !important;
+  color: var(--darkBlue);
+  text-shadow: none;
   opacity: 0.6;
+}
+
+.wind-loading {
+  color: var(--darkBlue);
 }
 
 /* WIND HISTORY (fullscreen) */
@@ -415,8 +445,10 @@ export default {
 .history-ring {
   position: absolute;
   box-sizing: border-box;
-  border: 1px solid var(--darkBlue);
+  border-width: 1px;
+  border-color: var(--darkBlue);
   border-radius: 50%;
+  /* border-style set inline per ring (see ringBorderStyle) */
 }
 
 .history-ring.no-data {
