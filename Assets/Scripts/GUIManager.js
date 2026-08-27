@@ -117,7 +117,7 @@ class GUIManager {
   // days, and the timeline should always end just after the newest data. Covers
   // the three days SourceErddapBuoys loads, plus half a day of empty cells.
   observationsDaysLoaded = 3;
-  observationsHoursAhead = 12;
+  observationsHoursAhead = 2;
   observationsRange(latestDate) {
     let end = new Date((latestDate || new Date()).getTime());
     end.setMinutes(0, 0, 0);
