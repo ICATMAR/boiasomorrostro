@@ -187,7 +187,8 @@ export default {
 }
 
 .cell-arrow {
-  font-size: 9px;
+  font-size: 11px;
+  margin-right: 4px;
   color: rgba(0, 0, 0, 0.75);
 }
 
