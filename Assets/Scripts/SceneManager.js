@@ -244,7 +244,8 @@ class SceneManager{
     loadDiv.appendChild(sponsorsImg);
     // Add to body
     document.body.appendChild(loadDiv);
-
+    // Remove after 5 seconds
+    setTimeout(() => document.body.removeChild(loadDiv), 5000);
 
     // Load manager
     THREE.DefaultLoadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
