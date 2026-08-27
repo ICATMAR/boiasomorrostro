@@ -7,7 +7,7 @@
     <DTLayout v-else :groups="groups" :start-date="range.start" :end-date="range.end" scroll-to="end">
       <template #grid="{ cells }">
         <DTTimelineGrid :cells="cells">
-          <template v-for="group in groups" :key="group.key">
+          <template v-for="group in groups" :key="group.name">
             <!-- Product row (also the only header in the compact view, which
                  bundles its rows into this same group - see `groups` below) -->
             <tr v-if="group.link" class="group-row">
@@ -116,11 +116,11 @@ export default {
       return this.$dataService.observationProducts.flatMap(dp => {
         const product = dp.product;
         if (this.$gui.isCompact) {
-          return [{ key: dp.name, name: dp.name, product, link: product.link, variables: this.compactVariables(product) }];
+          return [{ name: dp.name, product, link: product.link, variables: this.compactVariables(product) }];
         }
         return [
-          { key: dp.name, name: dp.name, product, link: product.link, variables: [] },
-          ...this.sensorGroups(product).map(g => ({ key: `${dp.name}:${g.sensor}`, product, label: g.label, variables: g.variables })),
+          { name: dp.name, product, link: product.link, variables: [] },
+          ...this.sensorGroups(product).map(g => ({ name: `${dp.name}:${g.sensor}`, product, label: g.label, variables: g.variables })),
         ];
       });
     },
