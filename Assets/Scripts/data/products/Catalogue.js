@@ -9,13 +9,17 @@ import DPBuoys from './DPBuoys.js';
 
 // Somorrostro's raw ERDDAP columns already match the codes used elsewhere in
 // this app (see SourceErddapBuoys - a name not listed here just keeps its raw
-// name as its code), except: three variables are directions, and CTD and SAMI
-// both report a raw 'TEMP' (different sensors), so SAMI's needs its own code.
+// name as its code), except three variables that are directions.
 const BUOY_MAPPING = {
   WDIR: { code: 'WDIR', direction: true },
   WRDR: { code: 'WRDR', direction: true },
   HCDT: { code: 'HCDT', direction: true },
-  'SAMI.TEMP': { code: 'SAMITEMP' },
+};
+// CTD and SAMI both report their temperature as a raw column literally named
+// 'TEMP' - this per-sensor override gives SAMI's its own code so it doesn't
+// collide with CTD's (which keeps 'TEMP' via BUOY_MAPPING above).
+const BUOY_SENSOR_MAPPING = {
+  SAMI: { TEMP: { code: 'SAMITEMP' } },
 };
 // ADCP profiles current across 40 depth bins (2-41m) - pin to the shallowest
 // one as the surface current reading.
@@ -115,7 +119,7 @@ const dataProducts = [
       { code: 'DRYT', name: 'Air temperature',         unitGroup: 'airTemp',  compact: true },
       // Same colour scale as air temperature for now (see colorLegends.js) -
       // CTD and SAMI are fixed at these depths, not a queryable dimension.
-      { code: 'TEMP',     name: 'Sea temperature (0.5m)', unitGroup: 'airTemp' },
+      { code: 'TEMP',     name: 'Sea temperature (0.5m)', unitGroup: 'airTemp', compact: true },
       { code: 'SAMITEMP', name: 'Sea temperature (4m)',   unitGroup: 'airTemp' },
       { code: 'DEWT', name: 'Dew point temperature',   unitGroup: 'airTemp' },
       { code: 'WETT', name: 'Wet bulb temperature',    unitGroup: 'airTemp' },
@@ -135,6 +139,7 @@ const dataProducts = [
         sensorConstraints: BUOY_SENSOR_CONSTRAINTS,
         institution: 'ICATMAR',
         mapping: BUOY_MAPPING,
+        sensorMapping: BUOY_SENSOR_MAPPING,
       },
       {
         Class: SourceErddapBuoys,
@@ -144,6 +149,7 @@ const dataProducts = [
         sensorConstraints: BUOY_SENSOR_CONSTRAINTS,
         institution: 'ICM-CSIC',
         mapping: BUOY_MAPPING,
+        sensorMapping: BUOY_SENSOR_MAPPING,
       }
     ]
   },

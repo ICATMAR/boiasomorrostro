@@ -26,7 +26,7 @@ function dateRangeOf(entries) {
 
 class SourceErddapBuoys extends Source {
 
-  constructor({ fetchManager, src, datasetCommonKey, buoyId, mapping, sensorConstraints }) {
+  constructor({ fetchManager, src, datasetCommonKey, buoyId, mapping, sensorMapping, sensorConstraints }) {
     super({ fetchManager });
     this.src = src;
     this.baseUrl = src.replace(/\/index\.html$/, '');
@@ -38,9 +38,12 @@ class SourceErddapBuoys extends Source {
     // Raw ERDDAP name -> { code, direction, unitTransform }. A name not
     // listed here keeps its raw name as its standard code, unchanged - only
     // rename, flag a direction, or convert units when the source isn't
-    // already standard. 'sensorId.rawName' disambiguates two sensors sharing
-    // a raw name (e.g. CTD and SAMI both report 'TEMP').
+    // already standard.
     this.mapping = mapping || {};
+    // { sensorId: { rawName: { code, direction, unitTransform } } }, checked
+    // before the flat mapping above - only needed when two sensors report the
+    // same raw name (e.g. CTD and SAMI both report 'TEMP').
+    this.sensorMapping = sensorMapping || {};
     // { sensorId: extra ERDDAP query string }, e.g. ADCP's depth selection
     this.sensorConstraints = sensorConstraints || {};
 
@@ -146,10 +149,12 @@ class SourceErddapBuoys extends Source {
   }
 
   // Standard code + direction/unitTransform for a sensor's raw column - a
-  // sensor-qualified override ('sensorId.rawName') wins over a flat one,
-  // which wins over just keeping the raw name unchanged (see this.mapping).
+  // sensor-specific override wins over a flat one, which wins over just
+  // keeping the raw name unchanged (see this.sensorMapping / this.mapping).
   mappingFor(sensorId, rawName) {
-    return this.mapping[`${sensorId}.${rawName}`] || this.mapping[rawName] || { code: rawName };
+    return (this.sensorMapping[sensorId] && this.sensorMapping[sensorId][rawName])
+      || this.mapping[rawName]
+      || { code: rawName };
   }
 
   // The last DAYS_LOADED days of one sensor's data, ending at its own maxTime
