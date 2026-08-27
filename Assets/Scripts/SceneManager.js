@@ -244,8 +244,11 @@ class SceneManager{
     loadDiv.appendChild(sponsorsImg);
     // Add to body
     document.body.appendChild(loadDiv);
-    // Remove after 5 seconds
-    setTimeout(() => document.body.removeChild(loadDiv), 5000);
+    // Remove after 5 seconds - guarded in case onLoad's own removal (below)
+    // already ran first
+    setTimeout(() => {
+      if (loadDiv.parentNode === document.body) document.body.removeChild(loadDiv);
+    }, 5000);
 
     // Load manager
     THREE.DefaultLoadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
@@ -256,8 +259,10 @@ class SceneManager{
       console.log('Loading Complete!');
       if (loadDiv.parentElement != null){
         loadDiv.style.opacity = 0;
-        setTimeout(() => document.body.removeChild(loadDiv), 1300);
-        
+        // Guarded in case the 5-second fallback removal (above) already ran first
+        setTimeout(() => {
+          if (loadDiv.parentNode === document.body) document.body.removeChild(loadDiv);
+        }, 1300);
       }
       // Emit event
       window.eventBus.emit('SceneManager_LoadingComplete');
