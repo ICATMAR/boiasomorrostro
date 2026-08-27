@@ -82,7 +82,8 @@ export class AISManager {
 
   // Process AIS message
   processAISMessage(message) {
-
+    if (message.MessageType == "SubscriptionConfirmation")
+      return;
     const metaData = message.MetaData;
     if (!metaData || !metaData.latitude || !metaData.longitude) { debugger };
 
