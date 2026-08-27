@@ -5,8 +5,8 @@ import COLOR_LEGENDS from './data/colorLegends.js';
 // before and after the current hour (finer scales show a shorter span, so the
 // number of requested cells stays similar on every scale).
 const TIMESCALES = [
-  { id: '3h', minutes: 180, hoursAheadBehind: 48 },
   { id: '1h', minutes: 60,  hoursAheadBehind: 24 },
+  { id: '3h', minutes: 180, hoursAheadBehind: 48 },
 ];
 
 const UNITS_STORAGE_KEY = 'boiasomorrostro_units';
@@ -21,7 +21,7 @@ class GUIManager {
   timelineSections = ['forecast', 'observations'];
 
   // BOTTOM SECTION
-  _selectedSection = 'forecast';
+  _selectedSection = 'observations';
   get selectedSection() { return this._selectedSection; }
   set selectedSection(id) {
     this._selectedSection = id;
@@ -42,7 +42,7 @@ class GUIManager {
   get isCompact() { return this._panelState != 'fullscreen'; }
 
   // TIMELINE SCALE
-  _timelineScaleId = '3h';
+  _timelineScaleId = '1h';
   get timelineScaleId() { return this._timelineScaleId; }
   set timelineScaleId(id) {
     this._timelineScaleId = id;

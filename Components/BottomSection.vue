@@ -309,7 +309,7 @@ export default {
   align-items: center;
   overflow: auto;
   width: 100%;
-  min-height: 200px;
+  min-height: 100px;
   max-height: 87vh;
 }
 
