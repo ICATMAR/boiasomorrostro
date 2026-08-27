@@ -18,7 +18,7 @@ class SomorrostroBuoyEntity {
       // Fix material
       // AO
       buoyMesh.geometry.attributes.uv2 = buoyMesh.geometry.attributes.uv;
-      const aoTexture = new THREE.TextureLoader().load('/boiasomorrostro/Assets/SomorrostroBuoy/aoMap.png');
+      const aoTexture = new THREE.TextureLoader().load('/boiasomorrostro/Assets/SomorrostroBuoy/aoMap.jpg');
       aoTexture.flipY = false;
       buoyMesh.material.aoMap = aoTexture;
       buoyMesh.material.aoMapIntensity = 1;

@@ -1,11 +1,8 @@
 import * as THREE from 'three';
 import Stats from '/boiasomorrostro/lib/three.js/examples/jsm/libs/stats.module.js';
 import { OrbitControls } from '/boiasomorrostro/lib/three.js/examples/jsm/controls/OrbitControls.js';
-import { OBJLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/OBJLoader.js';
-import { GLTFLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/GLTFLoader.js';
-import { FBXLoader } from '/boiasomorrostro/lib/three.js/examples/jsm/loaders/FBXLoader.js'
 import { RosaVentsEntity } from '/boiasomorrostro/Assets/Orientation/RosaVentsEntity.js';
-import { SandEntity } from '/boiasomorrostro/Assets/Terrain/SandEntity.js';
+// import { SandEntity } from '/boiasomorrostro/Assets/Terrain/SandEntity.js';
 import { SkyboxEntity } from '/boiasomorrostro/Assets/Skybox/SkyboxEntity.js';
 // CoastLine
 import { CoastLineEntity } from '/boiasomorrostro/Assets/Terrain/CoastLine/CoastLineEntity.js';
@@ -135,8 +132,8 @@ class SceneManager{
     // });
     
     // Sand
-    this.sand = new SandEntity(scene);
-    this.sand.mesh.position.y = -43;
+    // this.sand = new SandEntity(scene);
+    // this.sand.mesh.position.y = -43;
 
     // Rosa dels vents
     //his.rosaVents = new RosaVentsEntity(scene);
