@@ -9,7 +9,7 @@ const LEGENDS = {
     [0.75, [255, 0, 0]],     // 30 kn
     [1.00, [255, 0, 255]],   // 40 kn
   ],
-  CLOUDS: [
+  CLOUDS: [ // White to gray
     [0.00, [255, 255, 255]],
     [0.50, [255, 255, 255]],
     [0.75, [220, 220, 220]],
@@ -32,11 +32,17 @@ const LEGENDS = {
     [0.60, [70, 70, 0]],     // 2.4 m
     [1.00, [255, 0, 255]],   // 4 m
   ],
-  HUMIDITY: [
+  HUMIDITY: [ // White to clear blue
     [0.00, [255, 255, 255]],
     [0.50, [255, 255, 255]],
     [1.00, [0, 255, 255]],
   ],
+  PHPH: [
+    [0.00, [175, 255, 110]], // 7
+    [0.33, [110, 255, 120]], // 
+    [0.66, [120, 255, 190]], // 
+    [1, [140, 255, 250]] // 9
+  ]
 };
 
 
@@ -59,6 +65,8 @@ const COLOR_LEGENDS = {
   WETT: LEGENDS.TEMPERATURE,
 
   CLOUD: LEGENDS.CLOUDS,
+
+  PHPH: LEGENDS.PHPH,
 
   // Reused as a generic low-to-high gradient for other bounded variables
   RELH: LEGENDS.HUMIDITY,
