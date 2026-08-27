@@ -86,6 +86,8 @@ export default ca = {
   "Wind gust": "Ràfega",
   "Wave significant height": "Onatge",
   "Air temperature": "Temp. aire",
+  "Sea temperature (0.5m)": "Temp. aigua (0.5m)",
+  "Sea temperature (4m)": "Temp. aigua (4m)",
   "Atmospheric pressure": "Pressió",
   "Sea surface temperature": "Temp. mar",
   "Sea bottom temperature": "Temperatura del fons del mar",

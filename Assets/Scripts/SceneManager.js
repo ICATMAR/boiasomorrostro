@@ -280,7 +280,7 @@ class SceneManager{
 
   // FLAG WIND
   // Sets the flag from the buoy's latest observation (see DataService.buoy,
-  // Assets/Scripts/data/products/DPBuoy.js). Same units/convention as the
+  // Assets/Scripts/data/products/DPBuoys.js). Same units/convention as the
   // (currently unused) wind updates in Canvas3D.vue: km/h, and setWindParameters
   // itself flips the "from" bearing WDIR reports into the "blowing toward" one
   // the flag needs.

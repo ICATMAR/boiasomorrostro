@@ -16,6 +16,35 @@ class Source {
   // only deals with standard codes.
   async getValueAt(code, date, intervalMinutes) { throw new Error('getValueAt() not implemented'); }
 
+  // Parses ERDDAP's info/dataset metadata format (jsonlKVP: one JSON object
+  // per line, each declaring a variable + its data type, or an attribute on a
+  // variable / on NC_GLOBAL for dataset-level metadata). Shared by any source
+  // that reads this format. Same as VISOC's Source.js, so ERDDAP-based sources
+  // can be copied between the two repositories unchanged.
+  parseERDDAPMetadata(text) {
+    const rows = text.trim().split('\n').filter(line => line).map(line => JSON.parse(line));
+
+    const variables = {};
+    const metadata = {};
+
+    rows.forEach(row => {
+      const varName = row['Variable Name'];
+      const attrName = row['Attribute Name'];
+      const value = row['Value'];
+
+      if (varName === 'NC_GLOBAL') {
+        if (attrName) metadata[attrName] = value;
+        return;
+      }
+
+      if (!variables[varName]) variables[varName] = {};
+      if (row['Row Type'] === 'variable') variables[varName].dataType = row['Data Type'];
+      else if (attrName) variables[varName][attrName] = value;
+    });
+
+    return { variables, metadata };
+  }
+
 }
 
 

@@ -115,7 +115,7 @@ class GUIManager {
   // OBSERVATIONS TIMELINE RANGE
   // Anchored on the latest measurement instead of on "now": the buoy can lag by
   // days, and the timeline should always end just after the newest data. Covers
-  // the three days SourceErddapBuoy loads, plus half a day of empty cells.
+  // the three days SourceErddapBuoys loads, plus half a day of empty cells.
   observationsDaysLoaded = 3;
   observationsHoursAhead = 12;
   observationsRange(latestDate) {

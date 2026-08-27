@@ -87,6 +87,8 @@ export default es = {
   "Wind gust": "Ráfaga",
   "Wave significant height": "Oleaje",
   "Air temperature": "Temp. aire",
+  "Sea temperature (0.5m)": "Temp. agua (0.5m)",
+  "Sea temperature (4m)": "Temp. agua (4m)",
   "Atmospheric pressure": "Presión",
   "Sea surface temperature": "Temp. mar",
   "Sea bottom temperature": "Temperatura del fondo del mar",

@@ -1,9 +1,9 @@
 import DP from './DataProduct.js';
 
-// Observations from the Somorrostro buoy. The same data is published on two
-// ERDDAP servers that do not always update at the same time, so every lookup
-// takes whichever source is ahead instead of trusting a single one.
-class DPBuoy extends DP {
+// Observations from the Somorrostro buoy. The same sensors are published on
+// two ERDDAP servers that do not always update at the same time, so every
+// lookup takes whichever source is ahead instead of trusting a single one.
+class DPBuoys extends DP {
 
   // Latest row across both servers for a code, plus the source it came from
   latestRow(code) {
@@ -18,7 +18,7 @@ class DPBuoy extends DP {
   // Most recent timestamp any source has data for - anchors the observations
   // timeline and the wind rose
   get latestDate() {
-    const dates = this.sources.map(s => s.rows[s.rows.length - 1]?.date).filter(Boolean);
+    const dates = this.sources.map(s => s.latestDate).filter(Boolean);
     return dates.length ? new Date(Math.max(...dates)) : undefined;
   }
 
@@ -26,7 +26,7 @@ class DPBuoy extends DP {
   // (network/HTTP/timeout), 'empty' if they all loaded fine but found nothing
   // in the requested window. Only meaningful after ready() resolves.
   get status() {
-    if (this.sources.some(s => s.rows.length > 0)) return 'ok';
+    if (this.sources.some(s => s.hasData)) return 'ok';
     if (this.sources.length && this.sources.every(s => s.error)) return 'error';
     return 'empty';
   }
@@ -38,4 +38,4 @@ class DPBuoy extends DP {
 
 }
 
-export default DPBuoy;
+export default DPBuoys;

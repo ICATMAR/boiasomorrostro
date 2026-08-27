@@ -85,6 +85,8 @@ export default en = {
   "Wind gust": "Gust",
   "Wave significant height": "Waves",
   "Air temperature": "Air temp.",
+  "Sea temperature (0.5m)": "Water temp. (0.5m)",
+  "Sea temperature (4m)": "Water temp. (4m)",
   "Atmospheric pressure": "Pressure",
   "Sea surface temperature": "Sea temp.",
   "Sea bottom temperature": "Sea bottom temperature",
