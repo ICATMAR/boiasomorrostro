@@ -31,12 +31,11 @@ import DataTimeline from "./DataTimeline/DataTimeline.vue";
 export default {
   name: "ForecastSection",
   computed: {
-    // Products with their rows filtered for the current panel state
     groups() {
       return this.$dataService.forecastProducts.map(dp => ({
         name: dp.name,
         product: dp.product,
-        variables: dp.product.visibleVariables(this.$gui.isCompact),
+        variables: dp.product.variables,
       }));
     },
   },

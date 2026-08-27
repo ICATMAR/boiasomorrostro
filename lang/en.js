@@ -10,6 +10,8 @@ export default en = {
   "Raw data": "Raw data",
   "Data": "Data",
   "Data from": "Data from",
+  "above water": "above water",
+  "below water": "below water",
 
 
   "About": "About",

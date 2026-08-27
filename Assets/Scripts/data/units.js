@@ -20,6 +20,7 @@ const UNIT_GROUPS = {
     { unit: 'm/s',  decimals: 2, range: [0, 1],   toDisplay: v => v },
     { unit: 'kn',   decimals: 1, range: [0, 2],   toDisplay: v => v * 1.94384 },
     { unit: 'cm/s', decimals: 0, range: [0, 100], toDisplay: v => v * 100 },
+    { unit: 'km/h', decimals: 1, range: [0, 3.6], toDisplay: v => v * 3.6 },
   ],
   seaTemp: [
     { unit: 'ºC', decimals: 1, range: [10, 30],   toDisplay: v => v },

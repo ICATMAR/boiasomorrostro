@@ -9,6 +9,8 @@ export default es = {
   "Raw data": "Datos crudos",
   "Data": "Datos",
   "Data from": "Datos de",
+  "above water": "sobre el agua",
+  "below water": "bajo el agua",
 
 
   "About": "Acerca de",

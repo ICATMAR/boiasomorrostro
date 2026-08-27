@@ -36,6 +36,17 @@ class DPBuoys extends DP {
     return this.sources.map(s => s.error).filter(Boolean);
   }
 
+  // A sensor's ERDDAP metadata (instrument, sensor_depth/sensor_height...),
+  // from whichever source discovered it - used by the extended observations
+  // view to label each sensor's group of rows.
+  sensorMetadata(sensorId) {
+    for (const source of this.sources) {
+      const sensor = source.buoy?.sensors.find(s => s.id === sensorId);
+      if (sensor) return sensor.metadata;
+    }
+    return undefined;
+  }
+
 }
 
 export default DPBuoys;

@@ -31,9 +31,10 @@ const BUOY_SENSOR_CONSTRAINTS = { ADCP: '&depth=2' };
 // range, and shows an arrow when directionCode points at another variable.
 // unitGroup (see Assets/Scripts/data/units.js) makes a variable's unit
 // clickable, cycling through that group's options; plain unit/range/decimals
-// are used as-is for variables without one.
-// compact -> shown when the bottom section is compact; without any compact
-// variable a product shows all of them (see BottomSection's panel state).
+// are used as-is for variables without one. Which rows show in the compact
+// panel state, and how they're grouped in fullscreen, are view-layer
+// decisions (see ObservationsSection.vue / ForecastSection.vue), not encoded
+// here.
 const dataProducts = [
 
   // Open Weather API
@@ -113,19 +114,25 @@ const dataProducts = [
     description: 'Meteorological observations measured at the buoy',
     type: 'real-time',
     link: 'https://erddap.icatmar.cat/erddap/info/BUOY_SOMO_METEO/index.html',
+    // Ordered and grouped by sensor (see ObservationsSection.vue's extended
+    // view, which splits these into one block per sensor) - which rows show
+    // in the compact view is a view-layer decision, not encoded here.
     variables: [
-      { code: 'WSPD', name: 'Wind speed',              unitGroup: 'wind',     directionCode: 'WDIR', fromDirection: true, compact: true },
-      { code: 'WRSP', name: 'Relative wind speed',     unitGroup: 'wind',     directionCode: 'WRDR', fromDirection: true },
-      { code: 'DRYT', name: 'Air temperature',         unitGroup: 'airTemp',  compact: true },
-      // Same colour scale as air temperature for now (see colorLegends.js) -
-      // CTD and SAMI are fixed at these depths, not a queryable dimension.
-      { code: 'TEMP',     name: 'Sea temperature (0.5m)', unitGroup: 'airTemp', compact: true },
-      { code: 'SAMITEMP', name: 'Sea temperature (4m)',   unitGroup: 'airTemp' },
-      { code: 'DEWT', name: 'Dew point temperature',   unitGroup: 'airTemp' },
-      { code: 'WETT', name: 'Wet bulb temperature',    unitGroup: 'airTemp' },
-      { code: 'ATMS', name: 'Atmospheric pressure',    unitGroup: 'pressure', compact: true },
-      { code: 'RELH', name: 'Humidity',                unit: '%',      range: [0, 100],   decimals: 0, compact: true },
-      { code: 'ADNS', name: 'Air density',             unit: 'kg/m³',  range: [1.1, 1.3],  decimals: 2 },
+      // METEO
+      { code: 'WSPD', name: 'Wind speed',              unitGroup: 'wind',     directionCode: 'WDIR', fromDirection: true, sensor: 'METEO' },
+      { code: 'WRSP', name: 'Relative wind speed',     unitGroup: 'wind',     directionCode: 'WRDR', fromDirection: true, sensor: 'METEO' },
+      { code: 'DRYT', name: 'Air temperature',         unitGroup: 'airTemp',  sensor: 'METEO' },
+      { code: 'DEWT', name: 'Dew point temperature',   unitGroup: 'airTemp',  sensor: 'METEO' },
+      { code: 'WETT', name: 'Wet bulb temperature',    unitGroup: 'airTemp',  sensor: 'METEO' },
+      { code: 'ATMS', name: 'Atmospheric pressure',    unitGroup: 'pressure', sensor: 'METEO' },
+      { code: 'RELH', name: 'Humidity',                unit: '%',      range: [0, 100],   decimals: 0, sensor: 'METEO' },
+      { code: 'ADNS', name: 'Air density',             unit: 'kg/m³',  range: [1.1, 1.3],  decimals: 2, sensor: 'METEO' },
+      // CTD - same colour scale as air temperature for now (see colorLegends.js)
+      { code: 'TEMP', name: 'Sea temperature (0.5m)', unitGroup: 'airTemp', sensor: 'CTD' },
+      // SAMI - fixed at this depth, not a queryable dimension
+      { code: 'SAMITEMP', name: 'Sea temperature (4m)', unitGroup: 'airTemp', sensor: 'SAMI' },
+      // ADCP - pinned to its shallowest bin (see BUOY_SENSOR_CONSTRAINTS)
+      { code: 'HCSP', name: 'Sea water velocity', unitGroup: 'current', directionCode: 'HCDT', sensor: 'ADCP' },
     ],
     // Same sensors on both servers; whichever is ahead answers first (see DPBuoys).
     // datasetCommonKey discovers every buoy the server hosts (same as VISOC's

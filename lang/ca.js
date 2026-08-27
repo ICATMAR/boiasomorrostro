@@ -9,6 +9,8 @@ export default ca = {
   "Raw data": "Dades crues",
   "Data": "Dades",
   "Data from": "Dades de",
+  "above water": "sobre l'aigua",
+  "below water": "sota l'aigua",
 
 
 

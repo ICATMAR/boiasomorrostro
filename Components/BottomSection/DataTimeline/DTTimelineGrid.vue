@@ -121,4 +121,28 @@ td.group-cell > .group-cell-label {
 .group-cell-label > a {
   text-decoration: underline;
 }
+
+/* Sub-row naming a buoy sensor within a product group, used by the extended
+   observations view (see ObservationsSection.vue's sensorGroups). Same
+   sticky-label trick as .group-cell, darker and indented to read as nested
+   under the product row above it. */
+td.sensor-cell {
+  text-align: left;
+  padding: 0;
+  background: var(--lightBlue);
+}
+td.sensor-cell > .sensor-cell-label {
+  position: sticky;
+  left: 0;
+  display: inline-block;
+  padding-left: 20px;
+  white-space: nowrap;
+  color: white;
+  text-shadow: 0 0 2px black;
+}
+.sensor-cell-label {
+  font-size: 0.65rem;
+  font-style: italic;
+  color: white;
+}
 </style>
