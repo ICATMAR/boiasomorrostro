@@ -47,6 +47,19 @@ class DPBuoys extends DP {
     return undefined;
   }
 
+  // One promise per sensor tagged in this product's variables (see
+  // Catalogue.js's `sensor` field), each resolving once every source has
+  // tried to load it (successfully or not) - lets a sensor's own rows show up
+  // in the observations timeline as soon as they're ready, instead of
+  // waiting for the whole buoy (mirrors VISOC's DTAPHFR.loadStations()).
+  sensorLoadPromises() {
+    const sensorIds = [...new Set(this.variables.map(v => v.sensor).filter(Boolean))];
+    return sensorIds.map(sensorId => ({
+      sensorId,
+      promise: Promise.all(this.sources.map(s => s.sensorLoadingPromise(sensorId))),
+    }));
+  }
+
 }
 
 export default DPBuoys;

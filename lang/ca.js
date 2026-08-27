@@ -103,7 +103,14 @@ export default ca = {
   "Wet bulb temperature": "Bulb humit",
   "Relative wind speed": "Vent relatiu",
   "Relative wind direction": "Direcció vent relatiu",
+  "Corrected wind direction": "Dir. vent corregida (mag.)",
   "Air density": "Densitat aire",
+
+  // Sensors CTD/SAMI de la boia, mostrats a la vista ampliada d'observacions
+  "Dissolved oxygen": "Oxigen dissolt",
+  "Sea pressure": "Pressió l'aigua",
+  "Electrical conductivity": "Cond. elèctrica",
+  "Water pH": "pH de l'aigua",
 
   // Secció inferior
   "Forecast": "Predicció",

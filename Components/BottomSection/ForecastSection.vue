@@ -14,7 +14,7 @@
                 </div>
               </td>
             </tr>
-            <DataTimeline :product="group.product" :variables="group.variables" :cells="cells"></DataTimeline>
+            <DataTimeline :product="group.product" :variables="group.variables" :cells="cells" :loading="loadingProducts"></DataTimeline>
           </template>
         </DTTimelineGrid>
       </template>
@@ -30,6 +30,21 @@ import DataTimeline from "./DataTimeline/DataTimeline.vue";
 
 export default {
   name: "ForecastSection",
+  created() {
+    // OpenWeather/CMEMS each have a single source/promise, not per-sensor
+    // ones like the buoy (see ObservationsSection.vue), so every row of a
+    // product spins until that one promise resolves - keyed by product name
+    // to match DataTimeline's isLoading() fallback for rows without a `sensor`.
+    this.$dataService.forecastProducts.forEach(({ name, product }) => {
+      this.loadingProducts[name] = true;
+      product.ready().then(() => { this.loadingProducts[name] = false; });
+    });
+  },
+  data() {
+    return {
+      loadingProducts: {}, // { productName: true } while still loading
+    }
+  },
   computed: {
     groups() {
       return this.$dataService.forecastProducts.map(dp => ({

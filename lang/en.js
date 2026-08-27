@@ -102,7 +102,14 @@ export default en = {
   "Wet bulb temperature": "Wet bulb",
   "Relative wind speed": "Rel. wind",
   "Relative wind direction": "Rel. wind direction",
+  "Corrected wind direction": "Corrected wind dir. (mag.)",
   "Air density": "Air density",
+
+  // Buoy CTD/SAMI sensors, shown in the extended observations view
+  "Dissolved oxygen": "Dissolved oxygen",
+  "Sea pressure": "Water pressure",
+  "Electrical conductivity": "Electrical cond.",
+  "Water pH": "Water pH",
 
   // Bottom section
   "Forecast": "Forecast",

@@ -23,7 +23,7 @@
           <!-- Spacer matching the product row on the right (see the sections) -->
           <div class="group-spacer"></div>
           <div class="horizontal name-row" v-for="v in group.variables" :key="v.code">
-            <span class="var-name">{{ $t(v.name) }}</span>
+            <span class="var-name">{{ $t(v.name) }}{{ v.suffix ? ' ' + v.suffix : '' }}</span>
             <span class="var-unit" :class="{ clickable: v.unitGroup }" @click="v.unitGroup && $gui.cycleUnit(v.unitGroup)">{{ unitLabel(v) }}</span>
           </div>
         </template>
@@ -294,6 +294,8 @@ export default {
   text-shadow: none;
   font-size: 0.7rem;
   padding: 0;
+  text-align: right;
+  line-height: 0.8;
 }
 
 .var-unit.clickable {

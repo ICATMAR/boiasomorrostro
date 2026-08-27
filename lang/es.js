@@ -104,7 +104,14 @@ export default es = {
   "Wet bulb temperature": "Bulbo húmedo",
   "Relative wind speed": "Viento relativo",
   "Relative wind direction": "Dirección viento relativo",
+  "Corrected wind direction": "Dir. viento corregida (mag.)",
   "Air density": "Densidad aire",
+
+  // Sensores CTD/SAMI de la boya, mostrados en la vista ampliada de observaciones
+  "Dissolved oxygen": "Oxígeno disuelto",
+  "Sea pressure": "Presión del agua",
+  "Electrical conductivity": "Cond. eléctrica",
+  "Water pH": "pH del agua",
 
   // Sección inferior
   "Forecast": "Predicción",

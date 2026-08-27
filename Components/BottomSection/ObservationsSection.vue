@@ -24,7 +24,7 @@
                 <div class="sensor-cell-label">{{ group.label }}</div>
               </td>
             </tr>
-            <DataTimeline :product="group.product" :variables="group.variables" :cells="cells"></DataTimeline>
+            <DataTimeline :product="group.product" :variables="group.variables" :cells="cells" :loading="loadingSensors"></DataTimeline>
           </template>
         </DTTimelineGrid>
       </template>
@@ -44,11 +44,21 @@ import BuoyStatusMessage from "./BuoyStatusMessage.vue";
 // `variables`) - a view-layer decision, not something the data product
 // should encode.
 const COMPACT_CODES = {
-  'Somorrostro buoy': ['WSPD', 'DRYT', 'TEMP', 'HCSP', 'RELH'],
+  'Somorrostro buoy': ['WSPD', 'DRYT', 'TEMP', 'HCSP_2', 'RELH'],
 };
 
 export default {
   name: "ObservationsSection",
+  created() {
+    // Each sensor's own promise resolves independently of the others (mirrors
+    // VISOC's DTAPHFR.loadStations()) - a sensor's rows keep a spinner (see
+    // DataTimeline.vue) only until its own fetch settles, instead of the
+    // whole buoy.
+    this.$dataService.buoy.sensorLoadPromises().forEach(({ sensorId, promise }) => {
+      this.loadingSensors[sensorId] = true;
+      promise.then(() => { this.loadingSensors[sensorId] = false; });
+    });
+  },
   async mounted() {
     // The range depends on the newest measurement, which is only known once the
     // ERDDAPs answer - until then the timeline shows the last three days up to now.
@@ -60,6 +70,7 @@ export default {
     return {
       latestDate: undefined,
       loaded: false, // product.status isn't meaningful until ready() resolves
+      loadingSensors: {}, // { sensorId: true } while that sensor is still loading
     }
   },
   methods: {
@@ -120,7 +131,9 @@ export default {
         }
         return [
           { key: dp.name, name: dp.name, product, link: product.link, variables: [] },
-          ...this.sensorGroups(product).map(g => ({ key: `${dp.name}:${g.sensor}`, product, label: g.label, variables: g.variables })),
+          // `name` is also DTLayout's own :key for its left-hand names column
+          // (see DTLayout.vue) - it must stay unique per group, same as `key`.
+          ...this.sensorGroups(product).map(g => ({ key: `${dp.name}:${g.sensor}`, name: `${dp.name}:${g.sensor}`, product, label: g.label, variables: g.variables })),
         ];
       });
     },

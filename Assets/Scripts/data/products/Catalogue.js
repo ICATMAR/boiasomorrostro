@@ -21,9 +21,27 @@ const BUOY_MAPPING = {
 const BUOY_SENSOR_MAPPING = {
   SAMI: { TEMP: { code: 'SAMITEMP' } },
 };
-// ADCP profiles current across 40 depth bins (2-41m) - pin to the shallowest
-// one as the surface current reading.
-const BUOY_SENSOR_CONSTRAINTS = { ADCP: '&depth=2' };
+
+// ADCP profiles current across 40 depth bins (2-41m, 1m steps) - one row per
+// depth (see SourceErddapBuoys's profiled-sensor handling, which builds a
+// 'HCSP_<depth>'/'HCDT_<depth>' code pair per bin). `suffix` is appended
+// as-is after the translated name (see DataTimeline.vue/DTLayout.vue).
+const ADCP_MIN_DEPTH = 2;
+const ADCP_MAX_DEPTH = 41;
+function adcpCurrentVariables() {
+  const variables = [];
+  for (let depth = ADCP_MIN_DEPTH; depth <= ADCP_MAX_DEPTH; depth++) {
+    variables.push({
+      code: `HCSP_${depth}`,
+      name: 'Sea water velocity',
+      suffix: `(${depth}m)`,
+      unitGroup: 'current',
+      directionCode: `HCDT_${depth}`,
+      sensor: 'ADCP',
+    });
+  }
+  return variables;
+}
 
 
 // Data products
@@ -121,6 +139,8 @@ const dataProducts = [
       // METEO
       { code: 'WSPD', name: 'Wind speed',              unitGroup: 'wind',     directionCode: 'WDIR', fromDirection: true, sensor: 'METEO' },
       { code: 'WRSP', name: 'Relative wind speed',     unitGroup: 'wind',     directionCode: 'WRDR', fromDirection: true, sensor: 'METEO' },
+      // Direction-only: no magnitude of its own, just an arrow (see DataTimeline.vue)
+      { code: 'WCDR', name: 'Corrected wind direction', directionOnly: true, fromDirection: true, unit: 'º', sensor: 'METEO' },
       { code: 'DRYT', name: 'Air temperature',         unitGroup: 'airTemp',  sensor: 'METEO' },
       { code: 'DEWT', name: 'Dew point temperature',   unitGroup: 'airTemp',  sensor: 'METEO' },
       { code: 'WETT', name: 'Wet bulb temperature',    unitGroup: 'airTemp',  sensor: 'METEO' },
@@ -129,10 +149,16 @@ const dataProducts = [
       { code: 'ADNS', name: 'Air density',             unit: 'kg/m³',  range: [1.1, 1.3],  decimals: 2, sensor: 'METEO' },
       // CTD - same colour scale as air temperature for now (see colorLegends.js)
       { code: 'TEMP', name: 'Sea temperature (0.5m)', unitGroup: 'airTemp', sensor: 'CTD' },
+      // CTD - noColor: true until these get their own legend (see colorLegends.js)
+      { code: 'PSAL', name: 'Salinity',                 unit: '‰',    range: [36, 39], decimals: 1, noColor: true, sensor: 'CTD' },
+      { code: 'DOX1', name: 'Dissolved oxygen',         unit: 'ml/L', range: [0, 8],   decimals: 2, noColor: true, sensor: 'CTD' },
+      { code: 'PRES', name: 'Sea pressure',             unit: 'dbar', range: [0, 5],   decimals: 2, noColor: true, sensor: 'CTD' },
+      { code: 'CNDC', name: 'Electrical conductivity',  unit: 'S/m',  range: [4, 7],   decimals: 2, noColor: true, sensor: 'CTD' },
       // SAMI - fixed at this depth, not a queryable dimension
       { code: 'SAMITEMP', name: 'Sea temperature (4m)', unitGroup: 'airTemp', sensor: 'SAMI' },
-      // ADCP - pinned to its shallowest bin (see BUOY_SENSOR_CONSTRAINTS)
-      { code: 'HCSP', name: 'Sea water velocity', unitGroup: 'current', directionCode: 'HCDT', sensor: 'ADCP' },
+      { code: 'PHPH', name: 'Water pH', unit: '', range: [7, 9], decimals: 2, sensor: 'SAMI' },
+      // ADCP - one row per depth bin (see adcpCurrentVariables)
+      ...adcpCurrentVariables(),
     ],
     // Same sensors on both servers; whichever is ahead answers first (see DPBuoys).
     // datasetCommonKey discovers every buoy the server hosts (same as VISOC's
@@ -143,7 +169,6 @@ const dataProducts = [
         src: 'https://erddap.icatmar.cat/erddap/index.html',
         datasetCommonKey: 'BUOY_',
         buoyId: 'SOMO',
-        sensorConstraints: BUOY_SENSOR_CONSTRAINTS,
         institution: 'ICATMAR',
         mapping: BUOY_MAPPING,
         sensorMapping: BUOY_SENSOR_MAPPING,
@@ -153,7 +178,6 @@ const dataProducts = [
         src: 'https://hebe.icm.csic.es/erddap/index.html',
         datasetCommonKey: 'BUOY_',
         buoyId: 'SOMO',
-        sensorConstraints: BUOY_SENSOR_CONSTRAINTS,
         institution: 'ICM-CSIC',
         mapping: BUOY_MAPPING,
         sensorMapping: BUOY_SENSOR_MAPPING,
