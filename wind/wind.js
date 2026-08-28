@@ -31,7 +31,7 @@ const BUOY_INTERVAL = 5 * MINUTE;
 const BUOY_RETRY = 1 * MINUTE;      // when no buoy data could be loaded at all
 const FORECAST_INTERVAL = 30 * MINUTE;
 const FORECAST_RETRY = 5 * MINUTE;
-const VIEW_INTERVAL = 200 * 1000;     // PAST <-> FUTURE swap
+const VIEW_INTERVAL = 30 * 1000;     // PAST <-> FUTURE swap
 
 // Wind speed colour scale, copied from ../Assets/Scripts/data/colorLegends.js.
 // Stops are normalized over the displayed unit's range (see colorForSpeed).
