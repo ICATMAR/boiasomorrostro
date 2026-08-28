@@ -4,7 +4,7 @@
 <head>
   <meta charset=utf-8>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wind - Boia Somorrostro</title>
+  <title>Boia Somorrostro - Vent</title>
   <meta name="description"
     content="Wind data from boia somorrostro">
   <meta name="author" content="Gerard Llorach">
@@ -16,6 +16,15 @@
 
   <!-- Umami tracker -->
   <!-- https://cloud.umami.is/analytics/eu/websites -->
+  <script>
+    // Local development is not worth counting. Umami checks this flag before
+    // sending anything, and this script is not deferred, so it runs while the
+    // page is still parsing - well before the tracker below loads.
+    const host = location.hostname;
+    if (host === 'localhost' || host === '::1' || host === '' || host.startsWith('127.')) {
+      localStorage.setItem('umami.disabled', 'true');
+    }
+  </script>
   <script defer src="https://cloud.umami.is/script.js" data-website-id="2f04e7f8-c375-47ad-bfbd-9fef14303bb2"></script>
 </head>
 
