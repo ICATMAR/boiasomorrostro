@@ -162,6 +162,16 @@ body {
 
 /* --------------------------------------------------------- HISTORY / NOW */
 
+/* Gone in the forecast view: they expand well past the window there, and the
+   corner of them still on screen is only noise behind the forecast rings. */
+#past {
+  opacity: calc(1 - var(--future-scale));
+}
+
+#stage.future #past {
+  pointer-events: none; /* invisible chips must not swallow clicks */
+}
+
 /* Older rings fade out; opacity is set per ring by JS (see buildPastRings) */
 #past .ring,
 #past .chip,
@@ -187,19 +197,17 @@ body {
   pointer-events: none;
 }
 
-/* Current wind direction, sitting on the now-ring at the bearing the wind
-   comes from and pointing inward - same placement trick as .chip. It belongs
-   to the 180px ring, so like the compass it goes once that ring has grown to
-   the size of the window. */
+/* Current wind direction, at the bearing the wind comes from and pointing
+   inward - same placement trick as .chip. It sits inside #now-panel, so the
+   panel's own transform moves and shrinks it along to the bottom of the
+   window in the forecast view. */
 #now-arrow {
   position: absolute;
   left: 50%;
   top: 50%;
   translate: -50% -50%;
   rotate: var(--dir);
-  /* 11px inside the ring's own radius, at any scale - so it keeps sitting on
-     the ring in the forecast view too, where that ring fills the window */
-  transform: translateX(calc(90px * var(--past-scale) - 11px));
+  transform: translateX(79px);
   border: 13px solid transparent;
   border-left-width: 0;
   border-right-color: white;

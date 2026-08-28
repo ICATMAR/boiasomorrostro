@@ -13,6 +13,10 @@
   <!-- Font poppins, same as the main app -->
   <link rel="stylesheet" type="text/css" href="../lib/font-poppins.css" />
   <link rel="stylesheet" type="text/css" href="style.css" />
+
+  <!-- Umami tracker -->
+  <!-- https://cloud.umami.is/analytics/eu/websites -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="2f04e7f8-c375-47ad-bfbd-9fef14303bb2"></script>
 </head>
 
 <body>
@@ -27,11 +31,12 @@
     <!-- Before #forecast: in future view this ring is the filled boundary the
          forecast rings sit inside, so it has to paint underneath them. -->
     <div id="now-ring" class="ring" title="Mostra la previsió"></div>
-    <div id="now-arrow"></div>
     <div id="forecast"></div>
     <div id="compass"></div>
 
     <div id="now-panel" title="Canvia de vista">
+      <!-- Inside the panel, so it travels and scales with it -->
+      <div id="now-arrow"></div>
       <div>
         <span id="now-speed">--</span>
         <span id="now-unit">kn</span>
