@@ -497,11 +497,12 @@ body {
   right: 0.75rem;
   top: 0.6rem;
   display: block;
-  width: clamp(34px, 6vw, 50px);
-  height: clamp(34px, 6vw, 50px);
+  width: clamp(45px, 8vw, 55px);
+  height: clamp(45px, 8vw, 55px);
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);;
+  border: 1px solid rgba(255, 255, 255, 0.5);
   z-index: 5;
 }
 

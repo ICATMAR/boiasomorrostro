@@ -21,8 +21,10 @@
     // sending anything, and this script is not deferred, so it runs while the
     // page is still parsing - well before the tracker below loads.
     const host = location.hostname;
-    if (host === 'localhost' || host === '::1' || host === '' || host.startsWith('127.')) {
+    if (host === 'localhost' || host === '::1' || host.startsWith('127.')) {
       localStorage.setItem('umami.disabled', 'true');
+    } else {
+      localStorage.setItem('umami.disabled', 'false');
     }
   </script>
   <script defer src="https://cloud.umami.is/script.js" data-website-id="2f04e7f8-c375-47ad-bfbd-9fef14303bb2"></script>
@@ -117,7 +119,8 @@
       </div>
 
       <div id="about-content">
-        <p>Aquesta aplicació ofereix una visualització de les dades de vent de la boia Somorrostro.
+        <p>Aquesta aplicació ofereix una visualització de les dades de vent de la boia Somorrostro. 
+          Aquesta boia està localitzada davant del Port Olímpic de Barcelona.
           El sensor (MaxiMet Marine GMX500) que recull les dades està a 1.5 metres de la superfície
           del mar. Fa servir sensors ultrasònics i una brúixula magnètica per obtenir dades de vent.</p>
 
