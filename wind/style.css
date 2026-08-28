@@ -497,8 +497,8 @@ body {
   right: 0.75rem;
   top: 0.6rem;
   display: block;
-  width: clamp(45px, 8vw, 55px);
-  height: clamp(45px, 8vw, 55px);
+  width: clamp(45px, 8vw, 128px);
+  height: clamp(45px, 8vw, 128px);
   border-radius: 50%;
   overflow: hidden;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);;
