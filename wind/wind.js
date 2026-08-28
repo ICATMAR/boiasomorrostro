@@ -557,6 +557,7 @@ function renderStatus() {
 
 // The animation toggle and, while it is on, how long until the view flips
 function renderControls() {
+  el('unit-value').textContent = currentUnit().unit;
   el('animation-toggle').textContent = `Animació ${animationOn ? 'On' : 'Off'}`;
   const seconds = Math.max(0, Math.ceil((nextViewSwap - Date.now()) / 1000));
   el('next-view').textContent = animationOn
@@ -640,10 +641,14 @@ function setupPan() {
     startX = e.clientX; startY = e.clientY;
     fromX = panX; fromY = panY;
     stage.classList.add('dragging');
-    stage.setPointerCapture(e.pointerId);
   });
 
-  stage.addEventListener('pointermove', e => {
+  // On the window, and deliberately WITHOUT setPointerCapture: capturing the
+  // pointer also retargets the click that follows it to the capturing element,
+  // which left nothing in the centre clickable - neither the unit toggle nor
+  // the view switch - on every window small enough to be pannable. Listening
+  // here instead still tracks a drag that leaves the stage.
+  window.addEventListener('pointermove', e => {
     if (!dragging) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
@@ -651,16 +656,13 @@ function setupPan() {
     setPan(fromX + dx, fromY + dy);
   });
 
-  const end = e => {
+  const end = () => {
     if (!dragging) return;
     dragging = false;
     stage.classList.remove('dragging');
-    // pointercancel can have released it already, and releasing a pointer we
-    // do not hold throws
-    if (stage.hasPointerCapture(e.pointerId)) stage.releasePointerCapture(e.pointerId);
   };
-  stage.addEventListener('pointerup', end);
-  stage.addEventListener('pointercancel', end);
+  window.addEventListener('pointerup', end);
+  window.addEventListener('pointercancel', end);
 
   // Capture phase, so a real drag is swallowed before it reaches the centre
   // ring or the panel and flips the view by accident.
@@ -669,9 +671,50 @@ function setupPan() {
   }, true);
 }
 
+// The buoy's position, and the about panel behind the top-right button
+function setupInfo() {
+  const coords = `${LATITUDE}, ${LONGITUDE}`;
+  el('coords').textContent = coords;
+
+  let feedbackTimer;
+  el('copy-coords').addEventListener('click', async () => {
+    let message;
+    try {
+      await navigator.clipboard.writeText(coords);
+      message = 'Copiat!';
+    } catch (e) {
+      // Needs a secure context; on http:// there is nothing sensible to fall
+      // back to, so say so rather than failing silently.
+      console.error('Could not copy the coordinates', e);
+      message = 'No s\'ha pogut copiar';
+    }
+    el('copy-feedback').textContent = message;
+    clearTimeout(feedbackTimer);
+    feedbackTimer = setTimeout(() => { el('copy-feedback').textContent = ''; }, 2000);
+  });
+
+  // The contact addresses live in the page as a user/host pair and are only
+  // joined up here, so neither the full address nor a mailto: appears in the
+  // HTML for an address scraper to pick up.
+  document.querySelectorAll('a.email').forEach(link => {
+    const address = link.dataset.user + String.fromCharCode(64) + link.dataset.host;
+    link.textContent = address;
+    link.href = 'mailto:' + address;
+  });
+
+  const about = el('about');
+  const setAbout = open => { about.hidden = !open; };
+  el('info-button').addEventListener('click', () => setAbout(true));
+  el('about-close').addEventListener('click', () => setAbout(false));
+  // Clicking the backdrop, but not the panel itself
+  about.addEventListener('click', e => { if (e.target === about) setAbout(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setAbout(false); });
+}
+
 async function start() {
-  el('now-unit').addEventListener('click', e => {
-    e.stopPropagation(); // the panel underneath switches views
+  setupInfo();
+
+  el('unit-toggle').addEventListener('click', () => {
     unitIndex = (unitIndex + 1) % UNITS.length;
     render();
   });

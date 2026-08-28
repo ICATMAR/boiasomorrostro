@@ -30,10 +30,17 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/* The expanded past rings run far outside the window, which inflates the
+   document's scroll extent - without this the page could be scrolled sideways,
+   sliding the about panel off and revealing what it was covering. */
+html {
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   height: 100vh;
-  overflow: hidden; /* expanded past rings run far outside the window */
+  overflow: hidden;
   background: radial-gradient(circle at 50% 45%, var(--blue), var(--darkBlue) 70%);
   color: white;
   user-select: none;
@@ -183,11 +190,12 @@ body {
   top: 50%;
   translate: -50% -50%;
   rotate: var(--dir);
-  transform: translateX(calc(79px * var(--past-scale)));
+  /* 11px inside the ring's own radius, at any scale - so it keeps sitting on
+     the ring in the forecast view too, where that ring fills the window */
+  transform: translateX(calc(90px * var(--past-scale) - 11px));
   border: 13px solid transparent;
   border-left-width: 0;
   border-right-color: white;
-  opacity: calc(1 - var(--future-scale));
   pointer-events: none;
   border-radius: 6px
 }
@@ -216,8 +224,10 @@ body {
   left: 50%;
   top: 50%;
   translate: -50% -50%;
-  /* 120px, not 85px (its own radius), so the disc clears the bottom edge */
-  transform: translateY(calc(var(--future-scale) * (50vh - 120px)));
+  /* Scale inside the transform, AFTER the translate, so the offset below is
+     not scaled with it. 90px clears the bottom edge for the smaller disc. */
+  transform: translateY(calc(var(--future-scale) * (50vh - 90px)))
+    scale(calc(1 - 0.4 * var(--future-scale)));
   width: 170px;
   height: 170px;
   border-radius: 50%;
@@ -245,9 +255,7 @@ body {
 
 #now-unit {
   font-size: 1rem;
-  cursor: pointer;
   opacity: 0.85;
-  border-bottom: 1px dotted rgba(255, 255, 255, 0.6);
 }
 
 #now-name {
@@ -284,10 +292,218 @@ body {
   opacity: var(--fade);
 }
 
+/* ------------------------------------------------- BRAND AND INFO PANEL */
+
+#brand {
+  position: fixed;
+  left: 0.75rem;
+  top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  text-shadow: 0 0 4px black;
+  z-index: 5;
+}
+
+#logos {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.2rem;
+}
+
+/* Same sizing as the main app's .logo */
+.logo {
+  width: clamp(45px, 8vw, 55px);
+  height: clamp(45px, 8vw, 55px);
+  display: block;
+}
+
+/* Overlapped slightly, the way the main app pairs these two */
+.obs-logo {
+  margin-left: -0.6rem;
+}
+
+/* logo-ICM.svg is white artwork on transparent, so it is used as a mask and
+   filled with the ICM blue instead. On its own it would then be invisible
+   against this page's dark background, hence the light chip behind it. */
+.logo-chip {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 5px;
+  padding: 0.25rem 0.4rem;
+}
+
+.logo-icm {
+  display: block;
+  height: clamp(14px, 2.6vw, 20px);
+  aspect-ratio: 157 / 41;
+  background-color: #0F049E;
+  -webkit-mask: url('../Assets/Logos/logo-ICM.svg') center / contain no-repeat;
+  mask: url('../Assets/Logos/logo-ICM.svg') center / contain no-repeat;
+}
+
+#brand-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+#brand-coords {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.6rem;
+  opacity: 0.8;
+}
+
+#copy-coords {
+  display: flex;
+  padding: 2px;
+  color: white;
+  background: none;
+  border: none;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+#copy-coords:hover {
+  opacity: 1;
+}
+
+#copy-feedback {
+  font-size: 0.55rem;
+  color: var(--lightBlue);
+}
+
+#brand-sensor {
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+#info-button {
+  position: fixed;
+  right: 0.75rem;
+  top: 0.6rem;
+  width: 1.7rem;
+  height: 1.7rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: white;
+  background: rgba(15, 48, 98, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 5;
+}
+
+/* Above the loading screen, which can still be on its way out */
+#about {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 20;
+}
+
+#about[hidden] {
+  display: none;
+}
+
+#about-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(40rem, 100%);
+  max-height: 100%;
+  background: var(--darkBlue);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  overflow: hidden; /* so the content's scroll stays inside the rounded corners */
+}
+
+/* Outside #about-content on purpose: that is what keeps the close button
+   still while the text scrolls. */
+#about-header {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0.6rem 0.6rem 0;
+  flex-shrink: 0;
+}
+
+#about-close {
+  width: 1.9rem;
+  height: 1.9rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#about-content {
+  /* Without min-height:0 a flex item refuses to shrink below its content, so
+     it would grow past the panel and get clipped by its overflow:hidden -
+     the text below the fold unreachable instead of scrollable. */
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.5rem 1.6rem 1.6rem;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+#about-content h2 {
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0;
+  margin: 1.4rem 0 0.4rem;
+  color: var(--lightBlue);
+}
+
+#about-content p {
+  padding: 0;
+  margin: 0 0 0.8rem;
+}
+
+#about-content .citation {
+  font-size: 0.72rem;
+  opacity: 0.85;
+  padding-left: 0.8rem;
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#about-content a {
+  color: var(--lightBlue);
+}
+
+/* Phones get the whole screen, and the close button centred above the text */
+@media (max-width: 40rem) {
+  #about {
+    padding: 0;
+  }
+
+  #about-panel {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 0;
+  }
+
+  #about-header {
+    justify-content: center;
+    padding-top: 0.8rem;
+  }
+}
+
 /* -------------------------------------------------- LOADING AND STATUSES */
 
 #loading {
-  position: absolute;
+  position: fixed;
   inset: 0;
   display: flex;
   flex-direction: column;
@@ -325,7 +541,7 @@ body {
 }
 
 #status {
-  position: absolute;
+  position: fixed;
   left: 0.75rem;
   bottom: 0.6rem;
   font-size: 0.6rem;
@@ -336,7 +552,7 @@ body {
 }
 
 #controls {
-  position: absolute;
+  position: fixed;
   right: 0.75rem;
   bottom: 0.6rem;
   display: flex;
@@ -346,6 +562,7 @@ body {
   z-index: 5;
 }
 
+#unit-toggle,
 #animation-toggle {
   font-family: inherit;
   font-size: 0.6rem;
