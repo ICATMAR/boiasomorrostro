@@ -30,13 +30,6 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* The expanded past rings run far outside the window, which inflates the
-   document's scroll extent - without this the page could be scrolled sideways,
-   sliding the about panel off and revealing what it was covering. */
-html {
-  overflow: hidden;
-}
-
 body {
   margin: 0;
   height: 100vh;
@@ -53,12 +46,23 @@ body {
 #stage {
   position: absolute;
   inset: 0;
+  /* The expanded rings run far outside the window. Clipping them here keeps
+     the document exactly window-sized, so it never gains a scroll extent that
+     the corner panels could slide out of. */
+  overflow: hidden;
   --past-scale: 1;
   --future-scale: 0;
-  /* Pan offset, only ever non-zero while .pannable (see setupPan) */
+  transition: --past-scale 1.2s ease-in-out, --future-scale 1.2s ease-in-out;
+}
+
+/* The pan moves this, not #stage, so the clipping box above always covers the
+   window however far the rings have been dragged. --pan-x/y are set on #stage
+   and inherit down (see setPan). */
+#stage-inner {
+  position: absolute;
+  inset: 0;
   transform: translate(var(--pan-x, 0px), var(--pan-y, 0px));
-  transition: --past-scale 1.2s ease-in-out, --future-scale 1.2s ease-in-out,
-    transform 1.2s ease-in-out;
+  transition: transform 1.2s ease-in-out;
 }
 
 /* Set when the rings do not fit the window (a phone, mostly): they are all
@@ -68,9 +72,12 @@ body {
   touch-action: none; /* the drag is ours, not the browser's scroll */
 }
 
-/* The pan follows the pointer exactly, so it must not be eased on the way */
 #stage.dragging {
   cursor: grabbing;
+}
+
+/* The pan follows the pointer exactly, so it must not be eased on the way */
+#stage.dragging #stage-inner {
   transition: none;
 }
 
@@ -587,5 +594,5 @@ body {
 /* Nothing here is worth animating on a device that asks not to - the two
    views still swap, they just cut instead of expanding. */
 @media (prefers-reduced-motion: reduce) {
-  #stage { transition: none; }
+  #stage, #stage-inner { transition: none; }
 }
