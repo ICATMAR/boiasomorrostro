@@ -333,6 +333,26 @@ body {
   pointer-events: none;
 }
 
+/* Fades only, with no travel of its own, so in the past view it is simply not
+   there. Timed like the forecast rings: in late, out quickly. */
+#forecast-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 6px black;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease-out;
+}
+
+#stage.future #forecast-title {
+  opacity: 0.85;
+  transition: opacity 0.45s ease-in 0.6s;
+}
+
 /* Like the history rings, further out means further from now means fainter.
    This multiplies with #forecast's own opacity above, which is what makes the
    whole set fade in and out with the view. */
