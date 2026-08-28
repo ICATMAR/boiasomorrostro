@@ -434,11 +434,12 @@ function addRing({ parent, radius, date, entry, fade, coarse }) {
   const chip = document.createElement('div');
   chip.className = 'chip';
   chip.style.setProperty('--r', radius + 'px');
-  chip.style.setProperty('--dir', entry.WDIR + 'deg');
+  chip.style.setProperty('--dir', (entry.WDIR-90) + 'deg');
   chip.style.setProperty('--text-flip', entry.WDIR > 180 ? '180deg' : '0deg');
   chip.style.setProperty('--color', colorForSpeed(entry.WSPD));
   if (fade !== undefined) chip.style.setProperty('--fade', fade);
   chip.innerHTML = `<span>${speedText(entry.WSPD)}</span>`;
+  chip.title = `${speedText(entry.WSPD)} ${currentUnit().unit}, ${entry.WDIR}º`
   parent.appendChild(chip);
 }
 
@@ -493,7 +494,7 @@ function renderNow() {
   el('now-unit').textContent = currentUnit().unit;
   el('now-name').textContent = latest ? windName(latest.WDIR) : 'Sense dades';
   el('now-ago').textContent = latest ? timeFromNow(latest.date) : '';
-  el('now-date').textContent = latest ? latest.date.toISOString() : '';
+  el('now-date').textContent = latest ? latest.date.toISOString().substring(0,16) + 'Z' : '';
 }
 
 const STATUS_TEXT = { loading: 'Comprovant…', ok: 'OK', nodata: 'No té dades', offline: 'Offline', skipped: 'No consultat' };

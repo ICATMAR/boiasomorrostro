@@ -99,6 +99,8 @@ body {
   font-size: 0.7rem;
   line-height: 1.2;
   white-space: nowrap;
+  z-index: 1;
+  pointer-events: all;
 }
 
 /* Points inward, towards the centre - wind direction is where it comes from */
@@ -178,7 +180,7 @@ body {
      labels; a soft halo (no hard edge, so it stays invisible against the
      centre ring in past view) keeps it readable. */
   padding: 0.6rem 3rem;
-  background: radial-gradient(closest-side, rgba(15, 48, 98, 0.85), rgba(15, 48, 98, 0.5) 70%, transparent);
+  /* background: radial-gradient(closest-side, rgba(15, 48, 98, 0.85), rgba(15, 48, 98, 0.5) 70%, transparent); */
 }
 
 #now-speed {
@@ -198,11 +200,15 @@ body {
   font-size: 1rem;
   margin-top: 2px;
 }
+#now-ago {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
 
-#now-ago,
 #now-date {
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   opacity: 0.7;
+  font-style: italic;
 }
 
 /* ------------------------------------------------------------- FORECAST */
