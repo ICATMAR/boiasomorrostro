@@ -127,6 +127,27 @@ body {
   height: 0;
 }
 
+/* The hour label sits at the bottom of a ring and the time-from-now at the
+   top, so the ring line would run straight through both. Rather than backing
+   the labels (the page background is a gradient, so no flat colour matches),
+   the ring itself is cut into two arcs by a conic-gradient mask: transparent
+   wedges of half-width --gap centred on 12 and 6 o'clock, opaque in between.
+   One element per ring still, and --gap is set per ring by addRing() from its
+   radius - the same label is a much wider angle on a small ring than a big
+   one. */
+#past .ring,
+#forecast .ring {
+  --gap: 12deg;
+  -webkit-mask-image: var(--arc-mask);
+  mask-image: var(--arc-mask);
+  --arc-mask: conic-gradient(
+    transparent 0 var(--gap),
+    #000 var(--gap) calc(180deg - var(--gap)),
+    transparent calc(180deg - var(--gap)) calc(180deg + var(--gap)),
+    #000 calc(180deg + var(--gap)) calc(360deg - var(--gap)),
+    transparent calc(360deg - var(--gap)) 360deg);
+}
+
 /* Ring outlines, at their own fixed size - the group above does the scaling */
 .ring {
   position: absolute;
@@ -415,6 +436,9 @@ body {
 }
 
 #brand-name {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.85rem;
   font-weight: 500;
 }
@@ -452,20 +476,40 @@ body {
 }
 
 #info-button {
-  position: fixed;
-  right: 0.75rem;
-  top: 0.6rem;
-  width: 1.7rem;
-  height: 1.7rem;
+  flex-shrink: 0;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   font-style: italic;
+  line-height: 1;
   color: white;
   background: rgba(15, 48, 98, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 50%;
   cursor: pointer;
+}
+
+/* The buoy's own icon, back up to the main app */
+#home {
+  position: fixed;
+  right: 0.75rem;
+  top: 0.6rem;
+  display: block;
+  width: clamp(34px, 6vw, 50px);
+  height: clamp(34px, 6vw, 50px);
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.4);
   z-index: 5;
+}
+
+#home img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Above the loading screen, which can still be on its way out */
@@ -608,6 +652,11 @@ body {
 
 @keyframes spin {
   to { rotate: 360deg; }
+}
+
+#status a {
+  color: inherit;
+  text-decoration: underline;
 }
 
 #status {

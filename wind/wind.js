@@ -383,6 +383,13 @@ function ringBorder(date) {
 
 // ------------------------------------------------------------------ GEOMETRY
 
+// Half-width of the widest ring label, and the limits on the wedge cut out of
+// a ring for it (see the mask on #past .ring). The same label covers a much
+// wider angle on a small ring than on a big one, hence the asin.
+const LABEL_HALF_WIDTH = 44;
+const GAP_MIN = 6;
+const GAP_MAX = 46;
+
 const NOW_RADIUS = 90;   // half of the 180x180 centre ring
 const EDGE_MARGIN = 24;  // keeps the outermost ring off the window edge
 // The tightest the rings are allowed to get. Above it they spread to fill the
@@ -440,6 +447,8 @@ function addRing({ parent, radius, date, entry, fade, coarse }) {
   const ring = document.createElement('div');
   ring.className = 'ring';
   ring.style.setProperty('--d', radius * 2 + 'px');
+  const gap = Math.asin(Math.min(1, LABEL_HALF_WIDTH / radius)) * 180 / Math.PI;
+  ring.style.setProperty('--gap', Math.min(GAP_MAX, Math.max(GAP_MIN, gap)) + 'deg');
   ring.style.borderStyle = border.style;
   ring.style.borderWidth = border.width;
   if (fade !== undefined) ring.style.setProperty('--fade', fade);
@@ -546,10 +555,19 @@ function renderNow() {
 const STATUS_TEXT = { loading: 'Comprovant…', ok: 'OK', nodata: 'No té dades', offline: 'Offline', skipped: 'No consultat' };
 const STATUS_CLASS = { loading: '', ok: 'status-ok', nodata: 'status-warn', offline: 'status-error', skipped: '' };
 
+// Where each line's data actually comes from, so the label can link to it
+const STATUS_LINK = {
+  int: ERDDAP.int + '/index.html',
+  ext: ERDDAP.ext + '/index.html',
+  repo: 'https://github.com/ICATMAR/data',
+  forecast: 'https://openweathermap.org/api',
+};
+
 function renderStatus() {
   const minutes = Math.max(0, Math.ceil((nextBuoyFetch - Date.now()) / MINUTE));
   const line = (label, key) =>
-    `<div>${label}: <span class="${STATUS_CLASS[status[key]]}">${STATUS_TEXT[status[key]]}</span></div>`;
+    `<div><a href="${STATUS_LINK[key]}" target="_blank" rel="noopener">${label}</a>: `
+    + `<span class="${STATUS_CLASS[status[key]]}">${STATUS_TEXT[status[key]]}</span></div>`;
   el('status').innerHTML =
     `<div>Propera actualització en ${minutes} min</div>`
     + line('ERDDAP Intern', 'int')
