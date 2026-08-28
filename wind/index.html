@@ -9,173 +9,45 @@
     content="Wind data from boia somorrostro">
   <meta name="author" content="Gerard Llorach">
   <link rel="shortcut icon" type="image/png" href="/boiasomorrostro/favicon.ico"/>
-  </head>
-  <body>
 
-  </body>
-  </html>
+  <!-- Font poppins, same as the main app -->
+  <link rel="stylesheet" type="text/css" href="../lib/font-poppins.css" />
+  <link rel="stylesheet" type="text/css" href="style.css" />
+</head>
 
+<body>
 
-  <script>
+  <!-- Every ring, chip and label below is created by wind.js and positioned
+       from the centre of #stage. The .hidden class starts them collapsed so
+       they expand into place once the data is in. -->
+  <div id="stage" class="hidden">
+    <div id="past"></div>
+    <!-- Before #forecast: in future view this ring is the filled boundary the
+         forecast rings sit inside, so it has to paint underneath them. -->
+    <div id="now-ring" class="ring"></div>
+    <div id="forecast"></div>
+    <div id="compass"></div>
 
-  const LATITUDE = 
-  const LONGITUDE = 
-  const PROXY_URL = 'https://api.icatmar.cat/proxy/';
-  
-  // Data
-  let dataBuoy;
-  let dataForecast;
+    <div id="now-panel">
+      <div>
+        <span id="now-speed">--</span>
+        <span id="now-unit" title="Canvia les unitats">kn</span>
+      </div>
+      <span id="now-name"></span>
+      <span id="now-ago"></span>
+      <span id="now-date"></span>
+    </div>
+  </div>
 
-  // Fetch datasets from ERDDAP
-  const externalERDDAP = 'https://erddap.icatmar.cat/erddap/tabledap/allDatasets.jsonlKVP?datasetID%2CmaxTime';
-  const internalERDDAP = 'https://hebe.icm.csic.es/erddap/tabledap/allDatasets.jsonlKVP?datasetID%2CmaxTime';
+  <div id="status"></div>
 
-  let latestDateExtERDDAP = new Date(2024,0,1);
-  let latestDateIntERDDAP = new Date(2024,0,1);
-  let datasetExists = false;
-  let loadListExtERDDAP = 0; // 0 Loading, 1 Success, 2 Error
-  let loadListIntERDDAP = 0; // 0 Loading, 1 Success, 2 Error
+  <div id="loading">
+    <div class="spinner"></div>
+    <div id="loading-message">Carregant…</div>
+  </div>
 
-  await fetch(proxy + internalERDDAP).then(res=> res.json()).then(r => {
-    // Find BUOY_SOMO_METEO
-    datasetExists
-    // If no, return and loardInternalErd = 2
-    // Check latest data
-    // Update HTML (show a small text on the corner saying latest data for ERDDAP)
-    latestDateIntERDDAP = 
-    // Set status
-    loadListIntERDDAP = 1;
-  }).catch(e => {
-    console.error(e)
-      // Update html (loading panel and corner info)
-    loadListIntERDDAP = 2;
-  });
+  <script src="wind.js"></script>
 
-  // Error when loading internal ERDDAP or latest data is too far away
-  await fetch(proxy + externalERDDAP).then...
-    // Find BUOY_SOMO_METEO
-    datasetExists
-    // If no, return and loardInternalErd = 2{
-    // Check latest data
-    // Update HTML (show a small text on the corner saying latest data for ERDDAP)
-    latestDateExtERDDAP = 
-    loadListExtERDDAP = 1;
-  }.catch
-  // Update html (loading panel and corner info)
-    loadListExtERDDAP = 2;
-  
-  
-  // If loadList was success
-  let loadERDDAPOption = '';
-  let latestERDDAPDate = undefined;
-  let erddapServer = undefined; // external / internal urls
-  if (loadListExtERDDAP || loadListIntERDDAP)
-    // Update HTML text
-    // Check latest date
-    if (latestDateExtERDDAP > latestDateIntERDDAP)
-      loadERDDAPOption = 'extERDDAP';
-      latestERDDAPDate = latestDateExtERDDAP
-    else
-      loadERDDAPOption = 'intERDDAP';
-      latestERDDAPDate = latestDateIntERDDAP;
-  
-  // If latest ERDDAP date is close but not recent (> 30min from now), load ERDDAP + github
-  // Update html text
-  // erddapServerLink = erddapServer + tabledap/BUOY_SOMO_METEO.csv?time,WDIR,WSPD&time>4h from now
-  // e.g., https://hebe.icm.csic.es/erddap/tabledap/BUOY_SOMO_METEO.htmlTable?time%2CWDIR%2CWSPD&time%3E=2026-08-21T00%3A00%3A00Z
-  await fetch(proxy + erddapServer).then...
-  .catch(e)
-  console.log(e)
-  // Update html panel
+</body>
 
-  // Load github (erddap max time is >30min) or both erddaps are down
-  // You can probaly check when was the file last modified and get an idea of the latest data without having to parse the file.
-  // Update html text
-  await fetch(proxy + meteoFile)
-  // http://icatmar.github.io/data/observational/insitu/Boies/SOMO/BoiaSomorrostro_cr1000xs_Meteo.dat
-  // or https://raw.githubusercontent.com/ICATMAR/data/refs/heads/main/observational/insitu/Boies/SOMO/BoiaSomorrostro_cr1000xs_Meteo.dat
-  // parse file. Look for columns TIMESTAMP, Corr_WindDir, Corr_WindS
-  // Update corner html (Github: latest data / down...)
-  // Store the data in data as in timestamp as key and then WDIR and WSPD inside. WSPD will be in m/s
-  
-
-  // Update HTML
-  // Either data was loaded or it wasnt. Now load forecast
-  const openWeatherURL = 'https://api.icatmar.cat/openWeatherAPI';
-
-  await fetch(openWeatherURL + ${this.src}?lat=${LATITUDE}&lon=${LONGITUDE}).then...
-  // store in dataForecast
-  .catch(e => {
-    // Update HTML (panel and corner OpenWeatherAPI: working/offline)
-    console.log(e);
-  })
-  
-
-
-  // Every 5 minutes, fetch buoy data.
-  // If data is recent (< 15 min, skip)
-  // If data is > 15, check the latest data (ERDDAPs and github). Decide where to load accordingly.
-  // You will have to check again if the services are online and show this information in the bottom corner.
-  // Also show in the bottom corner when is the next request going to happen as in Requesting in X minutes
-  // If no buoy data was loaded, try every minute
-
-  // Every 30 min, fetch forecast data
-  // IF no forecast data could be loaded, try every 5 minutes.
-
-  // There is loop that runs with requestAnimationFrame for example that checks the re-request loading timers and updates timing information (bottom corner request time to new request).
-
-  // HTML
-  // Rings are centered on the screen
-  // Each ring represents a data point. The more in the past, the bigger the ring
-  
-  // Two different views with an animated transition
-  // PAST VIEW (Somorrostro data)
-  // A circle for each data point (every 15 minutes)
-  // Central circle shows the current wind (Speed, Units, Wind name, TimeFromNow, ISODate) Ring size is 180x180 px
-  // Past wind data (every 15 min) is shown on outer rings. The wind speed is shown as a small arrow with the value with a colored-intensity background
-  // On each ring bottom, the hour and minutes are shown, e.g. 08:30. On each ring top, the time from now is shown, as in X min ago
-  // The rings have less opacity as they are further away from now time.
-  // The rings have a solid border when clock hours 00, dashed when 30 and dotted when 15 or 45. Line thickness at 00 is also thicker
-  // Around the main ring (180x180) there is name of the winds in catalan (Tramuntana, Gregal, Llevant, Xaloc, Migjorn, Garbí, Ponent, Mestral)
-
-
-  // FUTURE VIEW
-  // When switching from past to future view, the past cirles and "now" circle expand. the now circle should take the size of the min height-width of the window.
-  // The past circles expand beyond the window size. No overlow (hidden). At the bottom of the screen, current wind data is shown as (Speed, Units, Wind name, TimeFromNow, ISODate)
-  // Inner circles appear, they expand from 0 to their place. There is a ring for every hour (forecast). Similarly, the hours are shown at the bottom of the ring and the 
-  // time from now is shown at the top. The wind is expressed as in the PAST VIEW: small arrows with the value with colored-intensity background.
-  // When going from FUTURE TO PAST VIEW, the circles contract to the center. Data is updated every 30 min.
-
-  // TRANSITION
-  // Every 5 seconds, the PAST VIEW switches to the FUTURE VIEW. The rings expand and contract. The center panel in PAST VIEW moves to the bottom of the screen in FUTURE VIEW
-  
-  // LOADING SCREEN
-  // Loading screen let's the user know what is the loading process
-  // 1 - Comprovant que les dades existeixen a ERDDAP i que són actuals
-  // 2.1. - Les dades existeixen i són actuals, descarregant les dades
-  // 2.2. - Les dades existeixen a l'ERDDAP però no són actuals, comprovant les dades al repositori
-  // 2.3. - Les dades no existeixen a l'ERDDAP, comprovant les dades al repositori
-  // 3.1. - Descarregant les dades de previsió
-  // 3.2. - No s'han trobat les dades de la boia, descarregant dades de previsió
-
-  // BOTTOM CORNER
-  // Propera actualització en...
-  // ERDDAP Intern: OK / Offline / No té dades
-  // ERDDAP Extern: OK / Offline / No té dades
-  // Repositori: OK / Offline / No té dades
-
-
-  // DETAILS
-  // On initalization (first time load), the rings expand from the center to their place
-  // Default units: kn. When click on units switch to m/s, km/h, kn
-  // There is a counter that updates the X min ago and also requests new data
-  // Wind legend: WIND: [
-  //   [0.00, [255, 255, 255]], // 0
-  //   [0.15, [0, 255, 255]],   // 6 kn
-  //   [0.25, [0, 180, 0]],     // 10 kn
-  //   [0.50, [255, 255, 0]],   // 20 kn
-  //   [0.75, [255, 0, 0]],     // 30 kn
-  //   [1.00, [255, 0, 255]],   // 40 kn
-  // ],
-
-  </script>
+</html>

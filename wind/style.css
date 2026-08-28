@@ -1,0 +1,282 @@
+/* Wind rings - standalone SPA. Palette taken from ../globalStyle.css so this
+   page matches the main app, but nothing else is shared with it. */
+
+:root {
+  --blue: rgb(20, 120, 167);
+  --darkBlue: rgb(15, 48, 98);
+  --lightBlue: rgb(82, 181, 217);
+  --red: rgb(255, 115, 105);
+  --ring: rgba(255, 255, 255, 0.85);
+}
+
+/* --past-scale and --future-scale drive the whole PAST <-> FUTURE transition:
+   every ring diameter, chip radius and label offset below is a calc() on one
+   of them, so animating these two numbers animates the entire view at once.
+   They have to be registered, plain custom properties are not interpolable. */
+@property --past-scale {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
+@property --future-scale {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden; /* expanded past rings run far outside the window */
+  background: radial-gradient(circle at 50% 45%, var(--blue), var(--darkBlue) 70%);
+  color: white;
+  user-select: none;
+}
+
+/* ------------------------------------------------------------------ STAGE */
+
+/* Everything is positioned from the centre of this box: rings are centred on
+   it, chips are rotated around it and pushed out to their ring's radius. */
+#stage {
+  position: absolute;
+  inset: 0;
+  --past-scale: 1;
+  --future-scale: 0;
+  transition: --past-scale 1.2s ease-in-out, --future-scale 1.2s ease-in-out;
+}
+
+/* The one class the view toggle flips (see setView in wind.js). --now-scale is
+   set by JS on resize: how much the 180px "now" ring has to grow to reach the
+   edge of the window. */
+#stage.future {
+  --past-scale: var(--now-scale);
+  --future-scale: 1;
+}
+
+/* Grows from 0 on the first render, so the rings expand into place. */
+#stage.hidden {
+  --past-scale: 0;
+  --future-scale: 0;
+}
+
+/* Ring outlines. --d is the ring's own diameter at scale 1; the multiplier is
+   --past-scale for history rings and --future-scale for forecast ones. */
+.ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: calc(var(--d) * var(--scale));
+  height: calc(var(--d) * var(--scale));
+  border: 1px solid var(--ring);
+  border-radius: 50%;
+}
+
+/* Value + arrow sitting on a ring, at the bearing the wind comes from. The
+   property order CSS applies is translate -> rotate -> transform, so the box
+   is centred first, then turned to the bearing, then pushed out along the
+   (now rotated) x axis - the same trick the main app's wind rose uses. */
+.chip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  rotate: var(--dir);
+  transform: translateX(calc(var(--r) * var(--scale)));
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 5px 1px 2px;
+  border-radius: 10px;
+  background: var(--color);
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 0.7rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Points inward, towards the centre - wind direction is where it comes from */
+.chip::before {
+  content: '';
+  border: 5px solid transparent;
+  border-right-color: rgba(0, 0, 0, 0.6);
+  border-left-width: 0;
+}
+
+/* Kept upright: the chip itself is rotated to the bearing, so on the bottom
+   half the text would otherwise read upside-down. */
+.chip > span {
+  rotate: var(--text-flip);
+}
+
+/* Clock time under a ring, "x min ago" above it */
+.ring-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  transform: translateY(calc(var(--r) * var(--scale) * var(--side)));
+  font-size: 0.65rem;
+  opacity: 0.8;
+  white-space: nowrap;
+  text-shadow: 0 0 4px black;
+}
+
+/* --------------------------------------------------------- HISTORY / NOW */
+
+/* Older rings fade out; opacity is set per ring by JS (see buildPastRings) */
+#past .ring,
+#past .chip,
+#past .ring-label {
+  --scale: var(--past-scale);
+  opacity: var(--fade);
+}
+
+/* The 180x180 ring the current reading sits in. It is also what expands to
+   fill the window in the future view, becoming the outer boundary the
+   forecast rings live inside. */
+#now-ring {
+  --d: 180px;
+  --scale: var(--past-scale);
+  border-width: 2px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* The eight traditional Mediterranean winds, around #now-ring. They ride out
+   with it, but fade away as the future view opens: once the ring is the size
+   of the window they would land on top of the hour labels and the corner
+   statuses, and the forecast rings are the point of that view anyway. */
+#compass .ring-label {
+  --scale: var(--past-scale);
+  --r: 108px;
+  transform: rotate(var(--dir)) translateY(calc(var(--r) * var(--scale) * -1)) rotate(calc(-1 * var(--dir)));
+  font-size: 0.6rem;
+  opacity: calc(0.65 * (1 - var(--future-scale)));
+  letter-spacing: 0.05em;
+}
+
+/* Current reading. Centred in #now-ring in past view; slides down to the
+   bottom of the window as --future-scale goes to 1. */
+#now-panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  transform: translateY(calc(var(--future-scale) * (50vh - 4.5rem)));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-shadow: 0 0 6px black;
+  /* At the bottom of the future view it sits over the outer rings' hour
+     labels; a soft halo (no hard edge, so it stays invisible against the
+     centre ring in past view) keeps it readable. */
+  padding: 0.6rem 3rem;
+  background: radial-gradient(closest-side, rgba(15, 48, 98, 0.85), rgba(15, 48, 98, 0.5) 70%, transparent);
+}
+
+#now-speed {
+  font-size: 2.6rem;
+  line-height: 1;
+  font-weight: 500;
+}
+
+#now-unit {
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.85;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.6);
+}
+
+#now-name {
+  font-size: 1rem;
+  margin-top: 2px;
+}
+
+#now-ago,
+#now-date {
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+/* ------------------------------------------------------------- FORECAST */
+
+/* Hidden (scaled to nothing) in past view, expanding out of the centre in
+   future view. pointer-events off so they never sit in front of #now-unit. */
+#forecast {
+  opacity: var(--future-scale);
+  pointer-events: none;
+}
+
+#forecast .ring,
+#forecast .chip,
+#forecast .ring-label {
+  --scale: var(--future-scale);
+}
+
+/* -------------------------------------------------- LOADING AND STATUSES */
+
+#loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: var(--darkBlue);
+  text-align: center;
+  z-index: 10;
+  transition: opacity 0.6s ease;
+}
+
+#loading.done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#loading-message {
+  font-size: 0.9rem;
+  max-width: 22rem;
+}
+
+.spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--lightBlue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { rotate: 360deg; }
+}
+
+#status {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.6rem;
+  font-size: 0.6rem;
+  line-height: 1.5;
+  opacity: 0.75;
+  text-shadow: 0 0 4px black;
+  z-index: 5;
+}
+
+.status-ok { color: var(--lightBlue); }
+.status-warn { color: gold; }
+.status-error { color: var(--red); }
+
+/* Nothing here is worth animating on a device that asks not to - the two
+   views still swap, they just cut instead of expanding. */
+@media (prefers-reduced-motion: reduce) {
+  #stage { transition: none; }
+}
