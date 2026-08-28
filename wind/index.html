@@ -1,0 +1,153 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset=utf-8>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boia Somorrostro - Vent</title>
+  <meta name="description"
+    content="Wind data from boia somorrostro">
+  <meta name="author" content="Gerard Llorach">
+  <link rel="shortcut icon" type="image/png" href="/boiasomorrostro/favicon.ico"/>
+
+  <!-- Font poppins, same as the main app -->
+  <link rel="stylesheet" type="text/css" href="../lib/font-poppins.css" />
+  <link rel="stylesheet" type="text/css" href="style.css" />
+
+  <!-- Umami tracker -->
+  <!-- https://cloud.umami.is/analytics/eu/websites -->
+  <script>
+    // Local development is not worth counting. Umami checks this flag before
+    // sending anything, and this script is not deferred, so it runs while the
+    // page is still parsing - well before the tracker below loads.
+    const host = location.hostname;
+    if (host === 'localhost' || host === '::1' || host === '' || host.startsWith('127.')) {
+      localStorage.setItem('umami.disabled', 'true');
+    }
+  </script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="2f04e7f8-c375-47ad-bfbd-9fef14303bb2"></script>
+</head>
+
+<body>
+
+  <!-- Every ring, chip and label below is created by wind.js and positioned
+       from the centre of #stage. The .hidden class starts them collapsed so
+       they expand into place once the data is in. -->
+  <div id="stage" class="hidden">
+   <!-- #stage clips to the window; this inner box is what the pan moves -->
+   <div id="stage-inner">
+    <div id="past"></div>
+    <!-- Before #forecast: in future view this ring is the filled boundary the
+         forecast rings sit inside, so it has to paint underneath them. -->
+    <div id="now-ring" class="ring" title="Mostra la previsió"></div>
+    <div id="forecast"></div>
+    <div id="compass"></div>
+
+    <div id="now-panel" title="Canvia de vista">
+      <!-- Inside the panel, so it travels and scales with it -->
+      <div id="now-arrow"></div>
+      <div>
+        <span id="now-speed">--</span>
+        <span id="now-unit">kn</span>
+      </div>
+      <span id="now-name"></span>
+      <span id="now-ago"></span>
+      <span id="now-date"></span>
+    </div>
+   </div>
+  </div>
+
+  <!-- Who runs the buoy, where it is and what is measuring -->
+  <div id="brand">
+    <div id="logos">
+      <a href="https://icatmar.cat" target="_blank" rel="noopener" title="ICATMAR">
+        <img class="logo" src="../Assets/Logos/icatmar-mini-logo.svg" alt="ICATMAR">
+      </a>
+      <a href="https://icatmar.cat" target="_blank" rel="noopener" title="Xarxa observacional">
+        <img class="logo obs-logo" src="../Assets/Logos/ocea-mini-1.svg" alt="Xarxa observacional">
+      </a>
+      <a href="https://icm.csic.es" target="_blank" rel="noopener" title="Institut de Ciències del Mar">
+        <!-- The file is white artwork, so it is used as a mask and painted in
+             the ICM blue instead (see .logo-icm) -->
+        <span class="logo-chip"><span class="logo-icm" role="img" aria-label="ICM-CSIC"></span></span>
+      </a>
+    </div>
+
+    <div id="brand-name">Boia Somorrostro</div>
+
+    <div id="brand-coords">
+      <span id="coords"></span>
+      <button id="copy-coords" title="Copia les coordenades" aria-label="Copia les coordenades">
+        <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
+          <rect x="5.75" y="5.75" width="8.5" height="8.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M11 3.25H3.75a.5.5 0 0 0-.5.5V11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <span id="copy-feedback"></span>
+    </div>
+
+    <div id="brand-sensor">MaxiMet Marine GMX500</div>
+  </div>
+
+  <button id="info-button" title="Sobre aquesta aplicació" aria-label="Sobre aquesta aplicació">i</button>
+
+  <div id="status"></div>
+
+  <div id="controls">
+    <button id="unit-toggle" title="Canvia les unitats">Unitats: <span id="unit-value">kn</span></button>
+    <button id="animation-toggle">Animació On</button>
+    <span id="next-view"></span>
+  </div>
+
+  <!-- Centred panel on a desktop, the whole screen on a phone. The close
+       button lives outside #about-content, so it stays put while the text
+       scrolls under it. -->
+  <div id="about" hidden>
+    <div id="about-panel" role="dialog" aria-modal="true" aria-label="Sobre aquesta aplicació">
+      <div id="about-header">
+        <button id="about-close" title="Tanca" aria-label="Tanca">✕</button>
+      </div>
+
+      <div id="about-content">
+        <p>Aquesta aplicació ofereix una visualització de les dades de vent de la boia Somorrostro.
+          El sensor (MaxiMet Marine GMX500) que recull les dades està a 1.5 metres de la superfície
+          del mar. Fa servir sensors ultrasònics i una brúixula magnètica per obtenir dades de vent.</p>
+
+          <p>Les dades de predicció són de OpenWeatherAPI, que combina varis models de predicció.</p>
+
+        <p>Les dades presentades en aquesta aplicació són únicament per a fins informatius. Tot i que
+          ens esforcem per garantir-ne la precisió i fiabilitat, no podem assegurar que les dades
+          estiguin lliures d'errors o interrupcions. La informació no s'ha d'utilitzar per a la presa
+          de decisions crítiques sense una verificació addicional. L'ús d'aquesta aplicació és sota la
+          seva pròpia responsabilitat.</p>
+
+        <h2>Per citar aquesta aplicació, feu servir:</h2>
+        <p class="citation">Llorach Tó, G., Martí Comas, A., Pitarch Claramunt, X., Ribera Altimir, J.,
+          Molina, D., Casals Baixas, C., ... &amp; Ballabrera Poy, J. (2025). Data flow, infrastructure,
+          harmonization and 3d visualization: the use case of somorrostro's moored buoy's deployment.
+          Instrumentation viewpoint, (24), 32-33.</p>
+
+        <h2>Contacte</h2>
+        <p>Per qualsevol dubte, comentari o suggeriment respecte l'aplicació web, podeu contactar amb
+          <!-- Both addresses are assembled by setupInfo() rather than written
+               out here, so a scraper reading the page source finds neither a
+               mailto: nor the address itself -->
+          <a class="email" data-user="gerard.llorach" data-host="csic.es"></a>. Si esteu familiaritzats
+          amb github issues, podeu informar d'errors a través de
+          <a href="https://github.com/ICATMAR/boiasomorrostro/issues" target="_blank" rel="noopener">github</a>.
+          Per qualsevol altra cosa, podeu contactar a través de
+          <a class="email" data-user="observacions" data-host="icatmar.cat"></a></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <div id="loading-message">Carregant…</div>
+  </div>
+
+  <script src="wind.js"></script>
+
+</body>
+
+</html>
