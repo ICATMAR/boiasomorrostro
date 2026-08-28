@@ -141,11 +141,11 @@ body {
   -webkit-mask-image: var(--arc-mask);
   mask-image: var(--arc-mask);
   --arc-mask: conic-gradient(
-    transparent 0 var(--gap),
-    #000 var(--gap) calc(180deg - var(--gap)),
-    transparent calc(180deg - var(--gap)) calc(180deg + var(--gap)),
-    #000 calc(180deg + var(--gap)) calc(360deg - var(--gap)),
-    transparent calc(360deg - var(--gap)) 360deg);
+    transparent 0 calc(var(--gap)*0.7),
+    #000 calc(var(--gap)*1.2) calc(180deg - var(--gap)),
+    transparent calc(180deg - var(--gap)*0.3) calc(180deg + var(--gap)*0.3),
+    #000 calc(180deg + var(--gap)) calc(360deg - var(--gap)*1.2),
+    transparent calc(360deg - var(--gap)*0.7) 360deg);
 }
 
 /* Ring outlines, at their own fixed size - the group above does the scaling */
