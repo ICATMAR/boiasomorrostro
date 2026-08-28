@@ -5,8 +5,8 @@ import COLOR_LEGENDS from './data/colorLegends.js';
 // before and after the current hour (finer scales show a shorter span, so the
 // number of requested cells stays similar on every scale).
 const TIMESCALES = [
-  { id: '1h', minutes: 60,  hoursAheadBehind: 24 },
   { id: '3h', minutes: 180, hoursAheadBehind: 48 },
+  { id: '1h', minutes: 60,  hoursAheadBehind: 24 },
 ];
 
 const UNITS_STORAGE_KEY = 'boiasomorrostro_units';
