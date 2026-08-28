@@ -9,22 +9,6 @@
   --ring: rgba(255, 255, 255, 0.85);
 }
 
-/* --past-scale and --future-scale drive the whole PAST <-> FUTURE transition:
-   every ring diameter, chip radius and label offset below is a calc() on one
-   of them, so animating these two numbers animates the entire view at once.
-   They have to be registered, plain custom properties are not interpolable. */
-@property --past-scale {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 1;
-}
-
-@property --future-scale {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 0;
-}
-
 * {
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
@@ -50,9 +34,6 @@ body {
      the document exactly window-sized, so it never gains a scroll extent that
      the corner panels could slide out of. */
   overflow: hidden;
-  --past-scale: 1;
-  --future-scale: 0;
-  transition: --past-scale 1.2s ease-in-out, --future-scale 1.2s ease-in-out;
 }
 
 /* The pan moves this, not #stage, so the clipping box above always covers the
@@ -81,29 +62,79 @@ body {
   transition: none;
 }
 
-/* The one class the view toggle flips (see setView in wind.js). --now-scale is
-   set by JS on resize: how much the 180px "now" ring has to grow to reach the
-   edge of the window. */
-#stage.future {
-  --past-scale: var(--now-scale);
-  --future-scale: 1;
+/* The three ring groups. Each covers the window, so the rings inside keep
+   measuring from the same centre, and each is moved by ONE transform rather
+   than by every ring, chip and label recomputing its own size - see the note
+   above #stage-inner for why that matters. --now-scale is set by JS on resize:
+   how far the 180px centre ring has to grow to reach the edge of the window. */
+#past,
+#forecast,
+#compass {
+  position: absolute;
+  inset: 0;
 }
 
-/* Grows from 0 on the first render, so the rings expand into place. */
-#stage.hidden {
-  --past-scale: 0;
-  --future-scale: 0;
+/* Scaling a group scales its text too, so each group's opacity is timed to
+   keep it out of sight while it is at a size its labels were not drawn for:
+   the history fades out early on the way to the forecast and back in late on
+   the way home, the forecast the other way round. The transition on each rule
+   is the one that runs when moving INTO that state. */
+#past,
+#compass {
+  transform: scale(1);
+  opacity: 1;
+  transition: transform 1.2s ease-in-out, opacity 0.45s ease-out 0.65s;
 }
 
-/* Ring outlines. --d is the ring's own diameter at scale 1; the multiplier is
-   --past-scale for history rings and --future-scale for forecast ones. */
+#forecast {
+  transition: transform 1.2s ease-in-out, opacity 0.35s ease-out;
+}
+
+/* Past view: the forecast is collapsed into the centre */
+#forecast {
+  transform: scale(0);
+  opacity: 0;
+}
+
+/* Forecast view: the history expands out past the window, the forecast grows
+   out of the centre into its place. The compass belongs to the 180px ring, so
+   it just fades rather than being flung out at four times its size. */
+#stage.future #past {
+  transform: scale(var(--now-scale));
+  opacity: 0;
+  transition: transform 1.2s ease-in-out, opacity 0.45s ease-out;
+}
+
+#stage.future #compass {
+  opacity: 0;
+  transition: opacity 0.45s ease-out;
+}
+
+#stage.future #forecast {
+  transform: scale(1);
+  opacity: 1;
+  transition: transform 1.2s ease-in-out, opacity 0.45s ease-in 0.6s;
+}
+
+/* Everything grows out of the centre on the first render */
+#stage.hidden #past,
+#stage.hidden #compass {
+  transform: scale(0);
+}
+
+#stage.hidden #now-ring {
+  width: 0;
+  height: 0;
+}
+
+/* Ring outlines, at their own fixed size - the group above does the scaling */
 .ring {
   position: absolute;
   left: 50%;
   top: 50%;
   translate: -50% -50%;
-  width: calc(var(--d) * var(--scale));
-  height: calc(var(--d) * var(--scale));
+  width: var(--d);
+  height: var(--d);
   border: 1px solid var(--ring);
   border-radius: 50%;
 }
@@ -118,7 +149,7 @@ body {
   top: 50%;
   translate: -50% -50%;
   rotate: var(--dir);
-  transform: translateX(calc(var(--r) * var(--scale)));
+  transform: translateX(var(--r));
   display: flex;
   align-items: center;
   gap: 3px;
@@ -153,7 +184,7 @@ body {
   left: 50%;
   top: 50%;
   translate: -50% -50%;
-  transform: translateY(calc(var(--r) * var(--scale) * var(--side)));
+  transform: translateY(calc(var(--r) * var(--side)));
   font-size: 0.65rem;
   opacity: 0.8;
   white-space: nowrap;
@@ -164,10 +195,6 @@ body {
 
 /* Gone in the forecast view: they expand well past the window there, and the
    corner of them still on screen is only noise behind the forecast rings. */
-#past {
-  opacity: calc(1 - var(--future-scale));
-}
-
 #stage.future #past {
   pointer-events: none; /* invisible chips must not swallow clicks */
 }
@@ -176,19 +203,26 @@ body {
 #past .ring,
 #past .chip,
 #past .ring-label {
-  --scale: var(--past-scale);
   opacity: var(--fade);
 }
 
-/* The 180x180 ring the current reading sits in. It is also what expands to
-   fill the window in the future view, becoming the outer boundary the
-   forecast rings live inside. */
+/* The 180x180 ring the current reading sits in, and what expands to fill the
+   window in the forecast view, becoming the boundary the forecast rings live
+   inside. The one thing still animated by its box rather than a transform:
+   scaling it would thicken its 2px border along with it, and as a single
+   childless element the layout cost is negligible. --now-d comes from JS. */
 #now-ring {
-  --d: 180px;
-  --scale: var(--past-scale);
+  width: 180px;
+  height: 180px;
   border-width: 2px;
   background: rgba(255, 255, 255, 0.08);
   cursor: pointer;
+  transition: width 1.2s ease-in-out, height 1.2s ease-in-out;
+}
+
+#stage.future #now-ring {
+  width: var(--now-d);
+  height: var(--now-d);
 }
 
 /* In future view this ring is the size of the window, so clicking it would
@@ -224,25 +258,22 @@ body {
    of the window they would land on top of the hour labels and the corner
    statuses, and the forecast rings are the point of that view anyway. */
 #compass .ring-label {
-  --scale: var(--past-scale);
   /* --r is set per label, it varies with the bearing (see COMPASS_RADIUS) */
-  transform: rotate(var(--dir)) translateY(calc(var(--r) * var(--scale) * -1)) rotate(calc(-1 * var(--dir)));
+  transform: rotate(var(--dir)) translateY(calc(var(--r) * -1)) rotate(calc(-1 * var(--dir)));
   font-size: 0.6rem;
-  opacity: calc(0.65 * (1 - var(--future-scale)));
+  opacity: 0.65;
   letter-spacing: 0.05em;
 }
 
-/* Current reading. Centred in #now-ring in past view; slides down to the
-   bottom of the window as --future-scale goes to 1. */
+/* Current reading. Centred in #now-ring in past view, out at the bottom of
+   the window in the forecast view (see #stage.future #now-panel). */
 #now-panel {
   position: absolute;
   left: 50%;
   top: 50%;
   translate: -50% -50%;
-  /* Scale inside the transform, AFTER the translate, so the offset below is
-     not scaled with it. 90px clears the bottom edge for the smaller disc. */
-  transform: translateY(calc(var(--future-scale) * (50vh - 90px)))
-    scale(calc(1 - 0.4 * var(--future-scale)));
+  transition: transform 1.2s ease-in-out, background-color 1.2s ease-in-out,
+    border-color 1.2s ease-in-out;
   width: 170px;
   height: 170px;
   border-radius: 50%;
@@ -253,13 +284,19 @@ body {
   text-align: center;
   text-shadow: 0 0 6px black;
   cursor: pointer;
-  /* Its own circle, but only once it has left the now-ring: at the bottom of
-     the future view it sits over the outer rings' hour labels and needs to
-     read as a disc of its own, while in past view the ring is its backdrop
-     and any background here would just double up. Both fade in with the view
-     because --future-scale is a registered number, so the colours animate. */
-  background: rgba(15, 48, 98, calc(0.95 * var(--future-scale)));
-  border: 1px solid rgba(255, 255, 255, calc(0.4 * var(--future-scale)));
+  /* Transparent here: in past view the now-ring is its backdrop and a
+     background would just double up. */
+  background: rgba(15, 48, 98, 0);
+  border: 1px solid rgba(255, 255, 255, 0);
+}
+
+/* Out at the bottom of the window and two thirds the size, with its own disc
+   now that it sits over the outer rings' hour labels. The scale comes after
+   the translate, so the offset is not scaled along with it. */
+#stage.future #now-panel {
+  transform: translateY(calc(50vh - 90px)) scale(0.6);
+  background: rgba(15, 48, 98, 0.95);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 #now-speed {
@@ -290,10 +327,9 @@ body {
 
 /* ------------------------------------------------------------- FORECAST */
 
-/* Hidden (scaled to nothing) in past view, expanding out of the centre in
-   future view. pointer-events off so they never sit in front of #now-unit. */
+/* pointer-events off so the forecast rings never sit in front of anything
+   clickable; the group's own scale/opacity are set with #past above. */
 #forecast {
-  opacity: var(--future-scale);
   pointer-events: none;
 }
 
@@ -303,7 +339,6 @@ body {
 #forecast .ring,
 #forecast .chip,
 #forecast .ring-label {
-  --scale: var(--future-scale);
   opacity: var(--fade);
 }
 
@@ -602,5 +637,7 @@ body {
 /* Nothing here is worth animating on a device that asks not to - the two
    views still swap, they just cut instead of expanding. */
 @media (prefers-reduced-motion: reduce) {
-  #stage, #stage-inner { transition: none; }
+  #stage-inner, #past, #forecast, #compass, #now-ring, #now-panel {
+    transition: none;
+  }
 }

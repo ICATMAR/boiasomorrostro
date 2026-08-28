@@ -406,7 +406,10 @@ function layout() {
   const outerFuture = FORECAST_COUNT * forecastStep;
 
   geom = { maxRadius, pastStep, forecastStep, outerPast, outerFuture };
+  // Both are static: the transition reads them as its end state, it never
+  // animates them (see the group transforms in style.css).
   el('stage').style.setProperty('--now-scale', String(outerFuture / NOW_RADIUS));
+  el('stage').style.setProperty('--now-d', outerFuture * 2 + 'px');
   el('stage').classList.toggle('pannable', Math.max(outerPast, outerFuture) > maxRadius);
   setPan(panX, panY); // the limits just moved with the geometry
   return geom;
