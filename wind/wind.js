@@ -75,6 +75,9 @@ let dataForecast = [];  // [{ date, WDIR, WSPD }], oldest first
 const status = { int: 'loading', ext: 'loading', repo: 'loading', forecast: 'loading' };
 
 let unitIndex = 0;
+let animationOn = true; // automatic PAST <-> FUTURE swap (see the toggle)
+let geom = { maxRadius: 0, outerPast: 0, outerFuture: 0 }; // see layout()
+let panX = 0, panY = 0; // stage offset, only used when the rings overflow
 let nextBuoyFetch = 0;
 let nextForecastFetch = 0;
 let nextViewSwap = 0;
@@ -382,22 +385,46 @@ function ringBorder(date) {
 
 const NOW_RADIUS = 90;   // half of the 180x180 centre ring
 const EDGE_MARGIN = 24;  // keeps the outermost ring off the window edge
-const MIN_RING_GAP = 44; // enough room for a chip and its two labels
+// The tightest the rings are allowed to get. Above it they spread to fill the
+// window; below it they stop shrinking and overflow instead, which is what
+// makes a phone pannable while a short laptop still fits all of them.
+const MIN_RING_GAP = 30;
+const PAST_COUNT = 8;      // 2 h of history, at 15 min a ring
+const FORECAST_COUNT = 8;  // 24 h ahead, at one forecast step (3 h) a ring
 
-// How far the rings can reach, and therefore how many of them fit. Recomputed
-// on resize; --now-scale is how much the centre ring has to grow to reach the
-// edge of the window in future view.
+// Where every ring sits. Both sets are always drawn in full: the rings are
+// spread to fill the window when they fit, and on a window too small for that
+// (a phone, mostly) they keep MIN_RING_GAP and overflow instead, with the
+// stage becoming draggable so the outer ones stay reachable (see setupPan).
+// --now-scale is how much the centre ring has to grow to become the boundary
+// the forecast rings sit inside.
 function layout() {
   const maxRadius = Math.min(window.innerWidth, window.innerHeight) / 2 - EDGE_MARGIN;
-  const pastCount = Math.max(2, Math.min(8, Math.floor((maxRadius - NOW_RADIUS) / MIN_RING_GAP)));
-  const forecastCount = Math.max(2, Math.min(8, Math.floor(maxRadius / MIN_RING_GAP)));
-  el('stage').style.setProperty('--now-scale', String(maxRadius / NOW_RADIUS));
-  return {
-    pastCount,
-    pastStep: (maxRadius - NOW_RADIUS) / pastCount,
-    forecastCount,
-    forecastStep: maxRadius / forecastCount,
-  };
+  const pastStep = Math.max(MIN_RING_GAP, (maxRadius - NOW_RADIUS) / PAST_COUNT);
+  const forecastStep = Math.max(MIN_RING_GAP, maxRadius / FORECAST_COUNT);
+  const outerPast = NOW_RADIUS + PAST_COUNT * pastStep;
+  const outerFuture = FORECAST_COUNT * forecastStep;
+
+  geom = { maxRadius, pastStep, forecastStep, outerPast, outerFuture };
+  el('stage').style.setProperty('--now-scale', String(outerFuture / NOW_RADIUS));
+  el('stage').classList.toggle('pannable', Math.max(outerPast, outerFuture) > maxRadius);
+  setPan(panX, panY); // the limits just moved with the geometry
+  return geom;
+}
+
+// How far the stage can be dragged: enough to bring the outermost ring of the
+// view being shown into the window, and no further.
+function panLimit() {
+  const outer = futureView ? geom.outerFuture : geom.outerPast;
+  return Math.max(0, outer - geom.maxRadius + EDGE_MARGIN);
+}
+
+function setPan(x, y) {
+  const limit = panLimit();
+  panX = Math.min(limit, Math.max(-limit, x));
+  panY = Math.min(limit, Math.max(-limit, y));
+  el('stage').style.setProperty('--pan-x', panX + 'px');
+  el('stage').style.setProperty('--pan-y', panY + 'px');
 }
 
 // ----------------------------------------------------------------- RENDERING
@@ -451,14 +478,14 @@ function renderPast(geometry) {
   const latest = latestEntry();
   if (!latest) return;
 
-  for (let i = 1; i <= geometry.pastCount; i++) {
+  for (let i = 1; i <= PAST_COUNT; i++) {
     const date = new Date(latest.date.getTime() - i * BUOY_STEP_MINUTES * MINUTE);
     addRing({
       parent: past,
       radius: NOW_RADIUS + i * geometry.pastStep,
       date,
       entry: dataBuoy[date.toISOString()],
-      fade: 0.85 - 0.55 * (i - 1) / Math.max(1, geometry.pastCount - 1),
+      fade: 0.85 - 0.55 * (i - 1) / (PAST_COUNT - 1),
     });
   }
 }
@@ -470,26 +497,42 @@ function renderForecast(geometry) {
   forecast.innerHTML = '';
   dataForecast
     .filter(f => f.date > Date.now())
-    .slice(0, geometry.forecastCount)
+    .slice(0, FORECAST_COUNT)
     .forEach((f, i) => addRing({
       parent: forecast,
       radius: (i + 1) * geometry.forecastStep,
       date: f.date,
       entry: f,
+      fade: 0.9 - 0.5 * i / (FORECAST_COUNT - 1),
       coarse: true,
     }));
 }
+
+// Each name's distance from the centre, by bearing. The labels are far wider
+// than they are tall, so the ones due east and west need more room to clear
+// the ring while the ones due north and south can sit closer in.
+const COMPASS_RADIUS = { 0: 100, 90: 110, 180: 100, 270: 110 };
+const COMPASS_RADIUS_DEFAULT = 108; // the four diagonals
 
 // The eight wind names around the centre ring. Fixed, so only built once.
 function renderCompass() {
   const compass = el('compass');
   if (compass.children.length) return;
-  compass.innerHTML = WIND_NAMES.map((name, i) =>
-    `<div class="ring-label" style="--dir: ${i * 360 / WIND_NAMES.length}deg">${name}</div>`).join('');
+  compass.innerHTML = WIND_NAMES.map((name, i) => {
+    const dir = i * 360 / WIND_NAMES.length;
+    const radius = COMPASS_RADIUS[dir] || COMPASS_RADIUS_DEFAULT;
+    return `<div class="ring-label" style="--dir: ${dir}deg; --r: ${radius}px">${name}</div>`;
+  }).join('');
 }
 
 function renderNow() {
   const latest = latestEntry();
+  // Same -90 as the chips: the arrow is pushed out along the x axis, so a
+  // bearing of 0 has to be turned a quarter circle to point north.
+  const arrow = el('now-arrow');
+  arrow.classList.toggle('no-data', !latest);
+  if (latest) arrow.style.setProperty('--dir', (latest.WDIR - 90) + 'deg');
+
   el('now-speed').textContent = latest ? speedText(latest.WSPD) : '--';
   el('now-unit').textContent = currentUnit().unit;
   el('now-name').textContent = latest ? windName(latest.WDIR) : 'Sense dades';
@@ -512,6 +555,15 @@ function renderStatus() {
     + line('Previsió', 'forecast');
 }
 
+// The animation toggle and, while it is on, how long until the view flips
+function renderControls() {
+  el('animation-toggle').textContent = `Animació ${animationOn ? 'On' : 'Off'}`;
+  const seconds = Math.max(0, Math.ceil((nextViewSwap - Date.now()) / 1000));
+  el('next-view').textContent = animationOn
+    ? `${futureView ? 'Dades boia' : 'Previsió'} en ${seconds} s`
+    : '';
+}
+
 function render() {
   const geometry = layout();
   timeLabels = [];
@@ -520,6 +572,7 @@ function render() {
   renderCompass();
   renderNow();
   renderStatus();
+  renderControls();
 }
 
 function setMessage(text) {
@@ -529,7 +582,11 @@ function setMessage(text) {
 function setView(future) {
   futureView = future;
   el('stage').classList.toggle('future', future);
+  // The two views reach out to very different radii, so a pan that made sense
+  // in one is meaningless in the other - it eases back with the rest.
+  setPan(0, 0);
   nextViewSwap = Date.now() + VIEW_INTERVAL;
+  renderControls();
 }
 
 // ----------------------------------------------------------------- MAIN LOOP
@@ -541,6 +598,7 @@ function updateClock() {
   const latest = latestEntry();
   if (latest) el('now-ago').textContent = timeFromNow(latest.date);
   renderStatus();
+  renderControls();
 }
 
 // Everything time-driven runs from here: the two refetch timers, the view
@@ -557,7 +615,7 @@ function tick() {
     nextForecastFetch = now + FORECAST_INTERVAL;
     loadForecastData().then(render);
   }
-  if (now >= nextViewSwap) setView(!futureView);
+  if (animationOn && now >= nextViewSwap) setView(!futureView);
 
   const second = Math.floor(now / 1000);
   if (second !== lastTick) {
@@ -566,12 +624,72 @@ function tick() {
   }
 }
 
+// Dragging the stage around, for the windows too small to fit every ring.
+// A drag that barely moved is left alone so it still reads as a click on
+// whatever was under the pointer (the centre ring, the unit).
+const DRAG_THRESHOLD = 6; // px
+
+function setupPan() {
+  const stage = el('stage');
+  let startX = 0, startY = 0, fromX = 0, fromY = 0, moved = 0, dragging = false;
+
+  stage.addEventListener('pointerdown', e => {
+    moved = 0; // before the guard, so a stale drag never eats the next click
+    if (!stage.classList.contains('pannable')) return;
+    dragging = true;
+    startX = e.clientX; startY = e.clientY;
+    fromX = panX; fromY = panY;
+    stage.classList.add('dragging');
+    stage.setPointerCapture(e.pointerId);
+  });
+
+  stage.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    moved = Math.max(moved, Math.abs(dx) + Math.abs(dy));
+    setPan(fromX + dx, fromY + dy);
+  });
+
+  const end = e => {
+    if (!dragging) return;
+    dragging = false;
+    stage.classList.remove('dragging');
+    // pointercancel can have released it already, and releasing a pointer we
+    // do not hold throws
+    if (stage.hasPointerCapture(e.pointerId)) stage.releasePointerCapture(e.pointerId);
+  };
+  stage.addEventListener('pointerup', end);
+  stage.addEventListener('pointercancel', end);
+
+  // Capture phase, so a real drag is swallowed before it reaches the centre
+  // ring or the panel and flips the view by accident.
+  stage.addEventListener('click', e => {
+    if (moved > DRAG_THRESHOLD) e.stopPropagation();
+  }, true);
+}
+
 async function start() {
-  el('now-unit').addEventListener('click', () => {
+  el('now-unit').addEventListener('click', e => {
+    e.stopPropagation(); // the panel underneath switches views
     unitIndex = (unitIndex + 1) % UNITS.length;
     render();
   });
-  // Both the ring count and their spacing depend on the window size
+
+  // The centre is the view switch: the now-ring opens the forecast, and the
+  // panel - wherever it currently sits - toggles back and forth.
+  el('now-ring').addEventListener('click', () => setView(true));
+  el('now-panel').addEventListener('click', () => setView(!futureView));
+
+  el('animation-toggle').addEventListener('click', () => {
+    animationOn = !animationOn;
+    nextViewSwap = Date.now() + VIEW_INTERVAL;
+    renderControls();
+  });
+
+  setupPan();
+  // Ring spacing, whether they overflow, and the pan limits all follow the
+  // window size
   window.addEventListener('resize', render);
 
   const hasBuoyData = await loadBuoyData();

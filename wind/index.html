@@ -24,11 +24,12 @@
     <div id="past"></div>
     <!-- Before #forecast: in future view this ring is the filled boundary the
          forecast rings sit inside, so it has to paint underneath them. -->
-    <div id="now-ring" class="ring"></div>
+    <div id="now-ring" class="ring" title="Mostra la previsió"></div>
+    <div id="now-arrow"></div>
     <div id="forecast"></div>
     <div id="compass"></div>
 
-    <div id="now-panel">
+    <div id="now-panel" title="Canvia de vista">
       <div>
         <span id="now-speed">--</span>
         <span id="now-unit" title="Canvia les unitats">kn</span>
@@ -40,6 +41,11 @@
   </div>
 
   <div id="status"></div>
+
+  <div id="controls">
+    <button id="animation-toggle">Animació On</button>
+    <span id="next-view"></span>
+  </div>
 
   <div id="loading">
     <div class="spinner"></div>

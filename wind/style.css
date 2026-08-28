@@ -48,7 +48,23 @@ body {
   inset: 0;
   --past-scale: 1;
   --future-scale: 0;
-  transition: --past-scale 1.2s ease-in-out, --future-scale 1.2s ease-in-out;
+  /* Pan offset, only ever non-zero while .pannable (see setupPan) */
+  transform: translate(var(--pan-x, 0px), var(--pan-y, 0px));
+  transition: --past-scale 1.2s ease-in-out, --future-scale 1.2s ease-in-out,
+    transform 1.2s ease-in-out;
+}
+
+/* Set when the rings do not fit the window (a phone, mostly): they are all
+   drawn anyway and overflow, and the stage can be dragged around instead. */
+#stage.pannable {
+  cursor: grab;
+  touch-action: none; /* the drag is ours, not the browser's scroll */
+}
+
+/* The pan follows the pointer exactly, so it must not be eased on the way */
+#stage.dragging {
+  cursor: grabbing;
+  transition: none;
 }
 
 /* The one class the view toggle flips (see setView in wind.js). --now-scale is
@@ -148,6 +164,36 @@ body {
   --scale: var(--past-scale);
   border-width: 2px;
   background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+/* In future view this ring is the size of the window, so clicking it would
+   mean clicking anywhere - #now-panel is the target there instead. */
+#stage.future #now-ring {
+  pointer-events: none;
+}
+
+/* Current wind direction, sitting on the now-ring at the bearing the wind
+   comes from and pointing inward - same placement trick as .chip. It belongs
+   to the 180px ring, so like the compass it goes once that ring has grown to
+   the size of the window. */
+#now-arrow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  rotate: var(--dir);
+  transform: translateX(calc(79px * var(--past-scale)));
+  border: 13px solid transparent;
+  border-left-width: 0;
+  border-right-color: white;
+  opacity: calc(1 - var(--future-scale));
+  pointer-events: none;
+  border-radius: 6px
+}
+
+#now-arrow.no-data {
+  display: none;
 }
 
 /* The eight traditional Mediterranean winds, around #now-ring. They ride out
@@ -156,7 +202,7 @@ body {
    statuses, and the forecast rings are the point of that view anyway. */
 #compass .ring-label {
   --scale: var(--past-scale);
-  --r: 108px;
+  /* --r is set per label, it varies with the bearing (see COMPASS_RADIUS) */
   transform: rotate(var(--dir)) translateY(calc(var(--r) * var(--scale) * -1)) rotate(calc(-1 * var(--dir)));
   font-size: 0.6rem;
   opacity: calc(0.65 * (1 - var(--future-scale)));
@@ -170,17 +216,25 @@ body {
   left: 50%;
   top: 50%;
   translate: -50% -50%;
-  transform: translateY(calc(var(--future-scale) * (50vh - 4.5rem)));
+  /* 120px, not 85px (its own radius), so the disc clears the bottom edge */
+  transform: translateY(calc(var(--future-scale) * (50vh - 120px)));
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
   text-shadow: 0 0 6px black;
-  /* At the bottom of the future view it sits over the outer rings' hour
-     labels; a soft halo (no hard edge, so it stays invisible against the
-     centre ring in past view) keeps it readable. */
-  padding: 0.6rem 3rem;
-  /* background: radial-gradient(closest-side, rgba(15, 48, 98, 0.85), rgba(15, 48, 98, 0.5) 70%, transparent); */
+  cursor: pointer;
+  /* Its own circle, but only once it has left the now-ring: at the bottom of
+     the future view it sits over the outer rings' hour labels and needs to
+     read as a disc of its own, while in past view the ring is its backdrop
+     and any background here would just double up. Both fade in with the view
+     because --future-scale is a registered number, so the colours animate. */
+  background: rgba(15, 48, 98, calc(0.95 * var(--future-scale)));
+  border: 1px solid rgba(255, 255, 255, calc(0.4 * var(--future-scale)));
 }
 
 #now-speed {
@@ -220,10 +274,14 @@ body {
   pointer-events: none;
 }
 
+/* Like the history rings, further out means further from now means fainter.
+   This multiplies with #forecast's own opacity above, which is what makes the
+   whole set fade in and out with the view. */
 #forecast .ring,
 #forecast .chip,
 #forecast .ring-label {
   --scale: var(--future-scale);
+  opacity: var(--fade);
 }
 
 /* -------------------------------------------------- LOADING AND STATUSES */
@@ -275,6 +333,34 @@ body {
   opacity: 0.75;
   text-shadow: 0 0 4px black;
   z-index: 5;
+}
+
+#controls {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+  z-index: 5;
+}
+
+#animation-toggle {
+  font-family: inherit;
+  font-size: 0.6rem;
+  padding: 0.25rem 0.6rem;
+  color: white;
+  background: rgba(15, 48, 98, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+#next-view {
+  font-size: 0.6rem;
+  opacity: 0.75;
+  text-shadow: 0 0 4px black;
 }
 
 .status-ok { color: var(--lightBlue); }
