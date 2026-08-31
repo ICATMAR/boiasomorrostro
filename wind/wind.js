@@ -24,6 +24,13 @@ const OPENWEATHER_URL = 'https://api.icatmar.cat/openWeatherAPI';
 
 const MINUTE = 60 * 1000;
 const BUOY_STEP_MINUTES = 15;       // the buoy reports every 15 min
+// The logger writes 1000 m/s for a failed wind reading and the repository
+// serves it raw - ERDDAP quality-controls the same rows to NaN, so in practice
+// this only bites on the repository path. On those rows the direction column
+// still holds a plausible-looking number, so dropping the row on its speed is
+// what keeps a bogus bearing off the rings too. The strongest real reading in
+// the record is 27 m/s, so the exact threshold hardly matters.
+const MAX_WIND_SPEED = 500;
 const PAST_HOURS = 6;               // how much history to ask ERDDAP for
 const FRESH_LIMIT = 15 * MINUTE;    // data younger than this needs no refetch
 const STALE_LIMIT = 30 * MINUTE;    // ERDDAP older than this: check the repo too
@@ -145,7 +152,7 @@ function parseERDDAPCSV(text) {
     const [time, dir, speed] = line.split(',');
     const WDIR = parseFloat(dir);
     const WSPD = parseFloat(speed);
-    if (isNaN(WDIR) || isNaN(WSPD)) return;
+    if (isNaN(WDIR) || isNaN(WSPD) || WSPD > MAX_WIND_SPEED) return;
     entries[parseBuoyDate(time.replace('Z', '')).toISOString()] = { WDIR, WSPD };
   });
   return entries;
@@ -202,7 +209,7 @@ function parseRepoFile(text) {
     const cells = line.split(',');
     const WDIR = parseFloat(cells[iDir]);
     const WSPD = parseFloat(cells[iSpeed]);
-    if (isNaN(WDIR) || isNaN(WSPD)) return;
+    if (isNaN(WDIR) || isNaN(WSPD) || WSPD > MAX_WIND_SPEED) return;
     const date = parseBuoyDate(cells[iTime].replace(/"/g, '').replace(' ', 'T'));
     entries[date.toISOString()] = { WDIR, WSPD };
   });
