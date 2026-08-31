@@ -410,6 +410,21 @@ body {
   display: block;
 }
 
+#logos-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Same sizing as the main app's .logo */
+.logo-panel {
+  width: 85px;
+  display: block;
+}
+
 /* Overlapped slightly, the way the main app pairs these two */
 .obs-logo {
   margin-left: -0.6rem;
