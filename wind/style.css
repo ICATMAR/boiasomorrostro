@@ -202,8 +202,10 @@ body {
 /* Stands in for every model except the one currently selected (see addChip):
    the same inward-pointing wedge as .chip-point, coloured the same way, but
    on its own and small - just enough to show every model agrees, or doesn't,
-   while only the selected one gets its number. z-index 0 keeps it under every
-   .chip, in case a ring's bearings ever put the two at the same spot. */
+   while only the selected one gets its number. Clicking one selects that
+   model (see selectModel), hence the pointer cursor. z-index 0 keeps it
+   under every .chip, in case a ring's bearings ever put the two at the same
+   spot. */
 .chip-mini {
   position: absolute;
   left: 50%;
@@ -211,13 +213,13 @@ body {
   translate: -50% -50%;
   rotate: var(--dir);
   transform: translateX(var(--r));
-  border: 7px solid transparent;
+  border: 10px solid transparent;
   border-right-color: var(--color);
   border-left-width: 0;
   opacity: 0.9;
   user-select: all;
   pointer-events: all;
-  cursor: cell;
+  cursor: pointer;
   z-index: 0;
   border-radius: 20px;
 }

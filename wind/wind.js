@@ -545,11 +545,16 @@ function resolveSelectedModel() {
   return selectedModel;
 }
 
+function selectModel(id) {
+  if (!id || id === selectedModel) return;
+  selectedModel = id;
+  render();
+}
+
 function switchModel(step) {
   if (forecastModels.length < 2) return;
   const from = forecastModels.indexOf(resolveSelectedModel());
-  selectedModel = forecastModels[(from + step + forecastModels.length) % forecastModels.length];
-  render();
+  selectModel(forecastModels[(from + step + forecastModels.length) % forecastModels.length]);
 }
 
 // Shared by the full chip and .chip-mini, so hovering either gives the same
@@ -565,7 +570,7 @@ function chipTitle(item) {
 
 // One arrow and its speed, positioned directly on the ring at its bearing.
 // Every model except the selected one is drawn as a small numberless
-// .chip-mini instead, at the same spot.
+// .chip-mini instead, at the same spot - clicking one selects that model.
 function addChip({ parent, radius, item }) {
   const dir = (item.WDIR - 90) + 'deg';
   const color = colorForSpeed(item.WSPD);
@@ -577,6 +582,7 @@ function addChip({ parent, radius, item }) {
     mini.style.setProperty('--dir', dir);
     mini.style.setProperty('--color', color);
     mini.title = chipTitle(item);
+    mini.addEventListener('click', () => selectModel(item.source));
     parent.appendChild(mini);
     return;
   }
