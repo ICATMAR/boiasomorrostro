@@ -202,7 +202,7 @@ body {
   translate: -50% -50%;
   rotate: var(--dir);
   transform: translateX(var(--r));
-  border: 10px solid transparent;
+  border: 7px solid transparent;
   border-right-color: var(--color);
   border-left-width: 0;
   opacity: 0.9;
@@ -325,10 +325,13 @@ body {
 
 /* Out at the top of the window and two thirds the size, with its own disc
    now that it sits over the outer rings' hour labels. The scale comes after
-   the translate, so the offset is not scaled along with it - same distance
-   from centre as the old bottom placement, just the other way. */
+   the translate, so the offset is not scaled along with it. Its distance
+   from the top edge is normally a flat 90px (the 50vh cancels out, whatever
+   the viewport height) - clamp() makes that distance itself grow on a narrow
+   screen instead, from 90px at 450px wide up to 160px by ~275px wide, so the
+   panel sits closer to centre rather than crowding the top edge. */
 #stage.future #now-panel {
-  transform: translateY(calc(90px - 50vh)) scale(0.6);
+  transform: translateY(calc(clamp(90px, 350px - 40vw, 160px) - 50vh)) scale(0.6);
   background: rgba(15, 48, 98, 0.95);
   border-color: rgba(255, 255, 255, 0.4);
 }
@@ -374,7 +377,7 @@ body {
   left: 50%;
   top: 50%;
   translate: -50% -50%;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-shadow: 0 0 6px black;
   pointer-events: none;
@@ -667,6 +670,12 @@ body {
   pointer-events: none;
 }
 
+#loading-logo img {
+  display: block;
+  width: min(60vw, 220px);
+  height: auto;
+}
+
 #loading-message {
   font-size: 0.9rem;
   max-width: 22rem;
@@ -709,7 +718,7 @@ body {
 #model-select {
   position: fixed;
   left: 50%;
-  bottom: 0.75rem;
+  bottom: clamp(2rem, calc(8rem - 10vw), 5.75rem);
   transform: translateX(-50%);
   display: flex;
   align-items: center;
@@ -748,7 +757,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 999px;
   padding: 0.3rem 1.1rem;
-  min-width: 8rem;
+  min-width: 9rem;
   text-align: center;
   text-shadow: 0 0 6px black;
   cursor: pointer;
