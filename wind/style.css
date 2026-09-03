@@ -258,12 +258,15 @@ body {
   border-width: 2px;
   background: rgba(255, 255, 255, 0.08);
   cursor: pointer;
-  transition: width 1.2s ease-in-out, height 1.2s ease-in-out;
+  transition: width 1.2s ease-in-out, height 1.2s ease-in-out, opacity 1.2s ease-in-out;
 }
 
 #stage.future #now-ring {
   width: var(--now-d);
   height: var(--now-d);
+  /* At window size it's just a faint backdrop behind the forecast rings -
+     fades out instead, rather than staying a visible outline around them. */
+  opacity: 0;
 }
 
 /* In future view this ring is the size of the window, so clicking it would
@@ -379,15 +382,20 @@ body {
 }
 
 /* Fades only, with no travel of its own, so in the past view it is simply not
-   there. Timed like the forecast rings: in late, out quickly. */
+   there. Timed like the forecast rings: in late, out quickly. Padding widens
+   the click target well past the text itself - it's the way back to the buoy
+   data view (see setView(false) in wind.js) - without affecting the centring,
+   since that's done by the translate above, not by the box's own size. */
 #forecast-title {
   position: absolute;
   left: 50%;
   top: 50%;
   translate: -50% -50%;
+  padding: 0.75rem 1.5rem;
   font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-shadow: 0 0 6px black;
+  cursor: pointer;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.35s ease-out;
@@ -395,6 +403,7 @@ body {
 
 #stage.future #forecast-title {
   opacity: 0.85;
+  pointer-events: auto;
   transition: opacity 0.45s ease-in 0.6s;
 }
 

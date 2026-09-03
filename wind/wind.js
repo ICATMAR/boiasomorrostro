@@ -876,10 +876,13 @@ async function start() {
     render();
   });
 
-  // The centre is the view switch: the now-ring opens the forecast, and the
-  // panel - wherever it currently sits - toggles back and forth.
+  // The centre is the view switch: the now-ring opens the forecast, the
+  // panel - wherever it currently sits - toggles back and forth, and the
+  // "Previsió" title (only ever visible in the forecast view) is the way
+  // back out of it.
   el('now-ring').addEventListener('click', () => setView(true));
   el('now-panel').addEventListener('click', () => setView(!futureView));
+  el('forecast-title').addEventListener('click', () => setView(false));
 
   el('animation-toggle').addEventListener('click', () => {
     animationOn = !animationOn;
