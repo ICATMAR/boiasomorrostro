@@ -53,6 +53,10 @@ body {
   inset: 0;
 }
 
+#compass {
+  pointer-events: none;
+}
+
 /* Scaling a group scales its text too, so each group's opacity is timed to
    keep it out of sight while it is at a size its labels were not drawn for:
    the history fades out early on the way to the forecast and back in late on
@@ -158,6 +162,8 @@ body {
   white-space: nowrap;
   z-index: 1;
   pointer-events: all;
+  user-select: all;
+  cursor: cell;
 }
 
 /* Points inward, towards the centre - wind direction is where it comes from.
@@ -206,7 +212,9 @@ body {
   border-right-color: var(--color);
   border-left-width: 0;
   opacity: 0.9;
-  pointer-events: none;
+  user-select: all;
+  pointer-events: all;
+  cursor: cell;
   z-index: 0;
   border-radius: 20px;
 }
