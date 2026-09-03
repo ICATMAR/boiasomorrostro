@@ -552,6 +552,17 @@ function switchModel(step) {
   render();
 }
 
+// Shared by the full chip and .chip-mini, so hovering either gives the same
+// reading - source, speed/direction, gust.
+function chipTitle(item) {
+  const unit = currentUnit().unit;
+  return [
+    item.source || 'Boia',
+    `${speedText(item.WSPD, 1)} ${unit}, ${Math.round(item.WDIR)}º (${windName(item.WDIR)})`,
+    isFinite(item.GSPD) ? `Ratxa ${speedText(item.GSPD, 1)} ${unit}` : '',
+  ].filter(Boolean).join(' · ');
+}
+
 // One arrow and its speed, positioned directly on the ring at its bearing.
 // Every model except the selected one is drawn as a small numberless
 // .chip-mini instead, at the same spot.
@@ -565,6 +576,7 @@ function addChip({ parent, radius, item }) {
     mini.style.setProperty('--r', radius + 'px');
     mini.style.setProperty('--dir', dir);
     mini.style.setProperty('--color', color);
+    mini.title = chipTitle(item);
     parent.appendChild(mini);
     return;
   }
@@ -582,13 +594,7 @@ function addChip({ parent, radius, item }) {
   // tenth, so it rounds - the exact value is in the tooltip.
   chip.innerHTML = `<div class="chip-point"></div>`
     + `<div class="chip-round"><span>${speedText(item.WSPD, item.label ? 0 : undefined)}</span></div>`;
-
-  const unit = currentUnit().unit;
-  chip.title = [
-    item.source || 'Boia',
-    `${speedText(item.WSPD, 1)} ${unit}, ${Math.round(item.WDIR)}º (${windName(item.WDIR)})`,
-    isFinite(item.GSPD) ? `ratxa ${speedText(item.GSPD, 1)} ${unit}` : '',
-  ].filter(Boolean).join(' · ');
+  chip.title = chipTitle(item);
   parent.appendChild(chip);
 }
 
