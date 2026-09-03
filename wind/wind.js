@@ -392,9 +392,9 @@ async function loadForecastData() {
 
 const currentUnit = () => UNITS[unitIndex];
 
-function speedText(speed) {
-  const { toDisplay, decimals } = currentUnit();
-  return toDisplay(speed).toFixed(decimals);
+function speedText(speed, decimals) {
+  const unit = currentUnit();
+  return unit.toDisplay(speed).toFixed(decimals ?? unit.decimals);
 }
 
 // Interpolated WIND_LEGEND colour, normalized over the displayed unit's range
@@ -557,21 +557,42 @@ function addChip({ parent, radius, item, fade, laneStep }) {
   chip.style.setProperty('--color', colorForSpeed(item.WSPD));
   if (fade !== undefined) chip.style.setProperty('--fade', fade);
 
-  // Inline, so the source reads as a smaller aside on the chip without
-  // style.css having to know about it. It sits inside the same span as the
-  // number, so it turns with it and never ends up upside down.
-  const source = item.label
-    ? `<small class="chip-source" style="font-size:.72em;opacity:.8;margin-left:.35em;white-space:nowrap">${item.label}</small>`
-    : '';
-  chip.innerHTML = `<span>${speedText(item.WSPD)}${source}</span>`;
+  // The label sits under the number, inside the same span, so it turns with it
+  // and never ends up upside down (see .chip-source in style.css).
+  const source = item.label ? `<small class="chip-source">${item.label}</small>` : '';
+  if (source) chip.classList.add('has-source');
+  // A forecast is not precise to a tenth and the chip is stacked two lines
+  // high already, so it rounds - the exact value is in the tooltip.
+  chip.innerHTML = `<span>${speedText(item.WSPD, source ? 0 : undefined)}${source}</span>`;
+
+  addChipDepth(chip, item);
 
   const unit = currentUnit().unit;
   chip.title = [
     item.source || 'Boia',
-    `${speedText(item.WSPD)} ${unit}, ${Math.round(item.WDIR)}º (${windName(item.WDIR)})`,
-    isFinite(item.GSPD) ? `ratxa ${speedText(item.GSPD)} ${unit}` : '',
+    `${speedText(item.WSPD, 1)} ${unit}, ${Math.round(item.WDIR)}º (${windName(item.WDIR)})`,
+    isFinite(item.GSPD) ? `ratxa ${speedText(item.GSPD, 1)} ${unit}` : '',
   ].filter(Boolean).join(' · ');
   parent.appendChild(chip);
+}
+
+// Where the lanes run out the models still overlap, and whichever one is drawn
+// last would stay on top forever. Instead every chip loops its z-index, keyed
+// off the model's place in `forecastModels`: chips of the same model share a
+// delay, so a model surfaces across all of its rings at once and then hands
+// over to the next. The animation itself is .chip-depth in style.css, copied
+// from VISOC's MapCircleArrows.
+const MODEL_DEPTH_INTERVAL = 2; // seconds a model stays in front
+
+function addChipDepth(chip, item) {
+  const count = forecastModels.length;
+  const depth = item.source ? forecastModels.indexOf(item.source) : -1;
+  if (count < 2 || depth < 0) return;
+  chip.classList.add('chip-depth');
+  // One above `count` so the lowest model still clears the ring outlines
+  chip.style.setProperty('--maxZIndex', count + 1);
+  chip.style.setProperty('--duration', count * MODEL_DEPTH_INTERVAL + 's');
+  chip.style.setProperty('--delay', -depth * MODEL_DEPTH_INTERVAL + 's');
 }
 
 // One ring outline plus, for every value on it, a chip, and the two labels
