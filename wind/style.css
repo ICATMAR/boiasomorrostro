@@ -181,18 +181,20 @@ body {
 }
 
 /* Kept upright: the chip itself is rotated to the bearing, so on the bottom
-   half the text would otherwise read upside-down. */
+   half the text would otherwise read upside-down. inline-block because plain
+   inline elements aren't transformable boxes - rotate has no effect on a
+   bare <span>, which is what silently broke this when the span stopped being
+   a flex item directly (it used to be blockified for free as one). */
 .chip-round > span {
+  display: inline-block;
   rotate: var(--text-flip);
 }
 
-/* Stands in for a model between its turns on a ring (see addChip): the same
-   inward-pointing wedge as .chip-point, coloured the same way, but on its
-   own, small, and permanently up rather than crossfading - just enough to
-   show every model agrees, or doesn't, while only one gets its number. Its
-   own opacity folds the ring's distance-fade in (var(--fade, 1)) with a flat
-   dimming, and z-index 0 keeps it under every .chip so the active one simply
-   grows out of it. */
+/* Stands in for every model except the one currently selected (see addChip):
+   the same inward-pointing wedge as .chip-point, coloured the same way, but
+   on its own and small - just enough to show every model agrees, or doesn't,
+   while only the selected one gets its number. z-index 0 keeps it under every
+   .chip, in case a ring's bearings ever put the two at the same spot. */
 .chip-mini {
   position: absolute;
   left: 50%;
@@ -203,7 +205,7 @@ body {
   border: 10px solid transparent;
   border-right-color: var(--color);
   border-left-width: 0;
-  opacity: calc(var(--fade, 1) * 0.9);
+  opacity: 0.9;
   pointer-events: none;
   z-index: 0;
   border-radius: 20px;
@@ -230,9 +232,9 @@ body {
   pointer-events: none; /* invisible chips must not swallow clicks */
 }
 
-/* Older rings fade out; opacity is set per ring by JS (see buildPastRings) */
+/* Older rings fade out; opacity is set per ring by JS (see buildPastRings).
+   Chips are excluded - their value should read the same wherever they are. */
 #past .ring,
-#past .chip,
 #past .ring-label {
   opacity: var(--fade);
 }
@@ -296,8 +298,8 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* Current reading. Centred in #now-ring in past view, out at the bottom of
-   the window in the forecast view (see #stage.future #now-panel). */
+/* Current reading. Centred in #now-ring in past view, out at the top of the
+   window in the forecast view (see #stage.future #now-panel). */
 #now-panel {
   position: absolute;
   left: 50%;
@@ -321,11 +323,12 @@ body {
   border: 1px solid rgba(255, 255, 255, 0);
 }
 
-/* Out at the bottom of the window and two thirds the size, with its own disc
+/* Out at the top of the window and two thirds the size, with its own disc
    now that it sits over the outer rings' hour labels. The scale comes after
-   the translate, so the offset is not scaled along with it. */
+   the translate, so the offset is not scaled along with it - same distance
+   from centre as the old bottom placement, just the other way. */
 #stage.future #now-panel {
-  transform: translateY(calc(50vh - 90px)) scale(0.6);
+  transform: translateY(calc(90px - 50vh)) scale(0.6);
   background: rgba(15, 48, 98, 0.95);
   border-color: rgba(255, 255, 255, 0.4);
 }
@@ -384,39 +387,13 @@ body {
   transition: opacity 0.45s ease-in 0.6s;
 }
 
-/* Like the history rings, further out means further from now means fainter.
-   This multiplies with #forecast's own opacity above, which is what makes the
-   whole set fade in and out with the view. */
+/* Like the history rings, further out means further from now means fainter -
+   for the ring and its labels; chips stay fully opaque regardless of how far
+   out they are. This multiplies with #forecast's own opacity above, which is
+   what makes the whole set fade in and out with the view. */
 #forecast .ring,
-#forecast .chip,
 #forecast .ring-label {
   opacity: var(--fade);
-}
-
-/* Only one forecast model is shown at a time, on a schedule shared by every
-   chip (and the model-info panel entry) of that model - see modelCycleTiming
-   in wind.js, which sets --duration/--delay, and updateModelCycleStyle,
-   which generates @keyframes modelHighlight (below in a JS-injected <style>,
-   since its stops depend on how many models are cycling).
-   depthLoop rides along on the same schedule so that whichever model is
-   fading in draws over the one fading out, rather than it being down to
-   arbitrary DOM order; z-index is only animatable through an integer custom
-   property, hence @property. --maxZIndex is set per chip by addChip(). */
-@property --maxZIndex {
-  syntax: '<integer>';
-  inherits: true;
-  initial-value: 1;
-}
-
-@keyframes depthLoop {
-  0%   { z-index: 1; }
-  100% { z-index: var(--maxZIndex); }
-}
-
-.chip-depth {
-  animation: depthLoop var(--duration) infinite linear,
-             modelHighlight var(--duration) infinite linear;
-  animation-delay: var(--delay);
 }
 
 /* ------------------------------------------------- BRAND AND INFO PANEL */
@@ -724,88 +701,76 @@ body {
   z-index: 5;
 }
 
-/* Names whichever forecast model is currently highlighted on the rings (see
-   modelCycleTiming in wind.js), styled after #now-panel below - a circle
-   fixed at the top of the window instead of the bottom. Only meaningful in
-   the forecast view, so it's invisible otherwise; #model-info has to follow
-   #stage in the document for this sibling selector to reach it. */
-#stage.future ~ #model-info {
-  opacity: 1;
-}
-
-#model-info {
+/* The selected forecast model and the arrows that switch it (see
+   switchModel in wind.js), sitting where #now-panel used to before it moved
+   to the top. Only meaningful in the forecast view, so it's invisible (and
+   inert) otherwise; #model-select has to follow #stage in the document for
+   this sibling selector to reach it. */
+#model-select {
   position: fixed;
   left: 50%;
-  top: 0.75rem;
+  bottom: 0.75rem;
   transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
   z-index: 5;
 }
 
-#model-info-circle {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
+#stage.future ~ #model-select {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#model-prev,
+#model-next {
+  flex: none;
+  width: 1.8rem;
+  height: 1.8rem;
+  padding: 0;
+  font-family: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: white;
   background: rgba(15, 48, 98, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  padding: 0.5rem;
-  box-sizing: border-box;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#model-display {
+  font-family: inherit;
   color: white;
+  background: rgba(15, 48, 98, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  padding: 0.3rem 1.1rem;
+  min-width: 8rem;
   text-align: center;
   text-shadow: 0 0 6px black;
+  cursor: pointer;
 }
 
-/* The crossfading part - model name and its resolution line. A grid so the
-   per-model entries share one cell and crossfade in place instead of each
-   claiming their own layout space; the countdown below is not part of it, it
-   stays put while the name above it changes. */
-#model-info-stack {
-  display: grid;
-  justify-items: center;
+#model-prev:disabled,
+#model-next:disabled,
+#model-display:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
-.model-info-entry {
-  grid-area: 1 / 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-}
-
-/* Same @keyframes and --duration/--delay as the ring chips (modelHighlight
-   is generated by updateModelCycleStyle), so the name in this circle and the
-   highlighted chip out on the rings always agree on which model is "on". */
-.model-info-cycle {
-  animation: modelHighlight var(--duration) infinite linear;
-  animation-delay: var(--delay);
-}
-
-.model-info-name {
+#model-select-name {
   font-size: 1.1rem;
   font-weight: 600;
   line-height: 1.15;
 }
 
-.model-info-detail {
+#model-select-detail {
   font-size: 0.6rem;
   line-height: 1.3;
   opacity: 0.85;
-}
-
-#model-info-next {
-  font-size: 0.55rem;
-  opacity: 0.75;
 }
 
 #controls {
@@ -846,11 +811,5 @@ body {
 @media (prefers-reduced-motion: reduce) {
   #past, #forecast, #compass, #now-ring, #now-panel {
     transition: none;
-  }
-  /* The model crossfade stays - without it every model's chip would sit
-     permanently on top of the others - but the z-index restack is purely
-     cosmetic, so that alone is dropped. */
-  .chip-depth {
-    animation-name: modelHighlight;
   }
 }

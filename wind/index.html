@@ -121,13 +121,15 @@
 
   <div id="status"></div>
 
-  <!-- Which forecast model is currently highlighted on the rings, and its
-       temporal / spatial resolution; only shown in the forecast view -->
-  <div id="model-info">
-    <div id="model-info-circle">
-      <div id="model-info-stack"></div>
-      <span id="model-info-next"></span>
-    </div>
+  <!-- The selected forecast model, its resolution, and the arrows that
+       switch it; only shown in the forecast view -->
+  <div id="model-select">
+    <button id="model-prev" title="Model anterior" aria-label="Model anterior">‹</button>
+    <button id="model-display" title="Canvia de model">
+      <div id="model-select-name"></div>
+      <div id="model-select-detail"></div>
+    </button>
+    <button id="model-next" title="Següent model" aria-label="Següent model">›</button>
   </div>
 
   <div id="controls">
