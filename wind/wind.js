@@ -135,7 +135,6 @@ const status = { int: 'loading', ext: 'loading', repo: 'loading', forecast: 'loa
 let unitIndex = 0;
 let animationOn = true; // automatic PAST <-> FUTURE swap (see the toggle)
 let geom = { maxRadius: 0, outerPast: 0, outerFuture: 0 }; // see layout()
-let panX = 0, panY = 0; // stage offset, only used when the rings overflow
 let nextBuoyFetch = 0;
 let nextForecastFetch = 0;
 let nextViewSwap = 0;
@@ -497,8 +496,8 @@ const GAP_MAX = 46;
 const NOW_RADIUS = 90;   // half of the 180x180 centre ring
 const EDGE_MARGIN = 24;  // keeps the outermost ring off the window edge
 // The tightest the rings are allowed to get. Above it they spread to fill the
-// window; below it they stop shrinking and overflow instead, which is what
-// makes a phone pannable while a short laptop still fits all of them.
+// window; below it they stop shrinking and overflow the window instead (a
+// phone, mostly) - a short laptop still fits all of them either way.
 const MIN_RING_GAP = 30;
 const PAST_COUNT = 8;      // 2 h of history, at 15 min a ring
 const FORECAST_COUNT = 8;  // 8 h ahead, one hour a ring
@@ -510,8 +509,8 @@ const FORECAST_LEAD = 10 * MINUTE;
 
 // Where every ring sits. Both sets are always drawn in full: the rings are
 // spread to fill the window when they fit, and on a window too small for that
-// (a phone, mostly) they keep MIN_RING_GAP and overflow instead, with the
-// stage becoming draggable so the outer ones stay reachable (see setupPan).
+// (a phone, mostly) they keep MIN_RING_GAP and overflow instead - the outer
+// ones then simply run past the edge of the window, clipped by #stage.
 // --now-scale is how much the centre ring has to grow to become the boundary
 // the forecast rings sit inside.
 function layout() {
@@ -526,24 +525,7 @@ function layout() {
   // animates them (see the group transforms in style.css).
   el('stage').style.setProperty('--now-scale', String(outerFuture / NOW_RADIUS));
   el('stage').style.setProperty('--now-d', outerFuture * 2 + 'px');
-  el('stage').classList.toggle('pannable', Math.max(outerPast, outerFuture) > maxRadius);
-  setPan(panX, panY); // the limits just moved with the geometry
   return geom;
-}
-
-// How far the stage can be dragged: enough to bring the outermost ring of the
-// view being shown into the window, and no further.
-function panLimit() {
-  const outer = futureView ? geom.outerFuture : geom.outerPast;
-  return Math.max(0, outer - geom.maxRadius + EDGE_MARGIN);
-}
-
-function setPan(x, y) {
-  const limit = panLimit();
-  panX = Math.min(limit, Math.max(-limit, x));
-  panY = Math.min(limit, Math.max(-limit, y));
-  el('stage').style.setProperty('--pan-x', panX + 'px');
-  el('stage').style.setProperty('--pan-y', panY + 'px');
 }
 
 // ----------------------------------------------------------------- RENDERING
@@ -620,9 +602,13 @@ function addChip({ parent, radius, item, fade }) {
   chip.style.setProperty('--text-flip', item.WDIR > 180 ? '180deg' : '0deg');
   chip.style.setProperty('--color', color);
   if (fade !== undefined) chip.style.setProperty('--fade', fade);
-  // A forecast is not precise to a tenth, so it rounds - the exact value is
-  // in the tooltip.
-  chip.innerHTML = `<span>${speedText(item.WSPD, item.label ? 0 : undefined)}</span>`;
+  // .chip-point (inward) and .chip-round (outward) are the same colour and
+  // sit flush against each other, so together they read as one shape - a
+  // pill pulled to a point on the side facing the centre - rather than a
+  // pill plus a separately-coloured arrow. A forecast is not precise to a
+  // tenth, so it rounds - the exact value is in the tooltip.
+  chip.innerHTML = `<div class="chip-point"></div>`
+    + `<div class="chip-round"><span>${speedText(item.WSPD, item.label ? 0 : undefined)}</span></div>`;
 
   const timing = modelCycleTiming(item.source);
   if (timing) {
@@ -872,9 +858,6 @@ function setMessage(text) {
 function setView(future) {
   futureView = future;
   el('stage').classList.toggle('future', future);
-  // The two views reach out to very different radii, so a pan that made sense
-  // in one is meaningless in the other - it eases back with the rest.
-  setPan(0, 0);
   nextViewSwap = Date.now() + VIEW_INTERVAL;
   renderControls();
 }
@@ -923,52 +906,6 @@ function tick() {
     updateClock();
     if (forecastNeedsRebuild()) render();
   }
-}
-
-// Dragging the stage around, for the windows too small to fit every ring.
-// A drag that barely moved is left alone so it still reads as a click on
-// whatever was under the pointer (the centre ring, the unit).
-const DRAG_THRESHOLD = 6; // px
-
-function setupPan() {
-  const stage = el('stage');
-  let startX = 0, startY = 0, fromX = 0, fromY = 0, moved = 0, dragging = false;
-
-  stage.addEventListener('pointerdown', e => {
-    moved = 0; // before the guard, so a stale drag never eats the next click
-    if (!stage.classList.contains('pannable')) return;
-    dragging = true;
-    startX = e.clientX; startY = e.clientY;
-    fromX = panX; fromY = panY;
-    stage.classList.add('dragging');
-  });
-
-  // On the window, and deliberately WITHOUT setPointerCapture: capturing the
-  // pointer also retargets the click that follows it to the capturing element,
-  // which left nothing in the centre clickable - neither the unit toggle nor
-  // the view switch - on every window small enough to be pannable. Listening
-  // here instead still tracks a drag that leaves the stage.
-  window.addEventListener('pointermove', e => {
-    if (!dragging) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    moved = Math.max(moved, Math.abs(dx) + Math.abs(dy));
-    setPan(fromX + dx, fromY + dy);
-  });
-
-  const end = () => {
-    if (!dragging) return;
-    dragging = false;
-    stage.classList.remove('dragging');
-  };
-  window.addEventListener('pointerup', end);
-  window.addEventListener('pointercancel', end);
-
-  // Capture phase, so a real drag is swallowed before it reaches the centre
-  // ring or the panel and flips the view by accident.
-  stage.addEventListener('click', e => {
-    if (moved > DRAG_THRESHOLD) e.stopPropagation();
-  }, true);
 }
 
 // The buoy's position, and the about panel behind the top-right button
@@ -1030,9 +967,7 @@ async function start() {
     renderControls();
   });
 
-  setupPan();
-  // Ring spacing, whether they overflow, and the pan limits all follow the
-  // window size
+  // Ring spacing and whether they overflow follow the window size
   window.addEventListener('resize', render);
 
   const hasBuoyData = await loadBuoyData();

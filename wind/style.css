@@ -36,37 +36,16 @@ body {
   overflow: hidden;
 }
 
-/* The pan moves this, not #stage, so the clipping box above always covers the
-   window however far the rings have been dragged. --pan-x/y are set on #stage
-   and inherit down (see setPan). */
 #stage-inner {
   position: absolute;
   inset: 0;
-  transform: translate(var(--pan-x, 0px), var(--pan-y, 0px));
-  transition: transform 1.2s ease-in-out;
-}
-
-/* Set when the rings do not fit the window (a phone, mostly): they are all
-   drawn anyway and overflow, and the stage can be dragged around instead. */
-#stage.pannable {
-  cursor: grab;
-  touch-action: none; /* the drag is ours, not the browser's scroll */
-}
-
-#stage.dragging {
-  cursor: grabbing;
-}
-
-/* The pan follows the pointer exactly, so it must not be eased on the way */
-#stage.dragging #stage-inner {
-  transition: none;
 }
 
 /* The three ring groups. Each covers the window, so the rings inside keep
    measuring from the same centre, and each is moved by ONE transform rather
-   than by every ring, chip and label recomputing its own size - see the note
-   above #stage-inner for why that matters. --now-scale is set by JS on resize:
-   how far the 180px centre ring has to grow to reach the edge of the window. */
+   than by every ring, chip and label recomputing its own size. --now-scale is
+   set by JS on resize: how far the 180px centre ring has to grow to reach the
+   edge of the window. */
 #past,
 #forecast,
 #compass {
@@ -160,10 +139,11 @@ body {
   border-radius: 50%;
 }
 
-/* Value + arrow sitting on a ring, at the bearing the wind comes from. The
-   property order CSS applies is translate -> rotate -> transform, so the box
-   is centred first, then turned to the bearing, then pushed out along the
-   (now rotated) x axis - the same trick the main app's wind rose uses. */
+/* Value sitting on a ring, at the bearing the wind comes from. The property
+   order CSS applies is translate -> rotate -> transform, so the box is
+   centred first, then turned to the bearing, then pushed out along the (now
+   rotated) x axis - the same trick the main app's wind rose uses. The wrapper
+   itself carries no colour - see .chip-point/.chip-round just below. */
 .chip {
   position: absolute;
   left: 50%;
@@ -173,11 +153,6 @@ body {
   transform: translateX(var(--r));
   display: flex;
   align-items: center;
-  gap: 3px;
-  padding: 1px 5px 1px 2px;
-  border-radius: 10px;
-  background: var(--color);
-  color: rgba(0, 0, 0, 0.85);
   font-size: 0.7rem;
   line-height: 1.2;
   white-space: nowrap;
@@ -185,22 +160,34 @@ body {
   pointer-events: all;
 }
 
-/* Points inward, towards the centre - wind direction is where it comes from */
-.chip::before {
-  content: '';
-  border: 5px solid transparent;
-  border-right-color: rgba(0, 0, 0, 0.6);
+/* Points inward, towards the centre - wind direction is where it comes from.
+   Same border trick as .chip-mini, in the chip's own colour rather than a
+   fixed dark one, and butted right up against .chip-round with no gap, so
+   the two pieces fuse into a single pill-with-a-point shape. */
+.chip-point {
+  border: 7px solid transparent;
+  border-right-color: var(--color);
   border-left-width: 0;
+  flex: none;
+  margin-right: -4px;
+}
+
+/* Rounded everywhere else. */
+.chip-round {
+  padding: 1px 6px 1px 4px;
+  border-radius: 10px;
+  background: var(--color);
+  color: rgba(0, 0, 0, 0.85);
 }
 
 /* Kept upright: the chip itself is rotated to the bearing, so on the bottom
    half the text would otherwise read upside-down. */
-.chip > span {
+.chip-round > span {
   rotate: var(--text-flip);
 }
 
 /* Stands in for a model between its turns on a ring (see addChip): the same
-   inward-pointing wedge as .chip::before, coloured the same way, but on its
+   inward-pointing wedge as .chip-point, coloured the same way, but on its
    own, small, and permanently up rather than crossfading - just enough to
    show every model agrees, or doesn't, while only one gets its number. Its
    own opacity folds the ring's distance-fade in (var(--fade, 1)) with a flat
@@ -857,7 +844,7 @@ body {
 /* Nothing here is worth animating on a device that asks not to - the two
    views still swap, they just cut instead of expanding. */
 @media (prefers-reduced-motion: reduce) {
-  #stage-inner, #past, #forecast, #compass, #now-ring, #now-panel {
+  #past, #forecast, #compass, #now-ring, #now-panel {
     transition: none;
   }
   /* The model crossfade stays - without it every model's chip would sit
