@@ -308,6 +308,83 @@ async function refreshBuoyData() {
 // (https://openweathermap.org/forecast5)
 async function loadForecastData() {
   try {
+    // CLAUDE:
+    // Use this api instead:
+    // https://api.icatmar.cat/openMeteoAPI?buoy=SOMO
+    // It outputs a json with this format:
+    /*{
+"buoy": "SOMO",
+"latitude": 41.3757,
+"longitude": 2.2162,
+"units": {
+"WSPD": "m/s",
+"WDIR": "degrees",
+"GSPD": "m/s"
+},
+"requestedAt": "2026-09-03T10:25:16.789Z",
+"models": {
+"AROME-HD": {
+"lastRun": 1788404400,
+"available": 1788414069,
+"updateIntervalSeconds": 10800,
+"temporalResolutionSeconds": 3600
+},
+"GFS013": {
+"lastRun": 1788393600,
+"available": 1788413526,
+"updateIntervalSeconds": 21600,
+"temporalResolutionSeconds": 3600
+},
+"ICON-EU": {
+"lastRun": 1788415200,
+"available": 1788428609,
+"updateIntervalSeconds": 10800,
+"temporalResolutionSeconds": 3600
+},
+"ECMWF-IFS025": {
+"lastRun": 1788393600,
+"available": 1788422186,
+"updateIntervalSeconds": 21600,
+"temporalResolutionSeconds": 10800
+}
+},
+"data": {
+"2026-09-03T00Z": {
+"AROME-HD": {
+"WSPD": 3.86,
+"WDIR": 339,
+"GSPD": 4.4
+},
+"GFS013": {
+"WSPD": 0.58,
+"WDIR": 239
+},
+"ICON-EU": {
+"WSPD": 1.35,
+"WDIR": 312,
+"GSPD": 3.7
+},
+"ECMWF-IFS025": {
+"WSPD": 0.94,
+"WDIR": 328,
+"GSPD": 2.4
+}
+},
+"2026-09-03T01Z": {
+"AROME-HD": {
+"WSPD": 3.42,
+"WDIR": 339,
+"GSPD": 5.5
+},
+"GFS013": {
+"WSPD": 0.71,
+"WDIR": 278
+},
+...
+*/
+// I want you to show on the app all forecasts. Put a label next to the arrow showing the origin of the forecast
+// The forecast is hourly now (before 3-hours), so please update the code to show 8 circles (one circle per hour). When time to next forecast
+// is less than 10 minutes, show already the next hour (1h and 10 minutes).
     const url = `${OPENWEATHER_URL}?lat=${LATITUDE}&lon=${LONGITUDE}`;
     const json = await fetch(url).then(res => {
       if (!res.ok) throw new Error(res.status);
