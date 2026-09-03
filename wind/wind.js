@@ -3,9 +3,10 @@
 // Two views over the same set of concentric rings, swapping every few seconds:
 // PAST shows the buoy's own measurements (one ring per 15 min, older rings
 // bigger and fainter), FUTURE expands them past the edge of the window and
-// grows the Open-Meteo forecast out of the centre instead - one ring per hour,
-// with every model the API returns drawn on it. All the geometry is CSS (see
-// style.css); this file loads the data and lays the rings out.
+// grows the Open-Meteo forecast out of the centre instead - one ring per
+// hour, cycling through every model the API returns a few seconds at a time
+// (see modelCycleTiming). All the geometry is CSS (see style.css); this file
+// loads the data and lays the rings out.
 
 // Buoy location, same values as the main app's main.js
 const LATITUDE = 41.375694;
@@ -42,7 +43,7 @@ const BUOY_INTERVAL = 5 * MINUTE;
 const BUOY_RETRY = 1 * MINUTE;      // when no buoy data could be loaded at all
 const FORECAST_INTERVAL = 30 * MINUTE;
 const FORECAST_RETRY = 5 * MINUTE;
-const VIEW_INTERVAL = 30 * 1000;     // PAST <-> FUTURE swap
+const VIEW_INTERVAL = 300 * 1000;     // PAST <-> FUTURE swap
 
 // Wind speed colour scale, copied from ../Assets/Scripts/data/colorLegends.js.
 // Stops are normalized over the displayed unit's range (see colorForSpeed).
@@ -77,6 +78,35 @@ const MODEL_LABELS = {
 };
 const modelLabel = id => MODEL_LABELS[id] || id.split(/[-_ ]/)[0];
 
+// The API's modelMeta gives the temporal resolution (the forecast's own time
+// step) but not the grid spacing - that isn't part of the response, so this
+// is each model's own publicly documented spatial resolution instead.
+// Approximate, and worth checking against icatmar's actual model configs.
+const MODEL_RESOLUTION_KM = {
+  'AROME-HD': 1.3,
+  'GFS013': 13,
+  'ICON-EU': 7,
+  'ECMWF-IFS025': 25,
+};
+
+// Turns a seconds count from modelMeta into "X h" (every value the API has
+// sent so far is a whole number of hours) or, failing that, "X min".
+const formatModelInterval = seconds => {
+  if (!isFinite(seconds) || seconds <= 0) return '';
+  return seconds % 3600 === 0 ? `${seconds / 3600} h` : `${Math.round(seconds / 60)} min`;
+};
+
+// The line shown under a model's name in the model-info panel, e.g.
+// "Horari · 1.3 km": its temporal resolution (straight from the API, written
+// as "Horari" for the common hourly case) and its spatial one (from
+// MODEL_RESOLUTION_KM above).
+function modelInfoLine(id) {
+  const seconds = modelMeta[id]?.temporalResolutionSeconds;
+  const temporal = seconds === 3600 ? 'Horari' : formatModelInterval(seconds);
+  const spatial = MODEL_RESOLUTION_KM[id];
+  return [temporal, spatial && `${spatial} km`].filter(Boolean).join(' · ');
+}
+
 const MESSAGES = {
   checking: 'Comprovant que les dades existeixen a ERDDAP i que són actuals',
   erddapFresh: 'Les dades existeixen i són actuals, descarregant les dades',
@@ -93,6 +123,9 @@ let dataBuoy = {};      // ISO timestamp -> { WDIR (deg), WSPD (m/s) }
 // [{ date, entries: [{ source, label, WDIR, WSPD, GSPD }] }]
 let dataForecast = [];
 let forecastModels = []; // model ids, in the order the API lists them
+// model id -> { updateIntervalSeconds, temporalResolutionSeconds, ... }, as
+// the API returns it - shown in the model-info panel.
+let modelMeta = {};
 
 // 'loading' | 'ok' | 'nodata' | 'offline' | 'skipped', shown in the bottom
 // corner. 'skipped' is only the repository's: when ERDDAP has current data it
@@ -340,8 +373,9 @@ function parseForecastDate(stamp) {
 }
 
 // Hourly multi-model forecast at the buoy. Every model the API returns for an
-// hour is kept - they are drawn side by side on that hour's ring, each chip
-// labelled with where it came from.
+// hour is kept - one takes its turn on that hour's ring at a time, cycling
+// through them all (see modelCycleTiming); modelMeta carries each model's own
+// update rate and resolution, shown in the corner panel while it is up.
 async function loadForecastData() {
   try {
     const url = `${FORECAST_URL}?buoy=${BUOY_ID}`;
@@ -354,6 +388,7 @@ async function loadForecastData() {
     // describes models that may be missing from a given hour, so the entries
     // are what actually gets drawn.
     forecastModels = Object.keys(json.models || {});
+    modelMeta = json.models || {};
 
     const steps = Object.entries(json.data || {}).map(([stamp, byModel]) => {
       const date = parseForecastDate(stamp);
@@ -513,59 +548,91 @@ function setPan(x, y) {
 
 // ----------------------------------------------------------------- RENDERING
 
-// Models mostly agree, so on a forecast ring their chips would land on top of
-// each other and only the last one drawn would be readable. Bearings are never
-// moved - a chip that would collide with one already placed is pulled inward
-// onto the next lane instead, which keeps every arrow pointing where its model
-// says the wind blows.
-const CHIP_HALF_WIDTH = 46; // roughly, with the model label on it
-const MAX_LANES = 4;
-const MIN_CHIP_RADIUS = 26; // no lane may end up inside this
+// Rather than spreading every model's chip around a ring in its own lane, the
+// forecast now shows one model at a time, full-size with its number: chips of
+// the same model share a cycle (see modelCycleTiming) that keeps them all
+// opaque together for MODEL_DEPTH_INTERVAL seconds, then crossfades to the
+// next model. Every other model still marks its bearing meanwhile, just as a
+// small numberless arrow (see .chip-mini below) - so a ring is never down to
+// one arrow, only ever down to one number.
+const MODEL_DEPTH_INTERVAL = 5; // seconds a model stays highlighted
+const MODEL_TRANSITION = 1;     // seconds of crossfade between models
 
-const angleBetween = (a, b) => {
-  const d = Math.abs(a - b) % 360;
-  return d > 180 ? 360 - d : d;
-};
-
-function assignLanes(entries, radius, laneStep) {
-  if (!laneStep || entries.length < 2) return entries.map(e => ({ ...e, lane: 0 }));
-  // How wide a chip is in degrees at this radius, i.e. how close two of them
-  // have to be before they touch. Small rings are nearly all chip, hence the
-  // cap.
-  const minAngle = Math.min(120, 2 * Math.atan(CHIP_HALF_WIDTH / Math.max(radius, 1)) * 180 / Math.PI);
-  const lanes = Math.max(1, Math.min(MAX_LANES, Math.floor((radius - MIN_CHIP_RADIUS) / laneStep) + 1));
-
-  const placed = [];
-  return entries.map(e => {
-    const bearing = ((e.WDIR % 360) + 360) % 360;
-    let lane = 0;
-    while (lane < lanes - 1
-      && placed.some(p => p.lane === lane && angleBetween(p.bearing, bearing) < minAngle)) lane++;
-    placed.push({ bearing, lane });
-    return { ...e, lane };
-  });
+// Shared by every chip (and the model-info panel entry) of a given model, so
+// they all move in lockstep: a model surfaces across every ring - and in the
+// corner panel - at once, then hands over to the next.
+function modelCycleTiming(sourceId) {
+  const count = forecastModels.length;
+  const depth = sourceId ? forecastModels.indexOf(sourceId) : -1;
+  if (count < 2 || depth < 0) return null;
+  return {
+    duration: count * MODEL_DEPTH_INTERVAL,
+    delay: -depth * MODEL_DEPTH_INTERVAL,
+  };
 }
 
-// One arrow, its speed and - for the forecast - the model it came from. `lane`
-// pulls it inside its own ring, see assignLanes.
-function addChip({ parent, radius, item, fade, laneStep }) {
+// The crossfade's keyframes depend on how many models are cycling (each gets
+// a 1/count share of the loop), so they are generated into their own <style>
+// rather than fixed in style.css. Also drives .chip's pointer-events, so a
+// chip faded out can't steal hover/clicks from the one on top of it.
+let modelCycleStyle = null;
+// Date.now() when the cycling chips/panel were last (re)built - the wall-
+// clock reference modelCycleState() walks forward from, see render().
+let modelCycleStart = 0;
+function updateModelCycleStyle() {
+  if (!modelCycleStyle) {
+    modelCycleStyle = document.createElement('style');
+    document.head.appendChild(modelCycleStyle);
+  }
+  const count = forecastModels.length;
+  if (count < 2) { modelCycleStyle.textContent = ''; return; }
+
+  const total = count * MODEL_DEPTH_INTERVAL;
+  const slot = 100 / count;
+  const transitionPct = Math.min(slot / 2, MODEL_TRANSITION / total * 100);
+  const fadeOutStart = (slot - transitionPct).toFixed(3);
+  const fadeInStart = (100 - transitionPct).toFixed(3);
+  // opacity reads var(--fade, 1), not a literal 1, so a forecast ring's own
+  // distance-fade (see addRing) still applies while a chip is "on".
+  modelCycleStyle.textContent = `
+    @keyframes modelHighlight {
+      0%                        { opacity: var(--fade, 1); pointer-events: auto; }
+      ${fadeOutStart}%          { opacity: var(--fade, 1); pointer-events: auto; }
+      ${slot.toFixed(3)}%       { opacity: 0; pointer-events: none; }
+      ${fadeInStart}%           { opacity: 0; pointer-events: none; }
+      100%                      { opacity: var(--fade, 1); pointer-events: auto; }
+    }
+  `;
+}
+
+// One arrow and its speed, positioned directly on the ring at its bearing -
+// see modelCycleTiming for how forecast chips take turns being the one shown.
+// While a model isn't its turn, a small numberless .chip-mini stands in for
+// it at the same spot (added below) so the ring never goes fully quiet on it.
+function addChip({ parent, radius, item, fade }) {
+  const dir = (item.WDIR - 90) + 'deg';
+  const color = colorForSpeed(item.WSPD);
+
   const chip = document.createElement('div');
   chip.className = 'chip';
-  chip.style.setProperty('--r', Math.max(0, radius - (item.lane || 0) * (laneStep || 0)) + 'px');
-  chip.style.setProperty('--dir', (item.WDIR - 90) + 'deg');
+  chip.style.setProperty('--r', radius + 'px');
+  chip.style.setProperty('--dir', dir);
   chip.style.setProperty('--text-flip', item.WDIR > 180 ? '180deg' : '0deg');
-  chip.style.setProperty('--color', colorForSpeed(item.WSPD));
+  chip.style.setProperty('--color', color);
   if (fade !== undefined) chip.style.setProperty('--fade', fade);
+  // A forecast is not precise to a tenth, so it rounds - the exact value is
+  // in the tooltip.
+  chip.innerHTML = `<span>${speedText(item.WSPD, item.label ? 0 : undefined)}</span>`;
 
-  // The label sits under the number, inside the same span, so it turns with it
-  // and never ends up upside down (see .chip-source in style.css).
-  const source = item.label ? `<small class="chip-source">${item.label}</small>` : '';
-  if (source) chip.classList.add('has-source');
-  // A forecast is not precise to a tenth and the chip is stacked two lines
-  // high already, so it rounds - the exact value is in the tooltip.
-  chip.innerHTML = `<span>${speedText(item.WSPD, source ? 0 : undefined)}${source}</span>`;
-
-  addChipDepth(chip, item);
+  const timing = modelCycleTiming(item.source);
+  if (timing) {
+    chip.classList.add('chip-depth');
+    // One above the model count so the lowest model still clears the ring
+    // outlines during its crossfade.
+    chip.style.setProperty('--maxZIndex', forecastModels.length + 1);
+    chip.style.setProperty('--duration', timing.duration + 's');
+    chip.style.setProperty('--delay', timing.delay + 's');
+  }
 
   const unit = currentUnit().unit;
   chip.title = [
@@ -574,31 +641,22 @@ function addChip({ parent, radius, item, fade, laneStep }) {
     isFinite(item.GSPD) ? `ratxa ${speedText(item.GSPD, 1)} ${unit}` : '',
   ].filter(Boolean).join(' · ');
   parent.appendChild(chip);
-}
 
-// Where the lanes run out the models still overlap, and whichever one is drawn
-// last would stay on top forever. Instead every chip loops its z-index, keyed
-// off the model's place in `forecastModels`: chips of the same model share a
-// delay, so a model surfaces across all of its rings at once and then hands
-// over to the next. The animation itself is .chip-depth in style.css, copied
-// from VISOC's MapCircleArrows.
-const MODEL_DEPTH_INTERVAL = 2; // seconds a model stays in front
-
-function addChipDepth(chip, item) {
-  const count = forecastModels.length;
-  const depth = item.source ? forecastModels.indexOf(item.source) : -1;
-  if (count < 2 || depth < 0) return;
-  chip.classList.add('chip-depth');
-  // One above `count` so the lowest model still clears the ring outlines
-  chip.style.setProperty('--maxZIndex', count + 1);
-  chip.style.setProperty('--duration', count * MODEL_DEPTH_INTERVAL + 's');
-  chip.style.setProperty('--delay', -depth * MODEL_DEPTH_INTERVAL + 's');
+  if (timing) {
+    const mini = document.createElement('div');
+    mini.className = 'chip-mini';
+    mini.style.setProperty('--r', radius + 'px');
+    mini.style.setProperty('--dir', dir);
+    mini.style.setProperty('--color', color);
+    if (fade !== undefined) mini.style.setProperty('--fade', fade);
+    parent.appendChild(mini);
+  }
 }
 
 // One ring outline plus, for every value on it, a chip, and the two labels
 // (clock time below, time from now above). `fade` only applies to the history
 // rings, which dim as they go back in time.
-function addRing({ parent, radius, date, entries, fade, coarse, laneStep }) {
+function addRing({ parent, radius, date, entries, fade, coarse }) {
   const border = ringBorder(date);
   const ring = document.createElement('div');
   ring.className = 'ring';
@@ -626,8 +684,7 @@ function addRing({ parent, radius, date, entries, fade, coarse, laneStep }) {
   // Kept so the tick can refresh it in place as time passes (see updateClock)
   timeLabels.push({ el: label(-1, timeFromNow(date, coarse)), date, coarse });
 
-  assignLanes(entries || [], radius, laneStep)
-    .forEach(item => addChip({ parent, radius, item, fade, laneStep }));
+  (entries || []).forEach(item => addChip({ parent, radius, item, fade }));
 }
 
 // One ring per 15-min step back from the newest measurement, growing outward
@@ -652,12 +709,11 @@ function renderPast(geometry) {
 }
 
 // One ring per forecast hour, growing out of the centre and staying inside the
-// expanded centre ring, each carrying one labelled chip per model.
+// expanded centre ring, each carrying one chip per hour - whichever model is
+// currently highlighted (see modelCycleTiming).
 function renderForecast(geometry) {
   const forecast = el('forecast');
   forecast.innerHTML = '';
-  // Room to pull a colliding chip inward without it landing on the ring below
-  const laneStep = Math.min(18, Math.max(10, geometry.forecastStep * 0.4));
   const from = Date.now() + FORECAST_LEAD;
 
   dataForecast
@@ -670,7 +726,6 @@ function renderForecast(geometry) {
       entries: f.entries,
       fade: 0.9 - 0.5 * i / (FORECAST_COUNT - 1),
       coarse: true,
-      laneStep,
     }));
 }
 
@@ -735,6 +790,52 @@ function renderStatus() {
     + models;
 }
 
+// Top of the window, visible only in the forecast view (see #stage.future ~
+// #model-info in style.css): a circle like #now-panel's, naming whichever
+// model is currently highlighted on the rings. One entry per model, stacked
+// on top of each other inside the circle and crossfading in the same rhythm
+// as the ring chips (modelCycleTiming again).
+function renderModelInfo() {
+  el('model-info-stack').innerHTML = forecastModels.map(id => {
+    const timing = modelCycleTiming(id);
+    // Only one model: nothing to crossfade, so it's left permanently visible
+    // rather than animating against a --duration that was never set.
+    const cls = timing ? ' model-info-cycle' : '';
+    const style = timing ? ` style="--duration:${timing.duration}s;--delay:${timing.delay}s"` : '';
+    const line = modelInfoLine(id);
+    return `<div class="model-info-entry${cls}"${style}>`
+      + `<div class="model-info-name">${modelLabel(id)}</div>`
+      + (line ? `<div class="model-info-detail">${line}</div>` : '')
+      + `</div>`;
+  }).join('');
+}
+
+// Where the cycle is right now: which model is next and how long until the
+// hand-over - the same duration/delay math as modelCycleTiming, just walked
+// forward from modelCycleStart (a wall-clock reference, see render()) instead
+// of left to the CSS animation.
+function modelCycleState() {
+  const count = forecastModels.length;
+  if (count < 2) return null;
+  const total = count * MODEL_DEPTH_INTERVAL;
+  const elapsed = (Date.now() - modelCycleStart) / 1000;
+  const phase = ((elapsed % total) + total) % total;
+  const index = Math.floor(phase / MODEL_DEPTH_INTERVAL);
+  const remaining = MODEL_DEPTH_INTERVAL - (phase - index * MODEL_DEPTH_INTERVAL);
+  return {
+    next: forecastModels[(index + 1) % count],
+    seconds: Math.max(1, Math.ceil(remaining)),
+  };
+}
+
+// Refreshed every second by updateClock, like #next-view.
+function renderModelCountdown() {
+  const cycle = modelCycleState();
+  el('model-info-next').textContent = cycle
+    ? `Següent: ${modelLabel(cycle.next)} en ${cycle.seconds} s`
+    : '';
+}
+
 // The animation toggle and, while it is on, how long until the view flips
 function renderControls() {
   el('unit-value').textContent = currentUnit().unit;
@@ -748,12 +849,20 @@ function renderControls() {
 function render() {
   const geometry = layout();
   timeLabels = [];
+  // Stamped once here: both the chips' CSS animation-delay (set moments
+  // later, in renderForecast) and modelCycleState()'s wall-clock math start
+  // counting from this same instant, so the ring highlight and the panel's
+  // countdown never drift apart.
+  modelCycleStart = Date.now();
+  updateModelCycleStyle();
   renderPast(geometry);
   renderForecast(geometry);
   renderCompass();
   renderNow();
   renderStatus();
   renderControls();
+  renderModelInfo();
+  renderModelCountdown();
 }
 
 function setMessage(text) {
@@ -780,6 +889,7 @@ function updateClock() {
   if (latest) el('now-ago').textContent = timeFromNow(latest.date);
   renderStatus();
   renderControls();
+  renderModelCountdown();
 }
 
 // The innermost forecast ring is dropped once it comes within FORECAST_LEAD,
