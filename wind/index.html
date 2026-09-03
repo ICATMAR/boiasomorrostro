@@ -52,7 +52,6 @@
        from the centre of #stage. The .hidden class starts them collapsed so
        they expand into place once the data is in. -->
   <div id="stage" class="hidden">
-   <!-- #stage clips to the window; this inner box is what the pan moves -->
    <div id="stage-inner">
     <div id="past"></div>
     <!-- Before #forecast: in future view this ring is the filled boundary the
@@ -122,6 +121,17 @@
 
   <div id="status"></div>
 
+  <!-- The selected forecast model, its resolution, and the arrows that
+       switch it; only shown in the forecast view -->
+  <div id="model-select">
+    <button id="model-prev" title="Model anterior" aria-label="Model anterior">‹</button>
+    <button id="model-display" title="Canvia de model">
+      <div id="model-select-name"></div>
+      <div id="model-select-detail"></div>
+    </button>
+    <button id="model-next" title="Següent model" aria-label="Següent model">›</button>
+  </div>
+
   <div id="controls">
     <button id="unit-toggle" title="Canvia les unitats">Unitats: <span id="unit-value">kn</span></button>
     <button id="animation-toggle">Animació On</button>
@@ -143,7 +153,8 @@
           El sensor (MaxiMet Marine GMX500) que recull les dades està a 1.5 metres de la superfície
           del mar. Fa servir sensors ultrasònics i una brúixula magnètica per obtenir dades de vent.</p>
 
-          <p>Les dades de predicció són de OpenWeatherAPI, que combina varis models de predicció.</p>
+          <p>Les dades de predicció són de diversos models extretes a través de l'API d'OpenMeteo. 
+            Els models elegits són: AROME-HD (Méteo-France), ECMWF (Unió Europea), GFS (NOAA) i ICON-EU (DWD).</p>
 
         <p>Les dades presentades en aquesta aplicació són únicament per a fins informatius. Tot i que
           ens esforcem per garantir-ne la precisió i fiabilitat, no podem assegurar que les dades
@@ -190,6 +201,12 @@
   </div>
 
   <div id="loading">
+    <!-- .logo-chip (see #brand) gives it a white backdrop - most of this
+         logo is the same dark blue as the loading background, so it would
+         disappear without one -->
+    <div id="loading-logo">
+      <img src="../Assets/Logos/logo-icatmar-negatiu.svg" alt="ICATMAR">
+    </div>
     <div class="spinner"></div>
     <div id="loading-message">Carregant…</div>
   </div>

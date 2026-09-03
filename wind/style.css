@@ -36,42 +36,25 @@ body {
   overflow: hidden;
 }
 
-/* The pan moves this, not #stage, so the clipping box above always covers the
-   window however far the rings have been dragged. --pan-x/y are set on #stage
-   and inherit down (see setPan). */
 #stage-inner {
   position: absolute;
   inset: 0;
-  transform: translate(var(--pan-x, 0px), var(--pan-y, 0px));
-  transition: transform 1.2s ease-in-out;
-}
-
-/* Set when the rings do not fit the window (a phone, mostly): they are all
-   drawn anyway and overflow, and the stage can be dragged around instead. */
-#stage.pannable {
-  cursor: grab;
-  touch-action: none; /* the drag is ours, not the browser's scroll */
-}
-
-#stage.dragging {
-  cursor: grabbing;
-}
-
-/* The pan follows the pointer exactly, so it must not be eased on the way */
-#stage.dragging #stage-inner {
-  transition: none;
 }
 
 /* The three ring groups. Each covers the window, so the rings inside keep
    measuring from the same centre, and each is moved by ONE transform rather
-   than by every ring, chip and label recomputing its own size - see the note
-   above #stage-inner for why that matters. --now-scale is set by JS on resize:
-   how far the 180px centre ring has to grow to reach the edge of the window. */
+   than by every ring, chip and label recomputing its own size. --now-scale is
+   set by JS on resize: how far the 180px centre ring has to grow to reach the
+   edge of the window. */
 #past,
 #forecast,
 #compass {
   position: absolute;
   inset: 0;
+}
+
+#compass {
+  pointer-events: none;
 }
 
 /* Scaling a group scales its text too, so each group's opacity is timed to
@@ -160,10 +143,11 @@ body {
   border-radius: 50%;
 }
 
-/* Value + arrow sitting on a ring, at the bearing the wind comes from. The
-   property order CSS applies is translate -> rotate -> transform, so the box
-   is centred first, then turned to the bearing, then pushed out along the
-   (now rotated) x axis - the same trick the main app's wind rose uses. */
+/* Value sitting on a ring, at the bearing the wind comes from. The property
+   order CSS applies is translate -> rotate -> transform, so the box is
+   centred first, then turned to the bearing, then pushed out along the (now
+   rotated) x axis - the same trick the main app's wind rose uses. The wrapper
+   itself carries no colour - see .chip-point/.chip-round just below. */
 .chip {
   position: absolute;
   left: 50%;
@@ -173,30 +157,71 @@ body {
   transform: translateX(var(--r));
   display: flex;
   align-items: center;
-  gap: 3px;
-  padding: 1px 5px 1px 2px;
-  border-radius: 10px;
-  background: var(--color);
-  color: rgba(0, 0, 0, 0.85);
   font-size: 0.7rem;
   line-height: 1.2;
   white-space: nowrap;
   z-index: 1;
   pointer-events: all;
+  user-select: all;
+  cursor: cell;
 }
 
-/* Points inward, towards the centre - wind direction is where it comes from */
-.chip::before {
-  content: '';
-  border: 5px solid transparent;
-  border-right-color: rgba(0, 0, 0, 0.6);
+/* Points inward, towards the centre - wind direction is where it comes from.
+   Same border trick as .chip-mini, in the chip's own colour rather than a
+   fixed dark one, and butted right up against .chip-round with no gap, so
+   the two pieces fuse into a single pill-with-a-point shape. */
+.chip-point {
+  border: 7px solid transparent;
+  border-right-color: var(--color);
   border-left-width: 0;
+  flex: none;
+  margin-right: -4px;
+}
+
+/* Rounded everywhere else. */
+.chip-round {
+  padding: 1px 6px 1px 4px;
+  border-radius: 10px;
+  background: var(--color);
+  color: rgba(0, 0, 0, 0.85);
+  min-width: 1.5rem;
+  display: flex;
+  justify-content: center;
 }
 
 /* Kept upright: the chip itself is rotated to the bearing, so on the bottom
-   half the text would otherwise read upside-down. */
-.chip > span {
+   half the text would otherwise read upside-down. inline-block because plain
+   inline elements aren't transformable boxes - rotate has no effect on a
+   bare <span>, which is what silently broke this when the span stopped being
+   a flex item directly (it used to be blockified for free as one). */
+.chip-round > span {
+  display: inline-block;
   rotate: var(--text-flip);
+}
+
+/* Stands in for every model except the one currently selected (see addChip):
+   the same inward-pointing wedge as .chip-point, coloured the same way, but
+   on its own and small - just enough to show every model agrees, or doesn't,
+   while only the selected one gets its number. Clicking one selects that
+   model (see selectModel), hence the pointer cursor. z-index 0 keeps it
+   under every .chip, in case a ring's bearings ever put the two at the same
+   spot. */
+.chip-mini {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  rotate: var(--dir);
+  transform: translateX(var(--r));
+  border: 10px solid transparent;
+  border-right-color: var(--color);
+  border-left-width: 0;
+  opacity: 0.9;
+  user-select: all;
+  pointer-events: all;
+  cursor: pointer;
+  z-index: 0;
+  border-radius: 20px;
 }
 
 /* Clock time under a ring, "x min ago" above it */
@@ -220,9 +245,9 @@ body {
   pointer-events: none; /* invisible chips must not swallow clicks */
 }
 
-/* Older rings fade out; opacity is set per ring by JS (see buildPastRings) */
+/* Older rings fade out; opacity is set per ring by JS (see buildPastRings).
+   Chips are excluded - their value should read the same wherever they are. */
 #past .ring,
-#past .chip,
 #past .ring-label {
   opacity: var(--fade);
 }
@@ -238,12 +263,15 @@ body {
   border-width: 2px;
   background: rgba(255, 255, 255, 0.08);
   cursor: pointer;
-  transition: width 1.2s ease-in-out, height 1.2s ease-in-out;
+  transition: width 1.2s ease-in-out, height 1.2s ease-in-out, opacity 1.2s ease-in-out;
 }
 
 #stage.future #now-ring {
   width: var(--now-d);
   height: var(--now-d);
+  /* At window size it's just a faint backdrop behind the forecast rings -
+     fades out instead, rather than staying a visible outline around them. */
+  opacity: 0;
 }
 
 /* In future view this ring is the size of the window, so clicking it would
@@ -286,8 +314,8 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* Current reading. Centred in #now-ring in past view, out at the bottom of
-   the window in the forecast view (see #stage.future #now-panel). */
+/* Current reading. Centred in #now-ring in past view, out at the top of the
+   window in the forecast view (see #stage.future #now-panel). */
 #now-panel {
   position: absolute;
   left: 50%;
@@ -311,11 +339,15 @@ body {
   border: 1px solid rgba(255, 255, 255, 0);
 }
 
-/* Out at the bottom of the window and two thirds the size, with its own disc
+/* Out at the top of the window and two thirds the size, with its own disc
    now that it sits over the outer rings' hour labels. The scale comes after
-   the translate, so the offset is not scaled along with it. */
+   the translate, so the offset is not scaled along with it. Its distance
+   from the top edge is normally a flat 90px (the 50vh cancels out, whatever
+   the viewport height) - clamp() makes that distance itself grow on a narrow
+   screen instead, from 90px at 450px wide up to 160px by ~275px wide, so the
+   panel sits closer to centre rather than crowding the top edge. */
 #stage.future #now-panel {
-  transform: translateY(calc(50vh - 90px)) scale(0.6);
+  transform: translateY(calc(clamp(90px, 350px - 40vw, 160px) - 50vh)) scale(0.6);
   background: rgba(15, 48, 98, 0.95);
   border-color: rgba(255, 255, 255, 0.4);
 }
@@ -355,15 +387,20 @@ body {
 }
 
 /* Fades only, with no travel of its own, so in the past view it is simply not
-   there. Timed like the forecast rings: in late, out quickly. */
+   there. Timed like the forecast rings: in late, out quickly. Padding widens
+   the click target well past the text itself - it's the way back to the buoy
+   data view (see setView(false) in wind.js) - without affecting the centring,
+   since that's done by the translate above, not by the box's own size. */
 #forecast-title {
   position: absolute;
   left: 50%;
   top: 50%;
   translate: -50% -50%;
-  font-size: 1.1rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-shadow: 0 0 6px black;
+  cursor: pointer;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.35s ease-out;
@@ -371,14 +408,15 @@ body {
 
 #stage.future #forecast-title {
   opacity: 0.85;
+  pointer-events: auto;
   transition: opacity 0.45s ease-in 0.6s;
 }
 
-/* Like the history rings, further out means further from now means fainter.
-   This multiplies with #forecast's own opacity above, which is what makes the
-   whole set fade in and out with the view. */
+/* Like the history rings, further out means further from now means fainter -
+   for the ring and its labels; chips stay fully opaque regardless of how far
+   out they are. This multiplies with #forecast's own opacity above, which is
+   what makes the whole set fade in and out with the view. */
 #forecast .ring,
-#forecast .chip,
 #forecast .ring-label {
   opacity: var(--fade);
 }
@@ -488,6 +526,7 @@ body {
 #brand-sensor {
   font-size: 0.6rem;
   opacity: 0.7;
+  pointer-events: none;
 }
 
 #info-button {
@@ -654,6 +693,12 @@ body {
   pointer-events: none;
 }
 
+#loading-logo img {
+  display: block;
+  width: min(60vw, 220px);
+  height: auto;
+}
+
 #loading-message {
   font-size: 0.9rem;
   max-width: 22rem;
@@ -686,6 +731,78 @@ body {
   opacity: 0.75;
   text-shadow: 0 0 4px black;
   z-index: 5;
+}
+
+/* The selected forecast model and the arrows that switch it (see
+   switchModel in wind.js), sitting where #now-panel used to before it moved
+   to the top. Only meaningful in the forecast view, so it's invisible (and
+   inert) otherwise; #model-select has to follow #stage in the document for
+   this sibling selector to reach it. */
+#model-select {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(2rem, calc(8rem - 10vw), 5.75rem);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 5;
+}
+
+#stage.future ~ #model-select {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#model-prev,
+#model-next {
+  flex: none;
+  width: 1.8rem;
+  height: 1.8rem;
+  padding: 0;
+  font-family: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: white;
+  background: rgba(15, 48, 98, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#model-display {
+  font-family: inherit;
+  color: white;
+  background: rgba(15, 48, 98, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  padding: 0.3rem 1.1rem;
+  min-width: 9rem;
+  text-align: center;
+  text-shadow: 0 0 6px black;
+  cursor: pointer;
+}
+
+#model-prev:disabled,
+#model-next:disabled,
+#model-display:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+#model-select-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+#model-select-detail {
+  font-size: 0.6rem;
+  line-height: 1.3;
+  opacity: 0.85;
 }
 
 #controls {
@@ -724,7 +841,7 @@ body {
 /* Nothing here is worth animating on a device that asks not to - the two
    views still swap, they just cut instead of expanding. */
 @media (prefers-reduced-motion: reduce) {
-  #stage-inner, #past, #forecast, #compass, #now-ring, #now-panel {
+  #past, #forecast, #compass, #now-ring, #now-panel {
     transition: none;
   }
 }
