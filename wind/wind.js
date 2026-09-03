@@ -3,8 +3,9 @@
 // Two views over the same set of concentric rings, swapping every few seconds:
 // PAST shows the buoy's own measurements (one ring per 15 min, older rings
 // bigger and fainter), FUTURE expands them past the edge of the window and
-// grows the OpenWeather forecast out of the centre instead. All the geometry
-// is CSS (see style.css); this file loads the data and lays the rings out.
+// grows the Open-Meteo forecast out of the centre instead - one ring per hour,
+// with every model the API returns drawn on it. All the geometry is CSS (see
+// style.css); this file loads the data and lays the rings out.
 
 // Buoy location, same values as the main app's main.js
 const LATITUDE = 41.375694;
@@ -20,7 +21,10 @@ const DATASET = 'BUOY_SOMO_METEO';
 // access-control-allow-origin: * (and an exposed Last-Modified), so it is
 // fetched directly instead of through the proxy.
 const REPO_URL = 'https://icatmar.github.io/data/observational/insitu/Boies/SOMO/BoiaSomorrostro_cr1000xs_Meteo.dat';
-const OPENWEATHER_URL = 'https://api.icatmar.cat/openWeatherAPI';
+// Multi-model atmospheric forecast at the buoy, keyed by buoy id rather than
+// by coordinates. One entry per hour, each holding one block per model.
+const FORECAST_URL = 'https://api.icatmar.cat/openMeteoAPI';
+const BUOY_ID = 'SOMO';
 
 const MINUTE = 60 * 1000;
 const BUOY_STEP_MINUTES = 15;       // the buoy reports every 15 min
@@ -62,6 +66,17 @@ const UNITS = [
 // The eight traditional Mediterranean winds, from N clockwise
 const WIND_NAMES = ['Tramuntana', 'Gregal', 'Llevant', 'Xaloc', 'Migjorn', 'Garbí', 'Ponent', 'Mestral'];
 
+// Chip labels for the forecast models. The API's ids carry a resolution or a
+// variant that is meaningless on a chip 40 px wide, so only the model name is
+// kept; the full id stays in the chip's tooltip.
+const MODEL_LABELS = {
+  'AROME-HD': 'AROME-HD',
+  'GFS013': 'GFS',
+  'ICON-EU': 'ICON-EU',
+  'ECMWF-IFS025': 'ECMWF',
+};
+const modelLabel = id => MODEL_LABELS[id] || id.split(/[-_ ]/)[0];
+
 const MESSAGES = {
   checking: 'Comprovant que les dades existeixen a ERDDAP i que són actuals',
   erddapFresh: 'Les dades existeixen i són actuals, descarregant les dades',
@@ -74,7 +89,10 @@ const MESSAGES = {
 // --------------------------------------------------------------------- STATE
 
 let dataBuoy = {};      // ISO timestamp -> { WDIR (deg), WSPD (m/s) }
-let dataForecast = [];  // [{ date, WDIR, WSPD }], oldest first
+// One entry per forecast hour, oldest first:
+// [{ date, entries: [{ source, label, WDIR, WSPD, GSPD }] }]
+let dataForecast = [];
+let forecastModels = []; // model ids, in the order the API lists them
 
 // 'loading' | 'ok' | 'nodata' | 'offline' | 'skipped', shown in the bottom
 // corner. 'skipped' is only the repository's: when ERDDAP has current data it
@@ -105,7 +123,8 @@ const proxied = url => PROXY_URL + '?url=' + encodeURIComponent(url);
 // them at face value puts every measurement an hour or two in the future and
 // makes "fa X min" nonsense, so they are converted to the real instant here,
 // at the only two places timestamps enter. Drop this if the sources are ever
-// fixed to emit real UTC.
+// fixed to emit real UTC. The forecast API is unaffected - its keys really are
+// UTC (see parseForecastDate).
 const BUOY_TIMEZONE = 'Europe/Madrid';
 
 function parseBuoyDate(wallClock) {
@@ -304,101 +323,66 @@ async function refreshBuoyData() {
   render();
 }
 
-// 5 day / 3 hour atmospheric forecast at the buoy location
-// (https://openweathermap.org/forecast5)
+// A missing value can arrive as null or as an empty string, and Number() turns
+// both into a perfectly plausible 0 - a calm wind out of the north that was
+// never forecast. NaN instead, so the entry is dropped.
+const num = v => (v === null || v === undefined || v === '' ? NaN : Number(v));
+
+// The forecast keys the hours as "2026-09-03T00Z", which no engine parses on
+// its own - the minutes are missing. Real UTC, unlike the buoy's timestamps.
+// A key that already carries minutes (or seconds) still works.
+function parseForecastDate(stamp) {
+  const parts = /^(\d{4}-\d{2}-\d{2})T(\d{2})(?::(\d{2}))?(?::(\d{2}))?Z?$/.exec(String(stamp).trim());
+  const date = parts
+    ? new Date(`${parts[1]}T${parts[2]}:${parts[3] || '00'}:${parts[4] || '00'}Z`)
+    : new Date(stamp);
+  return isNaN(date) ? undefined : date;
+}
+
+// Hourly multi-model forecast at the buoy. Every model the API returns for an
+// hour is kept - they are drawn side by side on that hour's ring, each chip
+// labelled with where it came from.
 async function loadForecastData() {
   try {
-    // CLAUDE:
-    // Use this api instead:
-    // https://api.icatmar.cat/openMeteoAPI?buoy=SOMO
-    // It outputs a json with this format:
-    /*{
-"buoy": "SOMO",
-"latitude": 41.3757,
-"longitude": 2.2162,
-"units": {
-"WSPD": "m/s",
-"WDIR": "degrees",
-"GSPD": "m/s"
-},
-"requestedAt": "2026-09-03T10:25:16.789Z",
-"models": {
-"AROME-HD": {
-"lastRun": 1788404400,
-"available": 1788414069,
-"updateIntervalSeconds": 10800,
-"temporalResolutionSeconds": 3600
-},
-"GFS013": {
-"lastRun": 1788393600,
-"available": 1788413526,
-"updateIntervalSeconds": 21600,
-"temporalResolutionSeconds": 3600
-},
-"ICON-EU": {
-"lastRun": 1788415200,
-"available": 1788428609,
-"updateIntervalSeconds": 10800,
-"temporalResolutionSeconds": 3600
-},
-"ECMWF-IFS025": {
-"lastRun": 1788393600,
-"available": 1788422186,
-"updateIntervalSeconds": 21600,
-"temporalResolutionSeconds": 10800
-}
-},
-"data": {
-"2026-09-03T00Z": {
-"AROME-HD": {
-"WSPD": 3.86,
-"WDIR": 339,
-"GSPD": 4.4
-},
-"GFS013": {
-"WSPD": 0.58,
-"WDIR": 239
-},
-"ICON-EU": {
-"WSPD": 1.35,
-"WDIR": 312,
-"GSPD": 3.7
-},
-"ECMWF-IFS025": {
-"WSPD": 0.94,
-"WDIR": 328,
-"GSPD": 2.4
-}
-},
-"2026-09-03T01Z": {
-"AROME-HD": {
-"WSPD": 3.42,
-"WDIR": 339,
-"GSPD": 5.5
-},
-"GFS013": {
-"WSPD": 0.71,
-"WDIR": 278
-},
-...
-*/
-// I want you to show on the app all forecasts. Put a label next to the arrow showing the origin of the forecast
-// The forecast is hourly now (before 3-hours), so please update the code to show 8 circles (one circle per hour). When time to next forecast
-// is less than 10 minutes, show already the next hour (1h and 10 minutes).
-    const url = `${OPENWEATHER_URL}?lat=${LATITUDE}&lon=${LONGITUDE}`;
+    const url = `${FORECAST_URL}?buoy=${BUOY_ID}`;
     const json = await fetch(url).then(res => {
       if (!res.ok) throw new Error(res.status);
       return res.json();
     });
-    dataForecast = json.list.map(e => ({
-      date: new Date(e.dt * 1000),
-      WSPD: e.wind.speed,
-      WDIR: e.wind.deg,
-    }));
-    status.forecast = 'ok';
+
+    // `models` is the API's own ordering, and the one the chips keep. It also
+    // describes models that may be missing from a given hour, so the entries
+    // are what actually gets drawn.
+    forecastModels = Object.keys(json.models || {});
+
+    const steps = Object.entries(json.data || {}).map(([stamp, byModel]) => {
+      const date = parseForecastDate(stamp);
+      if (!date || !byModel) return undefined;
+      const names = forecastModels.length ? forecastModels : Object.keys(byModel);
+      const entries = names
+        .filter(name => byModel[name])
+        .map(name => ({
+          source: name,
+          label: modelLabel(name),
+          WDIR: num(byModel[name].WDIR),
+          WSPD: num(byModel[name].WSPD),
+          GSPD: num(byModel[name].GSPD),
+        }))
+        .filter(e => isFinite(e.WDIR) && isFinite(e.WSPD) && e.WSPD <= MAX_WIND_SPEED);
+      return entries.length ? { date, entries } : undefined;
+    }).filter(Boolean);
+
+    steps.sort((a, b) => a.date - b.date);
+    dataForecast = steps;
+    // A model that only shows up inside `data` still deserves a chip
+    if (!forecastModels.length) {
+      forecastModels = [...new Set(steps.flatMap(s => s.entries.map(e => e.source)))];
+    }
+
+    status.forecast = dataForecast.length ? 'ok' : 'nodata';
     nextForecastFetch = Date.now() + FORECAST_INTERVAL;
   } catch (e) {
-    console.error('Could not load the OpenWeather forecast', e);
+    console.error('Could not load the forecast', e);
     status.forecast = 'offline';
     nextForecastFetch = Date.now() + FORECAST_RETRY;
   }
@@ -443,8 +427,9 @@ const hourText = date => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 // "fa 1 h 23 min" for measurements, "d'aquí 4 h" for the forecast. How much
 // detail to keep follows how far apart the rings being labelled are, not how
 // big the number is: past rings are 15 min apart and every minute has to stay
-// in or neighbours collapse onto the same label, while forecast rings are 3 h
-// apart and "d'aquí 21 h 40 min" is just noise (see `coarse`).
+// in or neighbours collapse onto the same label, while forecast rings land on
+// the hour and carry their clock time anyway, so the odd minutes are just
+// noise (see `coarse`).
 function timeFromNow(date, coarse) {
   const minutes = Math.round((date - Date.now()) / MINUTE);
   const abs = Math.abs(minutes);
@@ -481,7 +466,12 @@ const EDGE_MARGIN = 24;  // keeps the outermost ring off the window edge
 // makes a phone pannable while a short laptop still fits all of them.
 const MIN_RING_GAP = 30;
 const PAST_COUNT = 8;      // 2 h of history, at 15 min a ring
-const FORECAST_COUNT = 8;  // 24 h ahead, at one forecast step (3 h) a ring
+const FORECAST_COUNT = 8;  // 8 h ahead, one hour a ring
+// The forecast steps hourly, so the nearest ring can be a minute away and gone
+// before anyone reads it. Anything closer than this is dropped and the hour
+// after it becomes the first ring, which puts the innermost one between 1 h 10
+// and 2 h 10 out.
+const FORECAST_LEAD = 10 * MINUTE;
 
 // Where every ring sits. Both sets are always drawn in full: the rings are
 // spread to fill the window when they fit, and on a window too small for that
@@ -523,10 +513,71 @@ function setPan(x, y) {
 
 // ----------------------------------------------------------------- RENDERING
 
-// One ring outline plus, when there is a measurement for it, the value chip
-// and the two labels (clock time below, time from now above). `fade` only
-// applies to the history rings, which dim as they go back in time.
-function addRing({ parent, radius, date, entry, fade, coarse }) {
+// Models mostly agree, so on a forecast ring their chips would land on top of
+// each other and only the last one drawn would be readable. Bearings are never
+// moved - a chip that would collide with one already placed is pulled inward
+// onto the next lane instead, which keeps every arrow pointing where its model
+// says the wind blows.
+const CHIP_HALF_WIDTH = 46; // roughly, with the model label on it
+const MAX_LANES = 4;
+const MIN_CHIP_RADIUS = 26; // no lane may end up inside this
+
+const angleBetween = (a, b) => {
+  const d = Math.abs(a - b) % 360;
+  return d > 180 ? 360 - d : d;
+};
+
+function assignLanes(entries, radius, laneStep) {
+  if (!laneStep || entries.length < 2) return entries.map(e => ({ ...e, lane: 0 }));
+  // How wide a chip is in degrees at this radius, i.e. how close two of them
+  // have to be before they touch. Small rings are nearly all chip, hence the
+  // cap.
+  const minAngle = Math.min(120, 2 * Math.atan(CHIP_HALF_WIDTH / Math.max(radius, 1)) * 180 / Math.PI);
+  const lanes = Math.max(1, Math.min(MAX_LANES, Math.floor((radius - MIN_CHIP_RADIUS) / laneStep) + 1));
+
+  const placed = [];
+  return entries.map(e => {
+    const bearing = ((e.WDIR % 360) + 360) % 360;
+    let lane = 0;
+    while (lane < lanes - 1
+      && placed.some(p => p.lane === lane && angleBetween(p.bearing, bearing) < minAngle)) lane++;
+    placed.push({ bearing, lane });
+    return { ...e, lane };
+  });
+}
+
+// One arrow, its speed and - for the forecast - the model it came from. `lane`
+// pulls it inside its own ring, see assignLanes.
+function addChip({ parent, radius, item, fade, laneStep }) {
+  const chip = document.createElement('div');
+  chip.className = 'chip';
+  chip.style.setProperty('--r', Math.max(0, radius - (item.lane || 0) * (laneStep || 0)) + 'px');
+  chip.style.setProperty('--dir', (item.WDIR - 90) + 'deg');
+  chip.style.setProperty('--text-flip', item.WDIR > 180 ? '180deg' : '0deg');
+  chip.style.setProperty('--color', colorForSpeed(item.WSPD));
+  if (fade !== undefined) chip.style.setProperty('--fade', fade);
+
+  // Inline, so the source reads as a smaller aside on the chip without
+  // style.css having to know about it. It sits inside the same span as the
+  // number, so it turns with it and never ends up upside down.
+  const source = item.label
+    ? `<small class="chip-source" style="font-size:.72em;opacity:.8;margin-left:.35em;white-space:nowrap">${item.label}</small>`
+    : '';
+  chip.innerHTML = `<span>${speedText(item.WSPD)}${source}</span>`;
+
+  const unit = currentUnit().unit;
+  chip.title = [
+    item.source || 'Boia',
+    `${speedText(item.WSPD)} ${unit}, ${Math.round(item.WDIR)}º (${windName(item.WDIR)})`,
+    isFinite(item.GSPD) ? `ratxa ${speedText(item.GSPD)} ${unit}` : '',
+  ].filter(Boolean).join(' · ');
+  parent.appendChild(chip);
+}
+
+// One ring outline plus, for every value on it, a chip, and the two labels
+// (clock time below, time from now above). `fade` only applies to the history
+// rings, which dim as they go back in time.
+function addRing({ parent, radius, date, entries, fade, coarse, laneStep }) {
   const border = ringBorder(date);
   const ring = document.createElement('div');
   ring.className = 'ring';
@@ -536,6 +587,7 @@ function addRing({ parent, radius, date, entry, fade, coarse }) {
   ring.style.borderStyle = border.style;
   ring.style.borderWidth = border.width;
   if (fade !== undefined) ring.style.setProperty('--fade', fade);
+  ring.dataset.stamp = String(date.getTime()); // read by forecastNeedsRebuild
   parent.appendChild(ring);
 
   const label = (side, text) => {
@@ -553,17 +605,8 @@ function addRing({ parent, radius, date, entry, fade, coarse }) {
   // Kept so the tick can refresh it in place as time passes (see updateClock)
   timeLabels.push({ el: label(-1, timeFromNow(date, coarse)), date, coarse });
 
-  if (!entry) return;
-  const chip = document.createElement('div');
-  chip.className = 'chip';
-  chip.style.setProperty('--r', radius + 'px');
-  chip.style.setProperty('--dir', (entry.WDIR-90) + 'deg');
-  chip.style.setProperty('--text-flip', entry.WDIR > 180 ? '180deg' : '0deg');
-  chip.style.setProperty('--color', colorForSpeed(entry.WSPD));
-  if (fade !== undefined) chip.style.setProperty('--fade', fade);
-  chip.innerHTML = `<span>${speedText(entry.WSPD)}</span>`;
-  chip.title = `${speedText(entry.WSPD)} ${currentUnit().unit}, ${entry.WDIR}º`
-  parent.appendChild(chip);
+  assignLanes(entries || [], radius, laneStep)
+    .forEach(item => addChip({ parent, radius, item, fade, laneStep }));
 }
 
 // One ring per 15-min step back from the newest measurement, growing outward
@@ -576,31 +619,37 @@ function renderPast(geometry) {
 
   for (let i = 1; i <= PAST_COUNT; i++) {
     const date = new Date(latest.date.getTime() - i * BUOY_STEP_MINUTES * MINUTE);
+    const entry = dataBuoy[date.toISOString()];
     addRing({
       parent: past,
       radius: NOW_RADIUS + i * geometry.pastStep,
       date,
-      entry: dataBuoy[date.toISOString()],
+      entries: entry ? [entry] : [],
       fade: 0.85 - 0.55 * (i - 1) / (PAST_COUNT - 1),
     });
   }
 }
 
-// One ring per forecast step ahead, growing out of the centre and staying
-// inside the expanded centre ring.
+// One ring per forecast hour, growing out of the centre and staying inside the
+// expanded centre ring, each carrying one labelled chip per model.
 function renderForecast(geometry) {
   const forecast = el('forecast');
   forecast.innerHTML = '';
+  // Room to pull a colliding chip inward without it landing on the ring below
+  const laneStep = Math.min(18, Math.max(10, geometry.forecastStep * 0.4));
+  const from = Date.now() + FORECAST_LEAD;
+
   dataForecast
-    .filter(f => f.date > Date.now())
+    .filter(f => f.date > from)
     .slice(0, FORECAST_COUNT)
     .forEach((f, i) => addRing({
       parent: forecast,
       radius: (i + 1) * geometry.forecastStep,
       date: f.date,
-      entry: f,
+      entries: f.entries,
       fade: 0.9 - 0.5 * i / (FORECAST_COUNT - 1),
       coarse: true,
+      laneStep,
     }));
 }
 
@@ -644,7 +693,7 @@ const STATUS_LINK = {
   int: ERDDAP.int + '/index.html',
   ext: ERDDAP.ext + '/index.html',
   repo: 'https://github.com/ICATMAR/data',
-  forecast: 'https://openweathermap.org/api',
+  forecast: 'https://open-meteo.com/',
 };
 
 function renderStatus() {
@@ -652,12 +701,17 @@ function renderStatus() {
   const line = (label, key) =>
     `<div><a href="${STATUS_LINK[key]}" target="_blank" rel="noopener">${label}</a>: `
     + `<span class="${STATUS_CLASS[status[key]]}">${STATUS_TEXT[status[key]]}</span></div>`;
+  // Which models the rings are showing, so the chip labels have a key
+  const models = status.forecast === 'ok' && forecastModels.length
+    ? `<div class="status-models">Models: ${forecastModels.map(modelLabel).join(', ')}</div>`
+    : '';
   el('status').innerHTML =
     `<div>Propera actualització en ${minutes} min</div>`
     + line('ERDDAP Intern', 'int')
     + line('ERDDAP Extern', 'ext')
     + line('Repositori', 'repo')
-    + line('Previsió', 'forecast');
+    + line('Previsió', 'forecast')
+    + models;
 }
 
 // The animation toggle and, while it is on, how long until the view flips
@@ -707,6 +761,15 @@ function updateClock() {
   renderControls();
 }
 
+// The innermost forecast ring is dropped once it comes within FORECAST_LEAD,
+// so the rings have to be rebuilt when that happens - the hour they show only
+// changes here, not on every tick.
+function forecastNeedsRebuild() {
+  const first = dataForecast.find(f => f.date > Date.now() + FORECAST_LEAD);
+  const drawn = el('forecast').firstChild;
+  return Boolean(first && drawn && drawn.dataset.stamp !== String(first.date.getTime()));
+}
+
 // Everything time-driven runs from here: the two refetch timers, the view
 // swap, and the once-a-second clock refresh.
 function tick() {
@@ -727,6 +790,7 @@ function tick() {
   if (second !== lastTick) {
     lastTick = second;
     updateClock();
+    if (forecastNeedsRebuild()) render();
   }
 }
 
