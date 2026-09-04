@@ -578,7 +578,7 @@ function addChip({ parent, radius, item }) {
   if (item.source && item.source !== resolveSelectedModel()) {
     const mini = document.createElement('div');
     mini.className = 'chip-mini';
-    mini.style.setProperty('--r', radius + 'px');
+    mini.style.setProperty('--r', radius - 7 + 'px');
     mini.style.setProperty('--dir', dir);
     mini.style.setProperty('--color', color);
     mini.title = chipTitle(item);
