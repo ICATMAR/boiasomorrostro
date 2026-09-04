@@ -18,7 +18,18 @@ body {
   margin: 0;
   height: 100vh;
   overflow: hidden;
-  background: radial-gradient(circle at 50% 45%, var(--blue), var(--darkBlue) 70%);
+  /* The coastline sits over the gradient, not instead of it. The file is
+     square, so `cover` scales it to the LONGER side of the window and lets the
+     shorter one crop - the aspect ratio is kept and the whole page is painted.
+     `center` then puts the buoy's stretch of coast in the middle of the
+     window, on the same centre the rings measure from: body is exactly the
+     window (100vh, no margin), so the background box and #stage coincide and
+     the two stay registered without background-attachment: fixed, which
+     mobile Safari handles badly. The artwork carries its own very low fill and
+     stroke opacity, so nothing is dimmed here. */
+  background:
+    url('coastline.svg') center / cover no-repeat,
+    radial-gradient(circle at 50% 45%, var(--blue), var(--darkBlue) 70%);
   color: white;
   user-select: none;
 }
