@@ -250,7 +250,7 @@ function parseRepoFile(text) {
   const lines = text.trim().split(/\r?\n/); // the logger writes CRLF
   const columns = lines[1].split(',').map(name => name.replace(/"/g, ''));
   const iTime = columns.indexOf('TIMESTAMP');
-  const iDir = columns.indexOf('Corr_WindDir');
+  const iDir = columns.indexOf('WindDir_True');
   const iSpeed = columns.indexOf('Corr_WindS');
   if (iTime < 0 || iDir < 0 || iSpeed < 0) throw new Error('Unexpected columns in the repository file');
 
