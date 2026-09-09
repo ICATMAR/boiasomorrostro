@@ -39,6 +39,7 @@ const MAX_WIND_SPEED = 500;
 const PAST_HOURS = 6;               // how much history to ask ERDDAP for
 const FRESH_LIMIT = 15 * MINUTE;    // data younger than this needs no refetch
 const STALE_LIMIT = 30 * MINUTE;    // ERDDAP older than this: check the repo too
+const STALE_WARNING_LIMIT = 60 * MINUTE; // reading older than this on load: warn
 const BUOY_INTERVAL = 5 * MINUTE;
 const BUOY_RETRY = 1 * MINUTE;      // when no buoy data could be loaded at all
 const FORECAST_INTERVAL = 30 * MINUTE;
@@ -712,6 +713,19 @@ function renderNow() {
   el('now-date').textContent = latest ? latest.date.toISOString().substring(0,16) + 'Z' : '';
 }
 
+// Checked once, right after the first load: if the newest reading was
+// already over an hour old by then, flag it so a glance at the rings isn't
+// mistaken for a live one. Dismissing (a tap anywhere) doesn't re-arm it -
+// this is a one-time heads up, not a recurring nag while the tab stays open.
+function checkStaleWarning() {
+  const latest = latestEntry();
+  if (!latest || Date.now() - latest.date < STALE_WARNING_LIMIT) return;
+  const age = timeFromNow(latest.date);
+  el('stale-warning-text').textContent = 'Dades desactualitzades';
+  el('stale-warning-text-time').textContent = age.charAt(0).toUpperCase() + age.slice(1);
+  el('stale-warning').hidden = false;
+}
+
 const STATUS_TEXT = { loading: 'Comprovant…', ok: 'OK', nodata: 'No té dades', offline: 'Offline', skipped: 'No consultat' };
 const STATUS_CLASS = { loading: '', ok: 'status-ok', nodata: 'status-warn', offline: 'status-error', skipped: '' };
 
@@ -890,6 +904,10 @@ async function start() {
   el('now-panel').addEventListener('click', () => setView(!futureView));
   el('forecast-title').addEventListener('click', () => setView(false));
 
+  // Covers the full screen, so any tap dismisses it - the "Tanca" label is
+  // just there to make that discoverable, not the only way to close it.
+  el('stale-warning').addEventListener('click', () => { el('stale-warning').hidden = true; });
+
   el('animation-toggle').addEventListener('click', () => {
     animationOn = !animationOn;
     nextViewSwap = Date.now() + VIEW_INTERVAL;
@@ -910,10 +928,15 @@ async function start() {
   await loadForecastData();
 
   render();
+  checkStaleWarning();
   el('loading').classList.add('done');
   // The rings start collapsed (see #stage.hidden) and expand into place on the
-  // first frame after the loading screen fades.
-  requestAnimationFrame(() => el('stage').classList.remove('hidden'));
+  // first frame after the loading screen fades; the map background zooms out
+  // to match (see .map-zoom in style.css).
+  requestAnimationFrame(() => {
+    el('stage').classList.remove('hidden');
+    document.body.classList.add('map-zoom');
+  });
 
   nextViewSwap = Date.now() + VIEW_INTERVAL;
   tick();

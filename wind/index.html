@@ -237,6 +237,18 @@
     <div id="loading-message">Carregant…</div>
   </div>
 
+  <!-- Shown once on load if the newest reading is already over an hour old
+       (see checkStaleWarning in wind.js). Covers the screen so a tap
+       anywhere dismisses it, not just the close label. -->
+  <div id="stale-warning" hidden>
+    <div id="stale-warning-circle">
+      <span id="stale-warning-text"></span>
+      <span id="stale-warning-text-time"></span>
+      <div id="stale-warning-close">✕</div>
+    </div>
+    
+  </div>
+
   <script src="wind.js"></script>
 
   <script>

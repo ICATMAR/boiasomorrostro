@@ -19,19 +19,37 @@ body {
   height: 100vh;
   overflow: hidden;
   /* The coastline sits over the gradient, not instead of it. The file is
-     square, so `cover` scales it to the LONGER side of the window and lets the
-     shorter one crop - the aspect ratio is kept and the whole page is painted.
-     `center` then puts the buoy's stretch of coast in the middle of the
-     window, on the same centre the rings measure from: body is exactly the
-     window (100vh, no margin), so the background box and #stage coincide and
-     the two stay registered without background-attachment: fixed, which
-     mobile Safari handles badly. The artwork carries its own very low fill and
-     stroke opacity, so nothing is dimmed here. */
+     square, so sizing it to 160vmax (rather than the `cover` keyword - see
+     below for why it's spelled out) scales it to the LONGER side of the
+     window and lets the shorter one crop - the aspect ratio is kept and the
+     whole page is painted. `center` then puts the buoy's stretch of coast in
+     the middle of the window, on the same centre the rings measure from: body
+     is exactly the window (100vh, no margin), so the background box and
+     #stage coincide and the two stay registered without
+     background-attachment: fixed, which mobile Safari handles badly. The
+     artwork carries its own very low fill and stroke opacity, so nothing is
+     dimmed here. */
   background:
-    url('coastline.svg') center / cover no-repeat,
+    url('coastline.svg') center / 400vmax 400vmax no-repeat,
     radial-gradient(circle at 50% 45%, var(--blue), var(--darkBlue) 70%);
   color: white;
   user-select: none;
+}
+
+/* First load only: the map starts zoomed in (160vmax, set above) and eases
+   out to its resting size once the loading screen hands off to the rings
+   (start() adds this class in the same frame it reveals #stage), so the
+   whole scene arrives with one matching motion. 100vmax is `cover`'s own
+   result for this square image - spelled out in length units instead of the
+   keyword so it can be a keyframe target; `auto` on the gradient layer keeps
+   it at its default sizing throughout. */
+@keyframes map-zoom-out {
+  from { background-size: 400vmax 400vmax, auto; }
+  to { background-size: 100vmax 100vmax, auto; }
+}
+
+body.map-zoom {
+  animation: map-zoom-out 2s ease-out forwards;
 }
 
 /* ------------------------------------------------------------------ STAGE */
@@ -742,6 +760,58 @@ body {
   opacity: 0.75;
   text-shadow: 0 0 4px black;
   z-index: 5;
+}
+
+/* Covers the window rather than sitting inside #stage-inner, so it stays
+   centred on the reading regardless of past/future view or ring geometry.
+   No dimmed backdrop - unlike #about this isn't meant to block the rings,
+   just flag the reading sitting under it. */
+#stale-warning {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  cursor: pointer;
+  z-index: 21;
+}
+
+#stale-warning[hidden] {
+  display: none;
+}
+
+#stale-warning-circle {
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.4rem;
+  text-align: center;
+  background: gold;
+  color: var(--darkBlue);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.55);
+  gap: 1rem;
+}
+
+#stale-warning-text-time {
+  font-weight: normal;
+}
+
+#stale-warning-close {
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  text-align: center;
+  line-height: 1.5rem;
 }
 
 /* The selected forecast model and the arrows that switch it (see
