@@ -558,6 +558,31 @@ body.map-zoom {
   pointer-events: none;
 }
 
+/* Revealed once #stale-warning has been dismissed (or, if staleness only
+   crept up after load, as soon as it does) - see updateStaleInfo in wind.js.
+   Same hidden+fade mechanic as #stale-warning itself: [hidden] is dropped
+   first so the opacity transition below has something to animate from. */
+#stale-info {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: gold;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.9s ease;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  text-align: center;
+  padding: 10px;
+}
+
+#stale-info.visible {
+  opacity: 1;
+}
+
+#stale-info[hidden] {
+  display: none;
+}
+
 #info-button {
   flex-shrink: 0;
   width: 1.15rem;
@@ -776,6 +801,16 @@ body.map-zoom {
   gap: 0.9rem;
   cursor: pointer;
   z-index: 21;
+  opacity: 1;
+  transition: opacity 0.9s ease;
+}
+
+/* Added on dismiss (see wind.js), before [hidden] follows once the fade
+   finishes - pointer-events off so the fading circle stops intercepting
+   clicks meant for the app underneath straight away, not just at the end. */
+#stale-warning.fade-out {
+  opacity: 0;
+  pointer-events: none;
 }
 
 #stale-warning[hidden] {

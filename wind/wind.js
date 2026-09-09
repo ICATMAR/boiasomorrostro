@@ -711,19 +711,49 @@ function renderNow() {
   el('now-name').textContent = latest ? windName(latest.WDIR) : 'Sense dades';
   el('now-ago').textContent = latest ? timeFromNow(latest.date) : '';
   el('now-date').textContent = latest ? latest.date.toISOString().substring(0,16) + 'Z' : '';
+  updateStaleInfo(latest);
 }
+
+// True once a reading is more than an hour old - shared by the once-per-load
+// popup below and the corner indicator it hands off to (updateStaleInfo).
+const isStale = latest => Boolean(latest) && Date.now() - latest.date > STALE_WARNING_LIMIT;
 
 // Checked once, right after the first load: if the newest reading was
 // already over an hour old by then, flag it so a glance at the rings isn't
-// mistaken for a live one. Dismissing (a tap anywhere) doesn't re-arm it -
-// this is a one-time heads up, not a recurring nag while the tab stays open.
+// mistaken for a live one. Dismissing doesn't re-arm it - this is a one-time
+// heads up, not a recurring nag - but see updateStaleInfo for what it hands
+// off to on the way out.
 function checkStaleWarning() {
   const latest = latestEntry();
-  if (!latest || Date.now() - latest.date < STALE_WARNING_LIMIT) return;
+  if (!isStale(latest)) return;
   const age = timeFromNow(latest.date);
   el('stale-warning-text').textContent = 'Dades desactualitzades';
-  el('stale-warning-text-time').textContent = age.charAt(0).toUpperCase() + age.slice(1);
+  el('stale-warning-text-time').textContent = 'Última dada ' + timeFromNow(latest.date);
   el('stale-warning').hidden = false;
+}
+
+// The corner line under "Sensor: ..." that #stale-warning fades into once
+// dismissed: same gold, same wording, just parked in the brand panel instead
+// of centre screen. Also the fallback for staleness that creeps up after
+// load (the popup only ever fires once, right at start()) - in that case
+// there was no popup to dismiss, so this just appears on its own. Live
+// either way: it clears itself if a fresh reading eventually comes in.
+function updateStaleInfo(latest) {
+  const warning = el('stale-warning');
+  const popupShowing = !warning.hidden && !warning.classList.contains('fade-out');
+  const show = isStale(latest) && !popupShowing;
+  const info = el('stale-info');
+
+  if (show) el('stale-info-age').textContent = 'Última dada ' + timeFromNow(latest.date);
+  if (show === info.classList.contains('visible')) return;
+
+  if (show) {
+    info.hidden = false;
+    requestAnimationFrame(() => info.classList.add('visible'));
+  } else {
+    info.classList.remove('visible');
+    info.addEventListener('transitionend', () => { info.hidden = true; }, { once: true });
+  }
 }
 
 const STATUS_TEXT = { loading: 'Comprovant…', ok: 'OK', nodata: 'No té dades', offline: 'Offline', skipped: 'No consultat' };
@@ -811,6 +841,7 @@ function updateClock() {
   timeLabels.forEach(({ el: label, date, coarse }) => { label.textContent = timeFromNow(date, coarse); });
   const latest = latestEntry();
   if (latest) el('now-ago').textContent = timeFromNow(latest.date);
+  updateStaleInfo(latest);
   renderStatus();
   renderControls();
 }
@@ -904,9 +935,17 @@ async function start() {
   el('now-panel').addEventListener('click', () => setView(!futureView));
   el('forecast-title').addEventListener('click', () => setView(false));
 
-  // Covers the full screen, so any tap dismisses it - the "Tanca" label is
-  // just there to make that discoverable, not the only way to close it.
-  el('stale-warning').addEventListener('click', () => { el('stale-warning').hidden = true; });
+  // Covers the full screen, so any tap dismisses it - the close icon is just
+  // there to make that discoverable, not the only way to close it. Fades out
+  // rather than vanishing outright, and updateStaleInfo() is called right
+  // away (not left to the next tick) so the corner line starts fading in at
+  // the same time, not up to a second late.
+  el('stale-warning').addEventListener('click', () => {
+    const warning = el('stale-warning');
+    warning.classList.add('fade-out');
+    warning.addEventListener('transitionend', () => { warning.hidden = true; }, { once: true });
+    updateStaleInfo(latestEntry());
+  });
 
   el('animation-toggle').addEventListener('click', () => {
     animationOn = !animationOn;
@@ -927,8 +966,11 @@ async function start() {
   setMessage(hasBuoyData ? MESSAGES.forecast : MESSAGES.forecastOnly);
   await loadForecastData();
 
-  render();
+  // Before render(): renderNow() (called from render) reads #stale-warning's
+  // own hidden state to decide whether the corner line should show instead,
+  // so the popup has to already be up before that first check runs.
   checkStaleWarning();
+  render();
   el('loading').classList.add('done');
   // The rings start collapsed (see #stage.hidden) and expand into place on the
   // first frame after the loading screen fades; the map background zooms out
