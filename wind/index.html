@@ -9,8 +9,18 @@
     content="Vent en temps real a la boia Somorrostro, davant de Barcelona: dades del sensor MaxiMet GMX500 cada 15 minuts i previsió de les properes 24 hores.">
   <meta name="author" content="Gerard Llorach">
   <link rel="shortcut icon" type="image/x-icon" href="/boiasomorrostro/favicon.ico"/>
-  <link rel="canonical" href="https://icatmar.github.io/boiasomorrostro/wind/">
+  <link rel="canonical" href="https://www.icatmar.cat/boiasomorrostro/wind/">
   <meta name="theme-color" content="#0F3063">
+
+  <!-- Installable app (PWA): manifest + icons make the browser offer "Add
+       to Home screen" / "Install app". apple-* tags cover iOS Safari, which
+       ignores the manifest for icon/status-bar purposes. -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vent Somorrostro">
 
   <!-- Link previews. Every URL here has to be absolute: the scrapers that
        build the preview card do not resolve relative paths. windAppLarge is
@@ -20,11 +30,11 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Boia Somorrostro">
   <meta property="og:locale" content="ca_ES">
-  <meta property="og:url" content="https://icatmar.github.io/boiasomorrostro/wind/">
+  <meta property="og:url" content="https://www.icatmar.cat/boiasomorrostro/wind/">
   <meta property="og:title" content="Boia Somorrostro - Vent">
   <meta property="og:description"
     content="Vent en temps real a la boia Somorrostro, davant de Barcelona: dades del sensor MaxiMet GMX500 cada 15 minuts i previsió de les properes 24 hores.">
-  <meta property="og:image" content="https://icatmar.github.io/boiasomorrostro/Assets/Icons/windAppLarge.jpg">
+  <meta property="og:image" content="https://www.icatmar.cat/boiasomorrostro/Assets/Icons/windAppLarge.jpg">
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="1200">
@@ -34,7 +44,7 @@
   <meta name="twitter:title" content="Boia Somorrostro - Vent">
   <meta name="twitter:description"
     content="Vent en temps real a la boia Somorrostro, davant de Barcelona: dades cada 15 minuts i previsió de les properes 24 hores.">
-  <meta name="twitter:image" content="https://icatmar.github.io/boiasomorrostro/Assets/Icons/windAppLarge.jpg">
+  <meta name="twitter:image" content="https://www.icatmar.cat/boiasomorrostro/Assets/Icons/windAppLarge.jpg">
   <meta name="twitter:image:alt" content="Anells amb les dades de vent de la boia Somorrostro">
 
   <!-- Font poppins, same as the main app -->
@@ -42,6 +52,22 @@
   <link rel="stylesheet" type="text/css" href="style.css" />
 
   <!-- Tracker/Analytics -->
+  <script>
+    // Queues wa() calls made before the deferred wa.js below has loaded and
+    // taken over window.wa (tracker.js flushes window.wa.q once it does).
+    window.wa = window.wa || function () { (window.wa.q = window.wa.q || []).push(arguments); };
+
+    // Chromium/Android only: fires once, right when the user finishes
+    // installing via the browser's install prompt.
+    window.addEventListener('appinstalled', () => wa('pwa_installed'));
+
+    // iOS has no install event at all, so this is what stands in for it: it
+    // fires on every load that is already running from the home-screen icon,
+    // the only signal iOS gives that the app was installed.
+    if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+      wa('pwa_launch_standalone');
+    }
+  </script>
   <script defer src="https://analytics.icatmar.cat/wa.js" data-site="Wind Somorrostro App"></script>
 
 </head>
@@ -212,6 +238,16 @@
   </div>
 
   <script src="wind.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.error('Service worker registration failed:', err);
+        });
+      });
+    }
+  </script>
 
 </body>
 
