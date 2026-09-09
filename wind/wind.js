@@ -720,9 +720,9 @@ const isStale = latest => Boolean(latest) && Date.now() - latest.date > STALE_WA
 
 // Checked once, right after the first load: if the newest reading was
 // already over an hour old by then, flag it so a glance at the rings isn't
-// mistaken for a live one. Dismissing doesn't re-arm it - this is a one-time
-// heads up, not a recurring nag - but see updateStaleInfo for what it hands
-// off to on the way out.
+// mistaken for a live one. A user dismissing it early doesn't re-arm it for
+// this same stale spell - see updateStaleInfo, which is what closes it back
+// out automatically once a fresh reading actually arrives.
 function checkStaleWarning() {
   const latest = latestEntry();
   if (!isStale(latest)) return;
@@ -732,16 +732,32 @@ function checkStaleWarning() {
   el('stale-warning').hidden = false;
 }
 
-// The corner line under "Sensor: ..." that #stale-warning fades into once
-// dismissed: same gold, same wording, just parked in the brand panel instead
-// of centre screen. Also the fallback for staleness that creeps up after
-// load (the popup only ever fires once, right at start()) - in that case
-// there was no popup to dismiss, so this just appears on its own. Live
-// either way: it clears itself if a fresh reading eventually comes in.
+// Shared by the manual dismiss (click) and the automatic one below - guarded
+// so calling it while already closed/closing (the common case, every tick)
+// is a harmless no-op rather than piling up duplicate transitionend listeners.
+function dismissStaleWarning() {
+  const warning = el('stale-warning');
+  if (warning.hidden || warning.classList.contains('fade-out')) return;
+  warning.classList.add('fade-out');
+  warning.addEventListener('transitionend', () => { warning.hidden = true; }, { once: true });
+}
+
+// Called after every buoy fetch and every clock tick (see renderNow and
+// updateClock), so both stale indicators track the real, current state of
+// dataBuoy rather than a load-time snapshot:
+//  - the centre popup closes itself the moment a fresh reading comes in,
+//    same as if the user had dismissed it - a data update, not just the
+//    user, can end this stale spell.
+//  - the corner line under "Sensor: ..." is what the popup fades into once
+//    it's gone (dismissed or auto-closed), and is also the fallback for
+//    staleness that creeps up after load with no popup ever having shown.
 function updateStaleInfo(latest) {
+  const stale = isStale(latest);
+  if (!stale) dismissStaleWarning();
+
   const warning = el('stale-warning');
   const popupShowing = !warning.hidden && !warning.classList.contains('fade-out');
-  const show = isStale(latest) && !popupShowing;
+  const show = stale && !popupShowing;
   const info = el('stale-info');
 
   if (show) el('stale-info-age').textContent = 'Última dada ' + timeFromNow(latest.date);
@@ -936,15 +952,17 @@ async function start() {
   el('forecast-title').addEventListener('click', () => setView(false));
 
   // Covers the full screen, so any tap dismisses it - the close icon is just
-  // there to make that discoverable, not the only way to close it. Fades out
-  // rather than vanishing outright, and updateStaleInfo() is called right
-  // away (not left to the next tick) so the corner line starts fading in at
-  // the same time, not up to a second late.
+  // there to make that discoverable, not the only way to close it.
+  // updateStaleInfo() is called right away (not left to the next tick) so
+  // the corner line starts fading in at the same time, not up to a second
+  // late - see dismissStaleWarning for the same fade also firing on its own
+  // once a fresh reading arrives, with no click involved (deliberately not
+  // tracked here - this event is only for an actual user dismissal).
   el('stale-warning').addEventListener('click', () => {
-    const warning = el('stale-warning');
-    warning.classList.add('fade-out');
-    warning.addEventListener('transitionend', () => { warning.hidden = true; }, { once: true });
-    updateStaleInfo(latestEntry());
+    const latest = latestEntry();
+    wa('stale_warning_dismissed', { ageMinutes: latest ? Math.round((Date.now() - latest.date) / MINUTE) : null });
+    dismissStaleWarning();
+    updateStaleInfo(latest);
   });
 
   el('animation-toggle').addEventListener('click', () => {
