@@ -726,7 +726,6 @@ const isStale = latest => Boolean(latest) && Date.now() - latest.date > STALE_WA
 function checkStaleWarning() {
   const latest = latestEntry();
   if (!isStale(latest)) return;
-  const age = timeFromNow(latest.date);
   el('stale-warning-text').textContent = 'Dades desactualitzades';
   el('stale-warning-text-time').textContent = 'Última dada ' + timeFromNow(latest.date);
   el('stale-warning').hidden = false;
@@ -767,8 +766,7 @@ function updateStaleInfo(latest) {
     info.hidden = false;
     requestAnimationFrame(() => info.classList.add('visible'));
   } else {
-    info.classList.remove('visible');
-    info.addEventListener('transitionend', () => { info.hidden = true; }, { once: true });
+    info.classList.remove('visible'); // see the permanent transitionend listener in start()
   }
 }
 
@@ -963,6 +961,21 @@ async function start() {
     wa('stale_warning_dismissed', { ageMinutes: latest ? Math.round((Date.now() - latest.date) / MINUTE) : null });
     dismissStaleWarning();
     updateStaleInfo(latest);
+  });
+
+  // One persistent listener, not a fresh one added per fade: unlike
+  // #stale-warning (which only ever fades out once, never back in),
+  // #stale-info can flip back and forth as data goes stale/fresh again, and
+  // re-showing it interrupts an in-flight fade-out before its transitionend
+  // ever fires (interrupted transitions don't fire the event, per spec) - a
+  // once-per-call listener would then dangle and fire on a later, unrelated
+  // transition, hiding the panel right after it just finished showing.
+  // Checking .visible at the moment this actually fires sidesteps that.
+  el('stale-info').addEventListener('transitionend', e => {
+    const info = el('stale-info');
+    if (e.target === info && e.propertyName === 'opacity' && !info.classList.contains('visible')) {
+      info.hidden = true;
+    }
   });
 
   el('animation-toggle').addEventListener('click', () => {

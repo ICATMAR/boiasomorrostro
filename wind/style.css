@@ -19,7 +19,7 @@ body {
   height: 100vh;
   overflow: hidden;
   /* The coastline sits over the gradient, not instead of it. The file is
-     square, so sizing it to 160vmax (rather than the `cover` keyword - see
+     square, so sizing it to 400vmax (rather than the `cover` keyword - see
      below for why it's spelled out) scales it to the LONGER side of the
      window and lets the shorter one crop - the aspect ratio is kept and the
      whole page is painted. `center` then puts the buoy's stretch of coast in
@@ -36,7 +36,7 @@ body {
   user-select: none;
 }
 
-/* First load only: the map starts zoomed in (160vmax, set above) and eases
+/* First load only: the map starts zoomed in (400vmax, set above) and eases
    out to its resting size once the loading screen hands off to the rings
    (start() adds this class in the same frame it reveals #stage), so the
    whole scene arrives with one matching motion. 100vmax is `cover`'s own
@@ -352,8 +352,8 @@ body.map-zoom {
   translate: -50% -50%;
   transition: transform 1.2s ease-in-out, background-color 1.2s ease-in-out,
     border-color 1.2s ease-in-out;
-  width: 220px;
-  height: 220px;
+  width: 170px;
+  height: 170px;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
@@ -818,8 +818,8 @@ body.map-zoom {
 }
 
 #stale-warning-circle {
-  width: 170px;
-  height: 170px;
+  width: 220px;
+  height: 220px;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
@@ -955,9 +955,16 @@ body.map-zoom {
 .status-error { color: var(--red); }
 
 /* Nothing here is worth animating on a device that asks not to - the two
-   views still swap, they just cut instead of expanding. */
+   views still swap, they just cut instead of expanding, the stale-data
+   fades cut too, and the first-load map zoom lands straight on its resting
+   size instead of easing there over 2s. */
 @media (prefers-reduced-motion: reduce) {
-  #past, #forecast, #compass, #now-ring, #now-panel {
+  #past, #forecast, #compass, #now-ring, #now-panel, #stale-warning, #stale-info {
     transition: none;
+  }
+
+  body.map-zoom {
+    animation: none;
+    background-size: 100vmax 100vmax, auto;
   }
 }
