@@ -441,6 +441,13 @@ function speedText(speed, decimals) {
   return unit.toDisplay(speed).toFixed(decimals ?? unit.decimals);
 }
 
+// speedText as markup, with the decimals in a smaller .decimals span so the
+// whole number stays the part that reads at a glance.
+function speedHTML(speed, decimals) {
+  const [whole, fraction] = speedText(speed, decimals).split('.');
+  return fraction ? `${whole}<span class="decimals">.${fraction}</span>` : whole;
+}
+
 // Interpolated WIND_LEGEND colour, normalized over the displayed unit's range
 // so the scale keeps its meaning when the unit changes.
 function colorForSpeed(speed) {
@@ -608,7 +615,7 @@ function addChip({ parent, radius, item }) {
   // pill plus a separately-coloured arrow. A forecast is not precise to a
   // tenth, so it rounds - the exact value is in the tooltip.
   chip.innerHTML = `<div class="chip-point"></div>`
-    + `<div class="chip-round"><span>${speedText(item.WSPD, item.label ? 0 : undefined)}</span></div>`;
+    + `<div class="chip-round"><span>${speedHTML(item.WSPD, item.label ? 0 : undefined)}</span></div>`;
   chip.title = chipTitle(item);
   parent.appendChild(chip);
 }
@@ -714,7 +721,7 @@ function renderNow() {
   arrow.classList.toggle('no-data', !latest);
   if (latest) arrow.style.setProperty('--dir', (latest.WDIR - 90) + 'deg');
 
-  el('now-speed').textContent = latest ? speedText(latest.WSPD) : '--';
+  el('now-speed').innerHTML = latest ? speedHTML(latest.WSPD) : '--';
   el('now-unit').textContent = currentUnit().unit;
   el('now-name').textContent = latest ? windName(latest.WDIR) : 'Sense dades';
   el('now-ago').textContent = latest ? timeFromNow(latest.date) : '';
