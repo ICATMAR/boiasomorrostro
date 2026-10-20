@@ -1,7 +1,7 @@
 // Wind rings for the Somorrostro buoy.
 //
 // Two views over the same set of concentric rings, swapping every few seconds:
-// PAST shows the buoy's own measurements (one ring per 15 min, older rings
+// PAST shows the buoy's own measurements (one ring per 20 min, older rings
 // bigger and fainter), FUTURE expands them past the edge of the window and
 // grows the Open-Meteo forecast out of the centre instead - one ring per
 // hour, showing whichever model is selected (see selectedModel) full-size,
@@ -28,7 +28,7 @@ const FORECAST_URL = 'https://api.icatmar.cat/openMeteoAPI';
 const BUOY_ID = 'SOMO';
 
 const MINUTE = 60 * 1000;
-const BUOY_STEP_MINUTES = 15;       // the buoy reports every 15 min
+const BUOY_STEP_MINUTES = 20;       // the buoy reports every 20 min
 // The logger writes 1000 m/s for a failed wind reading and the repository
 // serves it raw - ERDDAP quality-controls the same rows to NaN, so in practice
 // this only bites on the repository path. On those rows the direction column
@@ -37,7 +37,7 @@ const BUOY_STEP_MINUTES = 15;       // the buoy reports every 15 min
 // the record is 27 m/s, so the exact threshold hardly matters.
 const MAX_WIND_SPEED = 500;
 const PAST_HOURS = 6;               // how much history to ask ERDDAP for
-const FRESH_LIMIT = 15 * MINUTE;    // data younger than this needs no refetch
+const FRESH_LIMIT = BUOY_STEP_MINUTES * MINUTE; // data younger than this needs no refetch
 const STALE_LIMIT = 30 * MINUTE;    // ERDDAP older than this: check the repo too
 const STALE_WARNING_LIMIT = 60 * MINUTE; // reading older than this on load: warn
 const BUOY_INTERVAL = 5 * MINUTE;
@@ -345,7 +345,7 @@ async function loadBuoyData() {
 }
 
 // Only actually refetches when what we hold has gone stale - the buoy reports
-// every 15 min, so a 5-minute tick usually has nothing new to ask for.
+// every 20 min, so a 5-minute tick usually has nothing new to ask for.
 async function refreshBuoyData() {
   const latest = latestEntry();
   if (latest && Date.now() - latest.date < FRESH_LIMIT) {
@@ -461,7 +461,7 @@ const hourText = date => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 
 // "fa 1 h 23 min" for measurements, "d'aquí 4 h" for the forecast. How much
 // detail to keep follows how far apart the rings being labelled are, not how
-// big the number is: past rings are 15 min apart and every minute has to stay
+// big the number is: past rings are 20 min apart and every minute has to stay
 // in or neighbours collapse onto the same label, while forecast rings land on
 // the hour and carry their clock time anyway, so the odd minutes are just
 // noise (see `coarse`).
@@ -477,11 +477,10 @@ function timeFromNow(date, coarse) {
   return minutes < 0 ? `fa ${amount}` : `d'aquí ${amount}`;
 }
 
-// A ring's own clock time: solid on the hour, dashed at :30, dotted at :15/:45
+// A ring's own clock time: solid on the hour, dotted at :20/:40
 function ringBorder(date) {
   const minute = Math.round(date.getMinutes() / BUOY_STEP_MINUTES) * BUOY_STEP_MINUTES % 60;
   if (minute === 0) return { style: 'solid', width: '2px' };
-  if (minute === 30) return { style: 'dashed', width: '1px' };
   return { style: 'dotted', width: '1px' };
 }
 
@@ -500,7 +499,7 @@ const EDGE_MARGIN = 24;  // keeps the outermost ring off the window edge
 // window; below it they stop shrinking and overflow the window instead (a
 // phone, mostly) - a short laptop still fits all of them either way.
 const MIN_RING_GAP = 30;
-const PAST_COUNT = 8;      // 2 h of history, at 15 min a ring
+const PAST_COUNT = 6;      // 2 h of history, at 20 min a ring
 const FORECAST_COUNT = 8;  // 8 h ahead, one hour a ring
 // The forecast steps hourly, so the nearest ring can be a minute away and gone
 // before anyone reads it. Anything closer than this is dropped and the hour
@@ -639,7 +638,7 @@ function addRing({ parent, radius, date, entries, fade, coarse }) {
   (entries || []).forEach(item => addChip({ parent, radius, item }));
 }
 
-// One ring per 15-min step back from the newest measurement, growing outward
+// One ring per 20-min step back from the newest measurement, growing outward
 // and fading as they go.
 function renderPast(geometry) {
   const past = el('past');
