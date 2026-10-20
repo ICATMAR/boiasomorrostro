@@ -276,12 +276,17 @@ async function fetchRepoData() {
 
 // ---------------------------------------------------------- LOADING THE DATA
 
+// Newest timestamp in a set of entries, or undefined when there are none
+function newestDate(entries) {
+  const times = Object.keys(entries || {});
+  if (times.length === 0) return undefined;
+  return new Date(Math.max(...times.map(t => new Date(t))));
+}
+
 // Newest measurement currently held, or undefined when nothing is loaded
 function latestEntry() {
-  const times = Object.keys(dataBuoy);
-  if (times.length === 0) return undefined;
-  const date = new Date(Math.max(...times.map(t => new Date(t))));
-  return { date, ...dataBuoy[date.toISOString()] };
+  const date = newestDate(dataBuoy);
+  return date && { date, ...dataBuoy[date.toISOString()] };
 }
 
 const isEmpty = entries => !entries || Object.keys(entries).length === 0;
@@ -320,12 +325,16 @@ async function loadBuoyData() {
       return undefined;
     });
 
+    // Last-Modified only rules the file out: GitHub Pages redeploys every file
+    // in the repository on any commit, so a fresh date can still hide rows
+    // that stopped days ago. What the file actually holds settles it.
     if (repoDate && (!maxTime || repoDate > maxTime)) {
       entries = await fetchRepoData().catch(e => {
         console.error('Could not load the repository file', e);
         status.repo = 'offline';
         return undefined;
       });
+      if (entries && maxTime && !(newestDate(entries) > maxTime)) entries = {};
       if (entries) status.repo = isEmpty(entries) ? 'nodata' : 'ok';
     } else if (repoDate) {
       status.repo = 'nodata'; // reachable, but behind what ERDDAP already has
