@@ -260,6 +260,17 @@
 
   <script>
     if ('serviceWorker' in navigator) {
+      // When a new sw.js takes over an already-controlled page (i.e. a new
+      // deploy), reload once so the page runs the new shell instead of the
+      // copy the old worker served. Skipped on first install.
+      if (navigator.serviceWorker.controller) {
+        let reloaded = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (reloaded) return;
+          reloaded = true;
+          window.location.reload();
+        });
+      }
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').catch(err => {
           console.error('Service worker registration failed:', err);
